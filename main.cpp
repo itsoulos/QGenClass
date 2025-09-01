@@ -186,6 +186,7 @@ void run()
             printf("GENERATION=%5d FITNESS=%10.4lg%% TEST_ERROR=%10.4lg%%\nPROGRAMS=\n%s",
                i,bestf,program->getClassError(genome),s.c_str());
 
+	    if(fabs(bestf)<1e-6) break;
     }
 }
 
