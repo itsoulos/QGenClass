@@ -124,6 +124,7 @@ void init()
 
 void run()
 {
+	srand(mainParams.getParam("random_seed").getValue().toInt());
     if(mainParams.getParam("train_file").getValue()=="")
         error(QString("Input train file not provided"));
 
