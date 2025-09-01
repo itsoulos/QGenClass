@@ -271,7 +271,7 @@ double 	ClassProgram::fitness(vector<int> &genome)
 			pgenome[j]=genome[i*genome.size()/(nclass-1)+j];
 		int redo=0;
 		string s = printRandomProgram(pgenome,redo);
-		if(redo>=wrapping) return -1e+8;
+		if(redo>=wrapping) return 1e+8;
 		pstring[i]=s;
 	}
 
@@ -280,14 +280,14 @@ double 	ClassProgram::fitness(vector<int> &genome)
 		int d=program->Parse(pstring[j]);
 		if(!d) {
 //			printf("failed %s \n",pstring[j].c_str());
-//			return 1e+8;
+			return 1e+8;
 		}
 		double dclass;
         for(unsigned int i=0;i<trainy.size();i++)
 		{
 			if(fabs(outy[i]-NAN_CLASS)>1e-5) continue;
             double v=program->Eval(trainx[i].data());
-			if(isnan(v) || isinf(v) ) return -1e+8;
+			if(isnan(v) || isinf(v) ) return 1e+8;
 			if(fabs(v-1.0)<1e-5) outy[i]=vclass[j];
 		}
 	}
@@ -334,7 +334,7 @@ double 	ClassProgram::fitness(vector<int> &genome)
 
         }
 
-	if(isnan(value) || isinf(value)) return -1e+8;
+	if(isnan(value) || isinf(value)) return 1e+8;
 
 	if(fitness_mode == FITNESS_CLASS)
 		return value*100.0/trainy.size();
