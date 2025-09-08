@@ -14,6 +14,52 @@ Population *pop      =NULL;
 
 ParameterList mainParams;
 
+
+void	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
+{
+    int i,j;
+    vector<double> T;
+    vector<double> O;
+    program->getOutputs(T,O);
+    int N=T.size();
+    int nclass=program->getClass();
+    int **CM;
+    printf("** CONFUSION MATRIX ** Number of classes: %d\n",nclass);
+    CM=new int*[nclass];
+    for(i=0;i<nclass;i++) CM[i]=new int[nclass];
+    for(i=0;i<nclass;i++)
+        for(j=0;j<nclass;j++) CM[i][j] = 0;
+
+    for(i=0;i<N;i++) CM[(int)T[i]][(int)O[i]]++;
+
+    precision.resize(nclass);
+    recall.resize(nclass);
+
+    for(i=0;i<nclass;i++)
+    {
+        double sum = 0.0;
+        for(j=0;j<nclass;j++)
+            sum+=CM[j][i];
+
+        precision[i]=CM[i][i]/sum;
+        sum = 0.0;
+        for(j=0;j<nclass;j++)
+            sum+=CM[i][j];
+        recall[i]=CM[i][i]/sum;
+    }
+
+    for(i=0;i<nclass;i++)
+    {
+        for(j=0;j<nclass;j++)
+        {
+            printf("%4d ",CM[i][j]);
+        }
+        printf("\n");
+        delete[] CM[i];
+    }
+    delete[] CM;
+}
+
 void setParams()
 {
     mainParams.addParam(Parameter("train_file","","The trainfile used here"));
@@ -189,6 +235,19 @@ void run()
 
 	    if(fabs(bestf)<1e-6) break;
     }
+    vector<double> precision;
+    vector<double> recall;
+    printConfusionMatrix(precision,recall);
+    double avg_precision = 0.0, avg_recall = 0.0,avg_fscore=0.0;
+    int nclass=program->getClass();
+    for(int i=0;i<nclass;i++)
+    {
+        avg_precision+=precision[i];
+        avg_recall+=recall[i];
+    }
+    avg_precision/=nclass;
+    avg_recall/=nclass;
+    printf("PRECISION: %20.10lf RECALL: %20.10lf\n",avg_precision,avg_recall);
 }
 
 int main(int argc, char *argv[])

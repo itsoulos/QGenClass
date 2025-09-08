@@ -18,7 +18,7 @@ DATAFILE=$1
 ## pop_lrate: Local search rate.
 ## pop_lmethod: Local search method. Available methods: none, crossover, mutate, siman.
 ## pop_fitnessmethod: Fitness calculation method. Available methods: class, average, squared
-GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05 --pop_lrate=0.001 --pop_lmethod=crossover --pop_fitnessmethod=average"
+GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=200 --pop_srate=0.1 --pop_mrate=0.05 --pop_lrate=0.001 --pop_lmethod=crossover --pop_fitnessmethod=squared"
 # TERMINATION: The termination method used. Available values: maxiters, doublebox, similarity
 TERMINATION=maxiters
 
