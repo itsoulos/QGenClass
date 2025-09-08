@@ -41,11 +41,11 @@ void	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
         for(j=0;j<nclass;j++)
             sum+=CM[j][i];
 
-        precision[i]=CM[i][i]/sum;
+        precision[i]=sum==0?0.0:CM[i][i]/sum;
         sum = 0.0;
         for(j=0;j<nclass;j++)
             sum+=CM[i][j];
-        recall[i]=CM[i][i]/sum;
+        recall[i]=sum==0?0.0:CM[i][i]/sum;
     }
 
     for(i=0;i<nclass;i++)
