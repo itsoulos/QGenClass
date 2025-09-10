@@ -41,11 +41,11 @@ void	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
         for(j=0;j<nclass;j++)
             sum+=CM[j][i];
 
-        precision[i]=sum==0?0.0:CM[i][i]/sum;
+        precision[i]=sum==0?-1.0:CM[i][i]/sum;
         sum = 0.0;
         for(j=0;j<nclass;j++)
             sum+=CM[i][j];
-        recall[i]=sum==0?0.0:CM[i][i]/sum;
+        recall[i]=sum==0?-1.0:CM[i][i]/sum;
     }
 
     for(i=0;i<nclass;i++)
@@ -79,8 +79,13 @@ void setParams()
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
     QStringList fitness_list;
-    fitness_list<<"class"<<"average"<<"squared";
+    fitness_list<<"class"<<"average"<<"squared"<<"mixed";
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
+
+    mainParams.addParam(Parameter("pop_classpercent",1.0,0.0,1.0,"The percentage of the class fitness method in mixed"));
+    mainParams.addParam(Parameter("pop_averagepercent",0.0,0.0,1.0,"The percentage of the average fitness method in mixed"));
+    mainParams.addParam(Parameter("pop_squaredpercent",0.0,0.0,1.0,"The percentage of the squared fitness method in mixed"));
+
     QStringList termMethod;
     termMethod<<"maxiters"<<"doublebox"<<"similarity";
     mainParams.addParam(Parameter("pop_termination",termMethod[0],termMethod,"Termination method for genetic algorithm"));
@@ -214,7 +219,16 @@ void run()
     if(fmethod == "average")
 	    program->setFitnessMode(FITNESS_AVERAGE);
     else
-	program->setFitnessMode(FITNESS_SQUARED);    
+    if(fmethod == "squared")
+        program->setFitnessMode(FITNESS_SQUARED);
+    else
+        program->setFitnessMode(FITNESS_MIXED);
+
+    double p1 = mainParams.getParam("pop_classpercent").getValue().toDouble();
+    double p2 = mainParams.getParam("pop_averagepercent").getValue().toDouble();
+    double p3 = mainParams.getParam("pop_squaredpercent").getValue().toDouble();
+
+    program->setFitnessPercentages(p1,p2,p3);
 
     int gens = mainParams.getParam("pop_gens").getValue().toInt();
     vector<int> genome;
@@ -238,16 +252,25 @@ void run()
     vector<double> precision;
     vector<double> recall;
     printConfusionMatrix(precision,recall);
-    double avg_precision = 0.0, avg_recall = 0.0,avg_fscore=0.0;
+    double avg_precision = 0.0, avg_recall = 0.0;
     int nclass=program->getClass();
+    int total_classes1 = nclass;
+    int total_classes2 = nclass;
     for(int i=0;i<nclass;i++)
     {
-        avg_precision+=precision[i];
-        avg_recall+=recall[i];
+        if(precision[i]<0)
+            total_classes1--;
+        else
+            avg_precision+=precision[i];
+        if(recall[i]<0)
+            total_classes2--;
+        else
+            avg_recall+=recall[i];
     }
-    avg_precision/=nclass;
-    avg_recall/=nclass;
-    printf("PRECISION: %20.10lf RECALL: %20.10lf\n",avg_precision,avg_recall);
+    avg_precision/=total_classes1;
+    avg_recall/=total_classes2;
+    double avg_f1score = 2.0 * avg_precision*avg_recall/(avg_precision+avg_recall);
+    printf("PRECISION: %15.10lf RECALL: %15.10lf F1SCORE: %15.10lf\n",avg_precision,avg_recall,avg_f1score);
 }
 
 int main(int argc, char *argv[])

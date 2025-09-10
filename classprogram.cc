@@ -245,6 +245,8 @@ double	ClassProgram::getClassError(vector<int> &genome)
 	printf("TEST REPORT=>\n");
 	for(int i=0;i<nclass;i++)
 	{
+        if(belong[i]==0) continue;
+
 		printf("CLASS[%3d (%3d)] FAIL=%5.2lf%% \n",i,belong[i],fail[i]*100.0/belong[i]);
 	}
 
@@ -316,6 +318,7 @@ double 	ClassProgram::fitness(vector<int> &genome)
 		printf("TRAIN REPORT=>\n");
 		for(int i=0;i<nclass;i++)
 		{
+            if(belong[i]==0) continue;
 			printf("CLASS[%3d (%3d)] FAIL=%5.2lf%% \n",i,belong[i],fail[i]*100.0/belong[i]);
 		}
 	}
@@ -340,14 +343,28 @@ double 	ClassProgram::fitness(vector<int> &genome)
 		return value*100.0/trainy.size();
 	else
 	if(fitness_mode == FITNESS_AVERAGE)	
-		return value1;
+        return value1/nclass;
 	else
+    if(fitness_mode == FITNESS_SQUARED)
 	return value2;
+    else
+    if(fitness_mode == FITNESS_MIXED)
+      return class_percent * (value*100.0/trainy.size())+
+              average_percent * (value1/nclass)+
+              squared_percent * sqrt(value2/nclass);
+        return 0.0;
 }
 
 void	ClassProgram::setFitnessMode(int m)
 {
 	fitness_mode =m;
+}
+
+void    ClassProgram::setFitnessPercentages(double p1,double p2,double p3)
+{
+    class_percent   = p1>=0&&p1<=1.0?p1:class_percent;
+    average_percent = p2>=0&&p2<=1.0?p2:average_percent;
+    squared_percent = p3>=0&&p3<=1.0?p3:squared_percent;
 }
 
 void	ClassProgram::getOutputs(vector<double> &real,vector<double> &est)
