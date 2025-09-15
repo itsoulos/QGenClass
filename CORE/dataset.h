@@ -1,15 +1,29 @@
 #ifndef DATASET_H
 #define DATASET_H
 # include <math.h>
-# include <stdio.h>
 # include <stdlib.h>
 # include <QString>
 # include <QRegExp>
 # include <vector>
-# include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <cmath>
+#include <random>
+#include <algorithm>
+#include <map>
+#include <climits>
 using namespace std;
 typedef vector<double> Data;
 typedef vector<Data>   Matrix;
+
+
+struct Sample
+{
+    vector<double> features;
+    double label;
+};
 
 /**
  * @brief The Dataset class
@@ -181,6 +195,21 @@ public:
     void    setPoint(int pos,Data &x,double y);
     int     nearestClassIndex(double value);
     Data    getAllYPoints() ;
+
+    /**
+     * @brief makeSmote balance the data using the smote method.
+     * @param k, the parameter for the KNN method.
+     */
+    void makeSmote(int k=5);
+
+    /**
+     * @brief getSamples
+     * @return  the dataset in Sample format.
+     */
+    vector<Sample> getSamples();
+
+
+    vector<int> kNearestNeighbors(const vector<Sample>& samples, int index, int k);
     ~Dataset();
 };
 

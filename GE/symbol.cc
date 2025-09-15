@@ -1,4 +1,4 @@
-# include <symbol.h>
+# include <GE/symbol.h>
 Symbol::Symbol()
 {
 	name = "";

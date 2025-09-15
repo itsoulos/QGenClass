@@ -1,7 +1,7 @@
 # ifndef __CPROGRAM__H
-# include <symbol.h>
-# include <rule.h>
-# include <fparser.hh>
+# include <GE/symbol.h>
+# include <GE/rule.h>
+# include <GE/fparser.hh>
 # include <string>
 # define SCALE	1
 extern int mperror;

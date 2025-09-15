@@ -8,6 +8,91 @@ Dataset::Dataset()
     ypoint.resize(0);
 }
 
+double euclideanDistance(const vector<double>& a, const vector<double>& b) {
+    double sum = 0.0;
+    for (size_t i = 0; i < a.size(); i++) {
+        double diff = a[i] - b[i];
+        sum += diff * diff;
+    }
+    return sqrt(sum);
+}
+void    Dataset::makeSmote(int k)
+{
+    vector<Sample> dataset = getSamples();
+    map<double, vector<Sample>> classSamples;
+    for (auto& s : dataset) classSamples[s.label].push_back(s);
+
+    int maxCount = 0;
+    for (auto& [cls, samples] : classSamples)
+        maxCount = max(maxCount, (int)samples.size());
+
+    vector<Sample> augmented = dataset;
+    random_device rd;
+    mt19937 gen(rd());
+
+    for (auto& [cls, samples] : classSamples) {
+        int needed = maxCount - (int)samples.size();
+        if (needed <= 0) continue;
+
+        int i = 0;
+        while (needed > 0) {
+            vector<int> nnArray = kNearestNeighbors(samples, i, k);
+            uniform_int_distribution<> dis(0, nnArray.size()-1);
+            int nnIndex = nnArray[dis(gen)];
+
+            Sample newSample;
+            newSample.label = cls;  // κρατάμε το δεκαδικό label
+
+            for (size_t d = 0; d < samples[i].features.size(); d++) {
+                double gap = uniform_real_distribution<>(0,1)(gen);
+                double syntheticValue = samples[i].features[d] + gap *
+                                                                     (samples[nnIndex].features[d] - samples[i].features[d]);
+                newSample.features.push_back(syntheticValue);
+            }
+            augmented.push_back(newSample);
+
+            needed--;
+            i = (i + 1) % samples.size();
+        }
+    }
+    clearPoints();
+    for(unsigned int i=0;i<augmented.size();i++)
+    {
+        xpoint.push_back(augmented[i].features);
+        ypoint.push_back(augmented[i].label);
+    }
+}
+
+
+vector<Sample> Dataset::getSamples()
+{
+    vector<Sample> p;
+    for(int i=0;i<count();i++)
+    {
+        Sample t;
+        t.features=xpoint[i];
+        t.label=ypoint[i];
+        p.push_back(t);
+    }
+    return p;
+}
+
+
+vector<int> Dataset::kNearestNeighbors(const vector<Sample>& samples, int index, int k)
+{
+    vector<pair<double,int>> distances;
+    for (size_t i = 0; i < samples.size(); i++) {
+        if ((int)i == index) continue;
+        double dist = euclideanDistance(samples[index].features, samples[i].features);
+        distances.push_back({dist, (int)i});
+    }
+    sort(distances.begin(), distances.end());
+    vector<int> neighbors;
+    for (int i = 0; i < k && i < (int)distances.size(); i++) {
+        neighbors.push_back(distances[i].second);
+    }
+    return neighbors;
+}
 
 Data    Dataset::getAllYPoints()
 {

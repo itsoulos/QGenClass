@@ -1,4 +1,4 @@
-# include <classprogram.h>
+# include <GE/classprogram.h>
 # include <math.h>
 # define NAN_CLASS	1e+10
 #include <iostream>

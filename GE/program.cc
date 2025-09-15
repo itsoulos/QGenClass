@@ -1,4 +1,4 @@
-# include <program.h>
+# include <GE/program.h>
 
 Program::Program()
 {

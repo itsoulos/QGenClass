@@ -1,6 +1,6 @@
 #ifndef PARAMETERLIST_H
 #define PARAMETERLIST_H
-# include <parameter.h>
+# include <CORE/parameter.h>
 # include <QJsonObject>
 # include <QStringList>
 # include <QVector>

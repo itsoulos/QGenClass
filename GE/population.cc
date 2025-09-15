@@ -1,10 +1,10 @@
-# include <population.h>
+# include <GE/population.h>
 # include <stdlib.h>
 # include <string.h>
 # include <math.h>
 # include <iostream>
-# include <problem.h>
-# include <integeranneal.h>
+# include <CORE/problem.h>
+# include <GE/integeranneal.h>
 # define MAX_RULE	256
 
 /* Population constructor */

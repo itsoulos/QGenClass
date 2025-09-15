@@ -1,4 +1,4 @@
-# include <rule.h>
+# include <GE/rule.h>
 # include <iostream>
 Rule::Rule()
 {

@@ -1,7 +1,7 @@
 #include <QCoreApplication>
-# include <parameterlist.h>
-# include <population.h>
-# include <classprogram.h>
+# include <CORE/parameterlist.h>
+# include <GE/population.h>
+# include <GE/classprogram.h>
 # include <QDebug>
 char    grammar_file[1024];
 int     wrapping=2;
@@ -92,6 +92,7 @@ void setParams()
     QStringList yesno;
     yesno<<"no"<<"yes";
     mainParams.addParam(Parameter("enable_smote",yesno[0],yesno,"Enable / disable SMOTE in training set"));
+    mainParams.addParam(Parameter("smote_k",5,2,100,"The k value for the smote procedure"));
 
     mainParams.addParam(Parameter("coutput_file","classifier.c","The name of the c output file"));
     mainParams.addParam(Parameter("pythonoutput_file","classifier.py","The name of the Python output file"));
@@ -183,6 +184,12 @@ void run()
                 mainParams.getParam("train_file").getValue(),
                 mainParams.getParam("train_format").getValue()
                 );
+    QString hasSmote = mainParams.getParam("enable_smote").getValue();
+    if(hasSmote == "yes")
+    {
+        int k = mainParams.getParam("smote_k").getValue().toInt();
+        trainSet->makeSmote(k);
+    }
     if(mainParams.getParam("test_file").getValue()!="")
     {
         testSet = new Dataset(
@@ -270,7 +277,9 @@ void run()
     avg_precision/=total_classes1;
     avg_recall/=total_classes2;
     double avg_f1score = 2.0 * avg_precision*avg_recall/(avg_precision+avg_recall);
-    printf("PRECISION: %15.10lf RECALL: %15.10lf F1SCORE: %15.10lf\n",avg_precision,avg_recall,avg_f1score);
+    printf("CLASS_ERROR: %15.10lf PRECISION: %15.10lf RECALL: %15.10lf F1SCORE: %15.10lf\n",
+           -program->getClassError(genome),
+           avg_precision,avg_recall,avg_f1score);
 }
 
 int main(int argc, char *argv[])

@@ -1,7 +1,7 @@
 # ifndef __CLASSPROGRAM__H
-# include <program.h>
-# include <cprogram.h>
-# include <dataset.h>
+# include <GE/program.h>
+# include <GE/cprogram.h>
+# include <CORE/dataset.h>
 # include <vector>
 # include <string>
 using namespace std;

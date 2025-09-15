@@ -1,7 +1,7 @@
 #ifndef INTEGERANNEAL_H
 #define INTEGERANNEAL_H
-# include <problem.h>
-# include <program.h>
+# include <CORE/problem.h>
+# include <GE/program.h>
 /**
  * @brief The IntegerAnneal class implements
  * the simulated annealing algorithm for Grammatical Evolution problems.

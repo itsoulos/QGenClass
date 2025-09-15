@@ -14,21 +14,21 @@ QMAKE_CFLAGS += -O3 -fopenmp -unroll-loops -omit-frame-pointer -Winline -unsafe-
 
 QMAKE_LFLAGS += -O3
 SOURCES += \
-        classprogram.cc \
-        cprogram.cc \
-        dataset.cpp \
-        doublestack.cc \
-        fparser.cc \
-        fpoptimizer.cc \
-        integeranneal.cpp \
-        main.cpp \
-        parameter.cpp \
-        parameterlist.cpp \
-        population.cc \
-        problem.cpp \
-        program.cc \
-        rule.cc \
-        symbol.cc
+        CORE/dataset.cpp \
+        CORE/parameter.cpp \
+        CORE/parameterlist.cpp \
+        CORE/problem.cpp \
+        GE/classprogram.cc \
+        GE/cprogram.cc \
+        GE/doublestack.cc \
+        GE/fparser.cc \
+        GE/fpoptimizer.cc \
+        GE/integeranneal.cpp \
+        GE/population.cc \
+        GE/program.cc \
+        GE/rule.cc \
+        GE/symbol.cc \
+        main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -36,18 +36,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    classprogram.h \
-    cprogram.h \
-    dataset.h \
-    doublestack.h \
-    fparser.hh \
-    fpconfig.hh \
-    fptypes.hh \
-    integeranneal.h \
-    parameter.h \
-    parameterlist.h \
-    population.h \
-    problem.h \
-    program.h \
-    rule.h \
-    symbol.h
+    CORE/dataset.h \
+    CORE/parameter.h \
+    CORE/parameterlist.h \
+    CORE/problem.h \
+    GE/classprogram.h \
+    GE/cprogram.h \
+    GE/doublestack.h \
+    GE/fparser.hh \
+    GE/fpconfig.hh \
+    GE/fptypes.hh \
+    GE/integeranneal.h \
+    GE/population.h \
+    GE/program.h \
+    GE/rule.h \
+    GE/symbol.h
