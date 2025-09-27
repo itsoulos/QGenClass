@@ -15,12 +15,12 @@ Population *pop      =NULL;
 ParameterList mainParams;
 
 
-void	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
+void 	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
 {
     int i,j;
     vector<double> T;
     vector<double> O;
-    program->getOutputs(T,O);
+    program->getOutputs(testSet,T,O);
     int N=T.size();
     int nclass=program->getClass();
     int **CM;
@@ -79,7 +79,7 @@ void setParams()
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
     QStringList fitness_list;
-    fitness_list<<"class"<<"average"<<"squared"<<"mixed";
+    fitness_list<<"class"<<"average"<<"squared"<<"mixed"<<"mean";
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
 
     mainParams.addParam(Parameter("pop_classpercent",1.0,0.0,1.0,"The percentage of the class fitness method in mixed"));
@@ -229,7 +229,10 @@ void run()
     if(fmethod == "squared")
         program->setFitnessMode(FITNESS_SQUARED);
     else
+        if(fmethod=="mixed")
         program->setFitnessMode(FITNESS_MIXED);
+    else
+        program->setFitnessMode(FITNESS_MEAN);
 
     double p1 = mainParams.getParam("pop_classpercent").getValue().toDouble();
     double p2 = mainParams.getParam("pop_averagepercent").getValue().toDouble();

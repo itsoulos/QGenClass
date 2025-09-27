@@ -25,11 +25,11 @@ fi
 ## pop_mrate: Mutation rate.
 ## pop_lrate: Local search rate.
 ## pop_lmethod: Local search method. Available methods: none, crossover, mutate, siman.
-## pop_fitnessmethod: Fitness calculation method. Available methods: class, average, squared, mixed
+## pop_fitnessmethod: Fitness calculation method. Available methods: class, average, squared, mixed, mean
 ## pop_classpercent:   The percentage of class mode in mixed mode fitness.
 ## pop_averagepercent: The percentage of average mode in mixed mode fitness.
 ## pop_squaredpercent: The percentage of squared mode in mixed mode fitness.
-GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05 --pop_lrate=0.001 --pop_lmethod=none --pop_fitnessmethod=class --pop_classpercent=0.5 --pop_averagepercent=0.25 --pop_squaredpercent=0.25 --random_seed=$SEED"
+GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05 --pop_lrate=0.001 --pop_lmethod=none --pop_fitnessmethod=mean --pop_classpercent=0.5 --pop_averagepercent=0.25 --pop_squaredpercent=0.25 --random_seed=$SEED"
 # TERMINATION: The termination method used. Available values: maxiters, doublebox, similarity
 TERMINATION=maxiters
 

@@ -187,6 +187,69 @@ void ClassProgram::printC(vector<int> &genome, std::string outname){
 	outprogram.close();
 }
 
+void    ClassProgram::getPrecisionAndRecall(double &precision,double &recall)
+{
+    getPrecisionAndRecall(trainSet,precision,recall);
+}
+
+
+void    ClassProgram::getPrecisionAndRecall(Dataset *t,double &avg_precision,double &avg_recall)
+{
+    int i,j;
+    getOutputs(t,realCached,estCached);
+    int N=realCached.size();
+    int nclass=getClass();
+    int **CM;
+    CM=new int*[nclass];
+    for(i=0;i<nclass;i++) CM[i]=new int[nclass];
+    for(i=0;i<nclass;i++)
+        for(j=0;j<nclass;j++) CM[i][j] = 0;
+
+    for(i=0;i<N;i++) CM[(int)realCached[i]][(int)estCached[i]]++;
+
+    Data recallArray;
+    Data precisionArray;
+    precisionArray.resize(nclass);
+    recallArray.resize(nclass);
+
+    for(i=0;i<nclass;i++)
+    {
+        double sum = 0.0;
+        for(j=0;j<nclass;j++)
+            sum+=CM[j][i];
+
+        precisionArray[i]=sum==0?-1.0:CM[i][i]/sum;
+        sum = 0.0;
+        for(j=0;j<nclass;j++)
+            sum+=CM[i][j];
+        recallArray[i]=sum==0?-1.0:CM[i][i]/sum;
+    }
+
+    avg_precision = 0.0;
+    avg_recall = 0.0;
+
+    int total_classes1 = nclass;
+    int total_classes2 = nclass;
+    for(int i=0;i<nclass;i++)
+    {
+        if(precisionArray[i]<0)
+            total_classes1--;
+        else
+            avg_precision+=precisionArray[i];
+        if(recallArray[i]<0)
+            total_classes2--;
+        else
+            avg_recall+=recallArray[i];
+    }
+    avg_precision/=total_classes1;
+    avg_recall/=total_classes2;
+    for(i=0;i<nclass;i++)
+    {
+        delete[] CM[i];
+    }
+    delete[] CM;
+}
+
 int	ClassProgram::findMapper(double y)
 {
     for(unsigned int i=0;i<vclass.size();i++)
@@ -337,6 +400,7 @@ double 	ClassProgram::fitness(vector<int> &genome)
 
         }
 
+
 	if(isnan(value) || isinf(value)) return 1e+8;
 
 	if(fitness_mode == FITNESS_CLASS)
@@ -346,13 +410,22 @@ double 	ClassProgram::fitness(vector<int> &genome)
         return value1/nclass;
 	else
     if(fitness_mode == FITNESS_SQUARED)
-	return value2;
+    return sqrt(value2/nclass);
     else
     if(fitness_mode == FITNESS_MIXED)
       return class_percent * (value*100.0/trainy.size())+
               average_percent * (value1/nclass)+
               squared_percent * sqrt(value2/nclass);
-        return 0.0;
+    else
+    if(fitness_mode==FITNESS_MEAN)
+    {
+        double precision=0.0,recall=0.0;
+        getPrecisionAndRecall(precision,recall);
+        precision=1.0-precision;
+        recall = 1.0 -recall;
+            return sqrt(precision * recall);
+    }
+    return 0.0;
 }
 
 void	ClassProgram::setFitnessMode(int m)
@@ -367,17 +440,25 @@ void    ClassProgram::setFitnessPercentages(double p1,double p2,double p3)
     squared_percent = p3>=0&&p3<=1.0?p3:squared_percent;
 }
 
-void	ClassProgram::getOutputs(vector<double> &real,vector<double> &est)
+void 	ClassProgram::getOutputs(Dataset *t,vector<double> &real,vector<double> &est)
 {
-    Matrix testx = testSet->getAllXpoint();
-    Data   testy = testSet->getAllYPoints();
-	real.resize(testy.size());
-	est.resize(testy.size());
+    Matrix testx = t->getAllXpoint();
+    Data   testy = t->getAllYPoints();
+    if(real.size()!=testy.size())
+    {
+        real.resize(testy.size());
+        est.resize(testy.size());
+    }
     for(unsigned int i=0;i<testy.size();i++)
-	{
-		real[i]=findMapper(testy[i]);
-		est[i]=outy[i];
-	}
+    {
+        real[i]=findMapper(testy[i]);
+        est[i]=outy[i];
+    }
+}
+
+void 	ClassProgram::getOutputs(vector<double> &real,vector<double> &est)
+{
+    getOutputs(trainSet,real,est);
 }
 
 ClassProgram::~ClassProgram()

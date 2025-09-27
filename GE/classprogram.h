@@ -10,6 +10,7 @@ using namespace std;
 # define FITNESS_AVERAGE 0x2
 # define FITNESS_SQUARED 0x4
 # define FITNESS_MIXED   0x8
+# define FITNESS_MEAN    0xF
 typedef vector<double> Data;
 class ClassProgram	:public Program
 {
@@ -27,6 +28,7 @@ class ClassProgram	:public Program
         Data outy;
         int fitness_mode = FITNESS_CLASS;
         double class_percent=1.0,average_percent=0.0,squared_percent=0.0;
+        Data realCached,estCached;
 	public:
         ClassProgram(Dataset *tr,Dataset *tt);
         void    setFitnessMode(int m);
@@ -37,8 +39,12 @@ class ClassProgram	:public Program
         int     findMapper(double x);
 		virtual double 	fitness(vector<int> &genome);
         double	getClassError(vector<int> &genome);
-		void	getOutputs(vector<double> &real,vector<double> &est);
+        void 	getOutputs(Dataset *t,vector<double> &real,vector<double> &est);
+        void 	getOutputs(vector<double> &real,vector<double> &est);
         int     getClass() const;
+        void    getPrecisionAndRecall(double &precision,double &recall);
+        void    getPrecisionAndRecall(Dataset *t,double &precision,double &recall);
+
 		~ClassProgram();
 };
 # define __CLASSPROGRAM__H
