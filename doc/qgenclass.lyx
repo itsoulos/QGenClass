@@ -288,14 +288,24 @@ Correspondence:
 \end_layout
 
 \begin_layout Abstract
-A s
+Data classification is a computational problem with important applications in many scientific fields and a series of machine learning models have been proposed for effective classification,
+ however most of the time the process either gets trapped in local minima of the error function or produces results that are not interpretable.
+ This paper presents a computational environment that can be used in such problems and which produces understandable classification rules in a high-level programming language.
+ To produce these classification rules,
+ the technique of Grammatical Evolution is utilized.
+ The implemented software includes a series of innovative techniques,
+ such as different initialization techniques for the chromosomes of Grammatical Evolution,
+ incorporation of local optimization rules on the chromosomes,
+ a variety of fitness calculation techniques for the chromosomes,
+ training data improvement techniques for the case of imbalanced data as well as stochastic techniques for terminating the evolutionary process.
+ The implemented software was applied to a wide range of classification problems and the experimental results were compared with other machine learning techniques and the results of these experiments are presented in detail in the present work.
 \end_layout
 
 \begin_layout Keywords
-keyword 1;
- keyword 2;
- keyword 3 (List three to ten pertinent keywords specific to the article;
- yet reasonably common within the subject discipline.)
+Grammatical Evolution;
+ Machine learning;
+ Evolutionary process;
+ Genetic algorithms
 \end_layout
 
 \begin_layout Standard
