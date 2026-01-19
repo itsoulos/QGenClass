@@ -8,6 +8,8 @@ using namespace std;
 # define GELOCAL_MUTATE     0x2
 # define GELOCAL_BFGS       0x4
 # define GELOCAL_SIMAN      0x8
+# define GELOCAL_DE         0x16
+# define GELOCAL_HILL       0x32
 /**
  * @brief The Population class class holds the current populatio for
  * Grammatical Evolution.

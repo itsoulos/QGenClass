@@ -3,7 +3,7 @@
 
 IntegerAnneal::IntegerAnneal(Program *pr)
 {
-    T0=1e+8;
+    T0=100.0;
     neps=200;
     myProblem = pr;
 }
@@ -16,7 +16,7 @@ void    IntegerAnneal::updateTemp()
 {
     const double alpha = 0.8;
 
-    T0 =T0 * pow(alpha,k);
+    T0 =T0 * alpha;
     k=k+1;
 }
 void    IntegerAnneal::setT0(double t)
@@ -53,12 +53,12 @@ void    IntegerAnneal::Solve()
         y[j]=xpoint[j];
 	for(int j=0;j<10;j++)
 	{
-	int randPos = rand() % bestx.size();
+        int randPos = rand() % bestx.size();
 		int range = 10;
 		int direction = rand() % 2==1?1:-1;
         int newValue =  y[randPos] + direction * (rand() % range);
         if(newValue<0) newValue = 0;
-    y[randPos]=newValue;
+        y[randPos]=newValue;
 	}
         fy = myProblem->fitness(y);
 
@@ -70,8 +70,8 @@ void    IntegerAnneal::Solve()
             ypoint = fy;
             if(ypoint<besty)
             {
-                                        bestx = xpoint;
-                                        besty = ypoint;
+                bestx = xpoint;
+                besty = ypoint;
             }
         }
         else
@@ -81,13 +81,13 @@ void    IntegerAnneal::Solve()
             double xmin = ratio<1?ratio:1;
             if(r<xmin)
             {
-                                        xpoint = y;
-                                        ypoint = fy;
-                                        if(ypoint<besty)
-                                        {
-                                            bestx = xpoint;
-                                            besty = ypoint;
-                                        }
+                xpoint = y;
+                ypoint = fy;
+                if(ypoint<besty)
+                {
+                    bestx = xpoint;
+                    besty = ypoint;
+                }
             }
         }
         }
