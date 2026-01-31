@@ -2,9 +2,9 @@
 # include <stdlib.h>
 # include <string.h>
 # include <math.h>
-# include <iostream>
 # include <CORE/problem.h>
 # include <GE/integeranneal.h>
+# include <GE/integerhill.h>
 # define MAX_RULE	256
 
 /* Population constructor */
@@ -530,8 +530,7 @@ void	Population::localSearch(int pos)
             if(i==randomIndex || rand()*1.0/RAND_MAX <=CR)
             {
                 int old_value = genome[pos][i];
-            again:
-                F = -0.5 + 2.0 * rand()*1.0/RAND_MAX;
+                //F = -0.5 + 2.0 * rand()*1.0/RAND_MAX;
                 genome[pos][i]=((int)(genome[randomA][i]+abs(F*(genome[randomB][i]-genome[randomC][i]))))%maxrule[i];
                 if(genome[pos][i]<0)
                 {
@@ -590,7 +589,18 @@ again1:
     else
     if(localMethod == GELOCAL_HILL)
     {
+        IntegerHill hill(program);
+        for(int j=0;j<genome_size;j++) g[j]=genome[pos][j];
+        vector<int> xx = hill.hill_climbing(g);
+        double ff = program->fitness(xx);
+        printf("HILL[%d] %lf=>%lf\n",pos,ff,fitness_array[pos]);
 
+        if(ff<fitness_array[pos])
+        {
+            printf("HILL[%d] %lf=>%lf\n",pos,ff,fitness_array[pos]);
+            for(int j=0;j<genome_size;j++) genome[pos][j]=xx[j];
+            fitness_array[pos]=ff;
+        }
     }
 }
 

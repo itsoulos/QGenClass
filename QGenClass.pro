@@ -24,6 +24,7 @@ SOURCES += \
         GE/fparser.cc \
         GE/fpoptimizer.cc \
         GE/integeranneal.cpp \
+        GE/integerhill.cpp \
         GE/population.cc \
         GE/program.cc \
         GE/rule.cc \
@@ -47,6 +48,7 @@ HEADERS += \
     GE/fpconfig.hh \
     GE/fptypes.hh \
     GE/integeranneal.h \
+    GE/integerhill.h \
     GE/population.h \
     GE/program.h \
     GE/rule.h \
