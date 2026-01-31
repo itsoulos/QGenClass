@@ -554,12 +554,13 @@ void	Population::localSearch(int pos)
     {
         int ipos =rand() % genome_size;
         int new_value;
-        for(int k=0;k<20;k++)
+        const int iters = 20;
+        const int range = 20;
+        for(int k=0;k<iters;k++)
         {
-			int old_value,range,direction;
+            int old_value,direction;
 again1:
             old_value = genome[pos][ipos];
-            range = 10;
             direction = rand() % 2==1?1:-1;
             new_value =  old_value + direction * (rand() % range);
             if(new_value<0) goto again1;
