@@ -78,6 +78,9 @@ void setParams()
     local_list<<"none"<<"crossover"<<"mutate"<<"siman"<<"hill"<<"de";
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
+    mainParams.addParam(Parameter("pop_mutationiters",20,1,100,"Mutation iters for local search"));
+    mainParams.addParam(Parameter("pop_mutationrange",10,1,100,"The range for mutation"));
+
     QStringList fitness_list;
     fitness_list<<"class"<<"average"<<"squared"<<"mixed"<<"mean";
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
@@ -207,6 +210,10 @@ void run()
     pop->setSelectionRate(mainParams.getParam("pop_srate").getValue().toDouble());
     pop->setMutationRate(mainParams.getParam("pop_mrate").getValue().toDouble());
     pop->setLocalSearchRate(mainParams.getParam("pop_lrate").getValue().toDouble());
+
+    pop->setMutationIters(mainParams.getParam("pop_mutationiters").getValue().toInt());
+    pop->setMutationRange(mainParams.getParam("pop_mutationrange").getValue().toInt());
+
     QString method = mainParams.getParam("pop_lmethod").getValue();
     if(method == "none")
         pop->setLocalMethod(GELOCAL_NONE);

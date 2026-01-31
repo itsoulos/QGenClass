@@ -44,6 +44,11 @@ class Population
         uniform_int_distribution<> intDistribGcount;
         uniform_int_distribution<> intDistribGsize;
         uniform_real_distribution<> doubleDistrib;
+
+        /**Parameters used in the mutation local search**/
+        int mutation_iters=20;
+        int mutation_range=10;
+
         void initPopulation(int gcount,int gsize,Program *p,vector<int> &r,int seed);
 	public:
         /**
@@ -56,6 +61,11 @@ class Population
          */
         Population(int gcount,int gsize,Program *p,int seed=1);
         Population(int gcount,int gsize,Program *p,vector<int> &rule,int seed=1);
+
+        void    setMutationIters(int i);
+        int     getMutationIters() const;
+        void    setMutationRange(int r);
+        int     getMutationRange() const;
         /**
          * @brief setLocalMethod
          * @param m

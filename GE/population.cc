@@ -474,7 +474,27 @@ public:
 
 };
 
-void	Population::localSearch(int pos)
+void    Population::setMutationIters(int i)
+{
+    mutation_iters=i;
+}
+
+int     Population::getMutationIters() const
+{
+    return mutation_iters;
+}
+
+void    Population::setMutationRange(int r)
+{
+    mutation_range = r;
+}
+
+int     Population::getMutationRange() const
+{
+    return mutation_range;
+}
+
+void 	Population::localSearch(int pos)
 {
 
     double ff = fitness_array[pos];
@@ -554,8 +574,8 @@ void	Population::localSearch(int pos)
     {
         int ipos =rand() % genome_size;
         int new_value;
-        const int iters = 20;
-        const int range = 20;
+        const int iters = mutation_iters;
+        const int range = mutation_range;
         for(int k=0;k<iters;k++)
         {
             int old_value,direction;
