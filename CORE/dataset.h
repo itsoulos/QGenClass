@@ -3,7 +3,7 @@
 # include <math.h>
 # include <stdlib.h>
 # include <QString>
-# include <QRegExp>
+//# include <QRegExp>
 # include <vector>
 #include <iostream>
 #include <fstream>

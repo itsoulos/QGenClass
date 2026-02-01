@@ -149,7 +149,7 @@ Dataset::Dataset(QString filename,QString format)
     else
     if(format=="arff")
     {
-        Data ypoint;
+        /*Data ypoint;
         QStringList classNames;
         int nattributes=0;
         QFile fp(filename);
@@ -189,7 +189,7 @@ Dataset::Dataset(QString filename,QString format)
                 ypoint.push_back(yy);
             }
         }
-        fp.close();
+        fp.close();*/
     }
     makePatternClass();
 }
