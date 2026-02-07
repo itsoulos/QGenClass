@@ -77,6 +77,15 @@ void    Population::setLocalSearchRate(double r)
     if(r>=0.0 && r<=1.0)
         lrate = r;
 }
+
+
+
+void	Population::setLocalSearchIters(int i)
+{
+	localSearchIters=i;
+}
+
+
 double  Population::getLocalSearchRate() const
 {
     return lrate;
@@ -267,7 +276,7 @@ void	Population::calcFitnessArray()
 		fitness_array[i]=fitness(g);
 		//else 
 		//localSearch(i);
-        if(lrate>0.0)
+        if((generation+1)%localSearchIters==0 && lrate>0.0)
         {
             double  r =  rand() *1.0 /RAND_MAX;
             if(r<=lrate)

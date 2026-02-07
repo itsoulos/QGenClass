@@ -72,6 +72,7 @@ void setParams()
     mainParams.addParam(Parameter("pop_gens",2000,10,10000,"Maximum number of generations"));
     mainParams.addParam(Parameter("pop_srate",0.1,0.0,1.0,"Selection rate"));
     mainParams.addParam(Parameter("pop_mrate",0.05,0.0,1.0,"Mutation rate"));
+    mainParams.addParam(Parameter("pop_lsearchiters",20,0,100,"Local search iters"));
     mainParams.addParam(Parameter("pop_lrate",0.0,0.0,1.0,"Local search rate"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
     QStringList local_list;
@@ -210,6 +211,7 @@ void run()
     pop->setSelectionRate(mainParams.getParam("pop_srate").getValue().toDouble());
     pop->setMutationRate(mainParams.getParam("pop_mrate").getValue().toDouble());
     pop->setLocalSearchRate(mainParams.getParam("pop_lrate").getValue().toDouble());
+    pop->setLocalSearchIters(mainParams.getParam("pop_lsearchiters").getValue().toInt());
 
     pop->setMutationIters(mainParams.getParam("pop_mutationiters").getValue().toInt());
     pop->setMutationRange(mainParams.getParam("pop_mutationrange").getValue().toInt());

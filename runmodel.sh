@@ -31,7 +31,8 @@ fi
 ## pop_squaredpercent: The percentage of squared mode in mixed mode fitness.
 ## pop_mutationiters:  The number of iters in mutation local search.
 ## pop_mutationrange:  The magnitude of changes in mutation local search.
-GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=500 --pop_srate=0.1 --pop_mrate=0.05 --pop_lrate=0.01 --pop_lmethod=mutate --pop_mutationiters=10 --pop_mutationrange=10 --pop_fitnessmethod=class --pop_classpercent=0.5 --pop_averagepercent=0.25 --pop_squaredpercent=0.25 --random_seed=$SEED"
+## pop_lsearchiters:   The number of generations before the application of the local search procedure.
+GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=500 --pop_srate=0.1 --pop_mrate=0.05 --pop_lsearchiters=20 --pop_lrate=0.01 --pop_lmethod=siman --pop_mutationiters=10 --pop_mutationrange=10 --pop_fitnessmethod=class --pop_classpercent=0.5 --pop_averagepercent=0.25 --pop_squaredpercent=0.25 --random_seed=$SEED"
 # TERMINATION: The termination method used. Available values: maxiters, doublebox, similarity
 TERMINATION=maxiters
 

@@ -25,10 +25,11 @@ class Population
 		int	genome_count;
 		int	genome_size;
 		int	generation;
-        double lrate=0.0;
-        int  crossover_items = 100;
+        	double lrate=0.0;
+        	int  crossover_items = 100;
 		Program	*program;
-        int  localMethod;
+        	int  localMethod;
+		int  localSearchIters=20;
 		void	select();
 		void	crossover();
 		void	mutate();
@@ -66,6 +67,7 @@ class Population
         int     getMutationIters() const;
         void    setMutationRange(int r);
         int     getMutationRange() const;
+	void	setLocalSearchIters(int i);
         /**
          * @brief setLocalMethod
          * @param m
