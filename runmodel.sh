@@ -32,7 +32,7 @@ fi
 ## pop_mutationiters:  The number of iters in mutation local search.
 ## pop_mutationrange:  The magnitude of changes in mutation local search.
 ## pop_lsearchiters:   The number of generations before the application of the local search procedure.
-GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=500 --pop_srate=0.1 --pop_mrate=0.05 --pop_lsearchiters=20 --pop_lrate=0.01 --pop_lmethod=siman --pop_mutationiters=10 --pop_mutationrange=10 --pop_fitnessmethod=class --pop_classpercent=0.5 --pop_averagepercent=0.25 --pop_squaredpercent=0.25 --random_seed=$SEED"
+GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=500 --pop_srate=0.1 --pop_mrate=0.05 --pop_lsearchiters=20 --pop_lrate=0.01 --pop_lmethod=none --pop_mutationiters=10 --pop_mutationrange=10 --pop_fitnessmethod=class --pop_classpercent=0.5 --pop_averagepercent=0.25 --pop_squaredpercent=0.25 --random_seed=$SEED"
 # TERMINATION: The termination method used. Available values: maxiters, doublebox, similarity
 TERMINATION=maxiters
 
@@ -43,6 +43,6 @@ TERMINATION=maxiters
 ## test_format:  The used format for the test file. Available values: data, csv, arff.
 ## enable_smote: This is a flag that enables or disables the Smote method in the train set. Values: yes/no
 ## smote_k     : An integer value used in the k-nn procedure of the smote method.
-DATAPARAMS="--train_file=$DATAPATH/$DATAFILE.train --train_format=data --test_file=$DATAPATH/$DATAFILE.test --test_format=data --enable_smote=no --smote_k=5"
+DATAPARAMS="--train_file=$DATAPATH/$DATAFILE.train --train_format=data --test_file=$DATAPATH/$DATAFILE.test --test_format=data --enable_smote=yes --smote_k=5"
 ## Execute the program
 $PROGRAM $GENPARAMS $DATAPARAMS

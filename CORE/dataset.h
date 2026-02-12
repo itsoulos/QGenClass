@@ -208,7 +208,15 @@ public:
      */
     vector<Sample> getSamples();
 
-
+    double distance(const std::vector<double>& a, const std::vector<double>& b);
+    std::vector<int> kNearest(
+        const std::vector<Sample>& minority,
+        int index,
+        int k);
+    std::vector<Sample> applySMOTE(
+        const std::vector<Sample>& data,
+        int k = 5
+        );
     vector<int> kNearestNeighbors(const vector<Sample>& samples, int index, int k);
     ~Dataset();
 };

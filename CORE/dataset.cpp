@@ -8,6 +8,94 @@ Dataset::Dataset()
     ypoint.resize(0);
 }
 
+
+
+double Dataset::distance(const std::vector<double>& a, const std::vector<double>& b)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < a.size(); i++) {
+        sum += std::pow(a[i] - b[i], 2);
+    }
+    return std::sqrt(sum);
+}
+
+std::vector<int> Dataset::kNearest(
+    const std::vector<Sample>& minority,
+    int index,
+    int k)
+{
+    std::vector<std::pair<double, int>> distances;
+
+    for (size_t i = 0; i < minority.size(); i++) {
+        if (i == index) continue;
+        double d = distance(minority[index].features,
+                            minority[i].features);
+        distances.push_back({d, i});
+    }
+
+    std::sort(distances.begin(), distances.end());
+
+    std::vector<int> neighbors;
+    for (int i = 0; i < k && i < distances.size(); i++) {
+        neighbors.push_back(distances[i].second);
+    }
+
+    return neighbors;
+}
+
+std::vector<Sample> Dataset::applySMOTE(
+    const std::vector<Sample>& data,
+    int k
+    )
+{
+    std::map<double, std::vector<Sample>> classes;
+
+    for (const auto& s : data) {
+        classes[s.label].push_back(s);
+    }
+
+    // εύρεση πλειοψηφικής κλάσης
+    int maxCount = 0;
+    for (auto& c : classes) {
+        maxCount = std::max(maxCount, (int)c.second.size());
+    }
+
+    std::vector<Sample> balanced = data;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dist(0.0, 1.0);
+
+    for (auto& [label, samples] : classes) {
+        if (samples.size() == maxCount) continue;
+
+        int needed = maxCount - samples.size();
+        int idx = 0;
+
+        while (needed-- > 0) {
+            const Sample& x = samples[idx % samples.size()];
+            auto neighbors = kNearest(samples, idx % samples.size(), k);
+
+            int nIndex = neighbors[gen() % neighbors.size()];
+            const Sample& n = samples[nIndex];
+
+            Sample synthetic;
+            synthetic.label = label;
+
+            for (size_t f = 0; f < x.features.size(); f++) {
+                double gap = dist(gen);
+                double val = x.features[f] +
+                             gap * (n.features[f] - x.features[f]);
+                synthetic.features.push_back(val);
+            }
+
+            balanced.push_back(synthetic);
+            idx++;
+        }
+    }
+
+    return balanced;
+}
+
 double euclideanDistance(const vector<double>& a, const vector<double>& b) {
     double sum = 0.0;
     for (size_t i = 0; i < a.size(); i++) {
@@ -19,47 +107,12 @@ double euclideanDistance(const vector<double>& a, const vector<double>& b) {
 void    Dataset::makeSmote(int k)
 {
     vector<Sample> dataset = getSamples();
-    map<double, vector<Sample>> classSamples;
-    for (auto& s : dataset) classSamples[s.label].push_back(s);
-
-    int maxCount = 0;
-    for (auto& [cls, samples] : classSamples)
-        maxCount = max(maxCount, (int)samples.size());
-
-    vector<Sample> augmented = dataset;
-    random_device rd;
-    mt19937 gen(rd());
-
-    for (auto& [cls, samples] : classSamples) {
-        int needed = maxCount - (int)samples.size();
-        if (needed <= 0) continue;
-
-        int i = 0;
-        while (needed > 0) {
-            vector<int> nnArray = kNearestNeighbors(samples, i, k);
-            uniform_int_distribution<> dis(0, nnArray.size()-1);
-            int nnIndex = nnArray[dis(gen)];
-
-            Sample newSample;
-            newSample.label = cls;  // κρατάμε το δεκαδικό label
-
-            for (size_t d = 0; d < samples[i].features.size(); d++) {
-                double gap = uniform_real_distribution<>(0,1)(gen);
-                double syntheticValue = samples[i].features[d] + gap *
-                                                                     (samples[nnIndex].features[d] - samples[i].features[d]);
-                newSample.features.push_back(syntheticValue);
-            }
-            augmented.push_back(newSample);
-
-            needed--;
-            i = (i + 1) % samples.size();
-        }
-    }
+    vector<Sample> dataset2=applySMOTE(dataset,k);
     clearPoints();
-    for(unsigned int i=0;i<augmented.size();i++)
+    for(unsigned int i=0;i<dataset2.size();i++)
     {
-        xpoint.push_back(augmented[i].features);
-        ypoint.push_back(augmented[i].label);
+        xpoint.push_back(dataset2[i].features);
+        ypoint.push_back(dataset2[i].label);
     }
 }
 
