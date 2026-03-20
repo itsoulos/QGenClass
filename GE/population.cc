@@ -99,7 +99,6 @@ void    Population::producePrimeNumbers()
 
 int Population::getRandomNumber()
 {
-    return geometric(0.5);
     return rand () % MAX_RULE;
 }
 
