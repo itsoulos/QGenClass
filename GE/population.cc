@@ -7,14 +7,112 @@
 # include <GE/integerhill.h>
 # define MAX_RULE	256
 
+
+// Uniform [a, b]
+int uniform(int a, int b) {
+    return a + rand() % (b - a + 1);
+}
+
+// Προσεγγιστική Normal (με Central Limit Theorem)
+int normal(int mean, int stddev) {
+    double sum = 0;
+    for (int i = 0; i < 12; i++) {
+        sum += (double)rand() / RAND_MAX;
+    }
+    double z = sum - 6.0; // ~ N(0,1)
+    return (int)(mean + z * stddev);
+}
+
+// Geometric (δοκιμές μέχρι πρώτη επιτυχία)
+int geometric(double p) {
+    int count = 1;
+    while (((double)rand() / RAND_MAX) > p) {
+        count++;
+    }
+    return count;
+}
+
+
+
+// Poisson (Knuth algorithm)
+int poisson(double lambda) {
+    double L = exp(-lambda);
+    int k = 0;
+    double p = 1.0;
+
+    do {
+        k++;
+        p *= (double)rand() / RAND_MAX;
+    } while (p > L);
+
+    return k - 1;
+}
+
+// Binomial (n δοκιμές)
+int binomial(int n, double p) {
+    int successes = 0;
+    for (int i = 0; i < n; i++) {
+        if (((double)rand() / RAND_MAX) < p)
+            successes++;
+    }
+    return successes;
+}
+
+bool isprime(int num) {
+    if (num < 2) return false;
+    for (int i = 2; i * i <= num; i++) {
+        if (num % i == 0)
+            return false;
+    }
+    return true;
+}
+
+
+void    Population::produceFibNumbers()
+{
+    const int N =1000;
+    long long a = 0, b = 1;
+
+    for (int i = 0; i < N; i++) {
+        long long next = a + b;
+        fibNumbers.push_back(next);
+        a = b;
+        b = next;
+    }
+}
+void    Population::producePrimeNumbers()
+{
+    const int N = 1000;
+    int count = 0;
+    int number = 2;
+    while(count<N)
+    {
+        if(isprime(number))
+        {
+            primeNumbers.push_back(number);
+            count++;
+
+        }
+        number++;
+    }
+}
+
+int Population::getRandomNumber()
+{
+    return geometric(0.5);
+    return rand () % MAX_RULE;
+}
+
 /* Population constructor */
 /* Input: genome count , genome size, pointer to Program instance */
 Population::Population(int gcount,int gsize,Program *p,int seed)
 {
+    producePrimeNumbers();
+    produceFibNumbers();
 	vector<int> grule;
 	grule.resize(gsize);
 	for(int i=0;i<gsize;i++)
-		grule[i]=MAX_RULE;
+        grule[i]=MAX_RULE;
 	initPopulation(gcount,gsize,p,grule,seed);
 }
 
@@ -57,7 +155,8 @@ void Population::initPopulation(int gcount,int gsize,Program *p,vector<int> &rul
 		genome[i]=new int[genome_size];
 		children[i]=new int[genome_size];
 			for(int j=0;j<genome_size;j++)
-                g[j]=genome[i][j]=rand()%maxrule[j];
+            g[j]=genome[i][j]=getRandomNumber();
+            //rand()%maxrule[j];
 	}
 	fitness_array=new double[genome_count];
 }
@@ -180,7 +279,6 @@ void	Population::crossover()
         int parent[2];
         int nchildren=(int)((1.0 - selection_rate) * genome_count);
 	if(!(nchildren%2==0)) nchildren++;
-        const int tournament_size =(genome_count<=100)?4:20;
         int count_children=0;
         while(1)
         {
@@ -247,7 +345,8 @@ void	Population::mutate()
             double r=rand()*1.0/RAND_MAX;
 			if(r<mutation_rate)
 			{
-				genome[i][j]=rand() % maxrule[j];
+                genome[i][j]=getRandomNumber();
+                // rand() % maxrule[j];
 			}
 		}
 	}

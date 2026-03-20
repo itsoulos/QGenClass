@@ -43,6 +43,6 @@ TERMINATION=maxiters
 ## test_format:  The used format for the test file. Available values: data, csv, arff.
 ## enable_smote: This is a flag that enables or disables the Smote method in the train set. Values: yes/no
 ## smote_k     : An integer value used in the k-nn procedure of the smote method.
-DATAPARAMS="--train_file=$DATAPATH/$DATAFILE.train --train_format=data --test_file=$DATAPATH/$DATAFILE.test --test_format=data --enable_smote=yes --smote_k=5"
+DATAPARAMS="--train_file=$DATAPATH/$DATAFILE.train --train_format=data --test_file=$DATAPATH/$DATAFILE.test --test_format=data --enable_smote=no --smote_k=5"
 ## Execute the program
 $PROGRAM $GENPARAMS $DATAPARAMS

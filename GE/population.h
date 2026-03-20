@@ -49,7 +49,11 @@ class Population
         /**Parameters used in the mutation local search**/
         int mutation_iters=20;
         int mutation_range=10;
-
+        vector<int> primeNumbers;
+        vector<long long> fibNumbers;
+        void producePrimeNumbers();
+        void produceFibNumbers();
+        int  getRandomNumber();
         void initPopulation(int gcount,int gsize,Program *p,vector<int> &r,int seed);
 	public:
         /**
