@@ -368,12 +368,11 @@ void	Population::calcFitnessArray()
 
 	double dmin=1e+100;
 	int icount=0;
+    if(generation%10==0) localSearch(0);
 	for(int i=0;i<genome_count;i++)
 	{
 		for(int j=0;j<genome_size;j++) g[j]=genome[i][j];	
-		fitness_array[i]=fitness(g);
-		//else 
-		//localSearch(i);
+        fitness_array[i]=fitness(g);
         if((generation+1)%localSearchIters==0 && lrate>0.0)
         {
             double  r =  rand() *1.0 /RAND_MAX;
@@ -600,7 +599,143 @@ int     Population::getMutationRange() const
 {
     return mutation_range;
 }
+vector<int> Population::discreteGradient(vector<int>& x)
+{
+    int n = x.size();
+    vector<int> grad(n);
 
+    double fx = fitness(x);
+
+    for (int i = 0; i < n; i++) {
+
+        vector<int> x_plus = x;
+        vector<int> x_minus = x;
+
+        x_plus[i] += 1;
+        x_minus[i] -= 1;
+        if(x_minus[i]<0) x_minus[i]=0;
+
+        double f_plus = fitness(x_plus);
+        double f_minus = fitness(x_minus);
+
+        if (f_plus < fx)
+            grad[i] = +1;
+        else if (f_minus < fx)
+            grad[i] = -1;
+        else
+            grad[i] = 0;
+    }
+    return grad;
+}
+
+vector<int> Population::discreteStep(vector<int>& x,vector<int>& grad)
+{
+    vector<int> res = x;
+
+    for (int i = 0; i < (int)x.size(); i++)
+    {
+        res[i] += grad[i];
+    }
+
+    return res;
+}
+
+void Population::integerLocalSearch(vector<int> &x,int maxSteps)
+{
+    double bestVal = fitness(x);
+    int stepSize = 100;
+    for (int step = 0; step < maxSteps; step++) {
+
+        vector<int> grad = discreteGradient(x);
+
+        vector<int> candidate = x;
+
+        for (int i = 0; i < x.size(); i++)
+        {
+            candidate[i] += grad[i] * stepSize;
+            if(candidate[i]<0) candidate[i]=0;
+        }
+
+        double val = fitness(candidate);
+
+        if (val < bestVal) {
+            x = candidate;
+            bestVal = val;
+        } else {
+            stepSize = max(1, stepSize / 2); // learning rate decay
+        }
+        printf("GD[%4d]=%20.10lg\n",step,bestVal);
+    }
+
+
+}
+
+
+vector<int> Population::integerAdam(
+    vector<int> x,
+    int steps,
+    double alpha,
+    double beta1,
+    double beta2,
+    double eps
+    ) {
+    int n = x.size();
+
+    vector<double> m(n, 0.0);
+    vector<double> v(n, 0.0);
+
+    double bestVal = fitness(x);
+
+    for (int t = 1; t <= steps; t++) {
+
+        vector<int> g_int = discreteGradient(x);
+
+        // convert gradient to double
+        vector<double> g(n);
+        for (int i = 0; i < n; i++)
+            g[i] = (double)g_int[i];
+
+        // update moments
+        for (int i = 0; i < n; i++) {
+            m[i] = beta1 * m[i] + (1 - beta1) * g[i];
+            v[i] = beta2 * v[i] + (1 - beta2) * g[i] * g[i];
+        }
+
+        // bias correction
+        vector<double> m_hat(n), v_hat(n);
+        for (int i = 0; i < n; i++) {
+            m_hat[i] = m[i] / (1 - pow(beta1, t));
+            v_hat[i] = v[i] / (1 - pow(beta2, t));
+        }
+
+        // candidate update
+        vector<int> candidate = x;
+
+        for (int i = 0; i < n; i++) {
+
+            double step = alpha * m_hat[i] / (sqrt(v_hat[i]) + eps);
+            double p = fabs(step);
+
+            if (rand()*1.0/RAND_MAX < p) {
+                candidate[i] += (step > 0 ? 1 : -1);
+            }
+
+            if(candidate[i]<0) candidate[i]=0;
+        }
+
+        double val = fitness(candidate);
+
+        if (val < bestVal) {
+            x = candidate;
+            bestVal = val;
+        }
+        else {
+            alpha *= 0.7; // decay learning rate
+        }
+    }
+
+    return x;
+}
 void 	Population::localSearch(int pos)
 {
 
@@ -727,6 +862,30 @@ again1:
         {
             printf("HILL[%d] %lf=>%lf\n",pos,ff,fitness_array[pos]);
             for(int j=0;j<genome_size;j++) genome[pos][j]=xx[j];
+            fitness_array[pos]=ff;
+        }
+    }
+    else
+    if(localMethod==GELOCAL_GD)
+    {
+        integerLocalSearch(g);
+        double ff = fitness(g);
+        if(ff<fitness_array[pos])
+        {
+            printf("GD LOCAL[%d] %lf=>%lf\n",pos,fitness_array[pos],ff);
+            for(int j=0;j<genome_size;j++) genome[pos][j]=g[j];
+            fitness_array[pos]=ff;
+        }
+    }
+    else
+        if(localMethod==GELOCAL_ADAM)
+    {
+        g = integerAdam(g);
+        double ff = fitness(g);
+        if(ff<fitness_array[pos])
+        {
+            printf("ADAM LOCAL[%d] %lf=>%lf\n",pos,fitness_array[pos],ff);
+            for(int j=0;j<genome_size;j++) genome[pos][j]=g[j];
             fitness_array[pos]=ff;
         }
     }

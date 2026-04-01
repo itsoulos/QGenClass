@@ -421,7 +421,7 @@ double 	ClassProgram::fitness(vector<int> &genome)
     {
         double precision=0.0,recall=0.0;
         getPrecisionAndRecall(precision,recall);
-        return 100*(1.0-sqrt(precision * recall));
+        return (100*(1.0-sqrt(precision * recall)));
     }
     return 0.0;
 }

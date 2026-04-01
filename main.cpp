@@ -76,7 +76,7 @@ void setParams()
     mainParams.addParam(Parameter("pop_lrate",0.0,0.0,1.0,"Local search rate"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
     QStringList local_list;
-    local_list<<"none"<<"crossover"<<"mutate"<<"siman"<<"hill"<<"de";
+    local_list<<"none"<<"crossover"<<"mutate"<<"siman"<<"hill"<<"de"<<"gd"<<"adam";
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
     mainParams.addParam(Parameter("pop_mutationiters",20,1,100,"Mutation iters for local search"));
@@ -234,6 +234,12 @@ void run()
     else
         if(method == "hill")
         pop->setLocalMethod(GELOCAL_HILL);
+    else
+        if(method == "gd")
+        pop->setLocalMethod(GELOCAL_GD);
+    else
+        if(method == "adam")
+        pop->setLocalMethod(GELOCAL_ADAM);
     QString fmethod = mainParams.getParam("pop_fitnessmethod").getValue();
     if(fmethod == "class")
 	    program->setFitnessMode(FITNESS_CLASS);

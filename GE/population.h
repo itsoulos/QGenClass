@@ -10,6 +10,8 @@ using namespace std;
 # define GELOCAL_SIMAN      0x8
 # define GELOCAL_DE         0x16
 # define GELOCAL_HILL       0x32
+# define GELOCAL_GD         0x64
+# define GELOCAL_ADAM       0x128
 /**
  * @brief The Population class class holds the current populatio for
  * Grammatical Evolution.
@@ -219,6 +221,18 @@ class Population
          * @param pos
          */
         void    evaluateFitnessAt(int pos);
+
+        vector<int> discreteGradient( vector<int>& x);
+        vector<int> discreteStep(vector<int>& x,vector<int>& grad);
+        void integerLocalSearch(vector<int> &x,int maxSteps = 20);
+        vector<int> integerAdam(
+            vector<int> x,
+            int steps = 50,
+            double alpha = 0.5,
+            double beta1 = 0.9,
+            double beta2 = 0.999,
+            double eps = 1e-8
+            ) ;
 		~Population();
 		
 };
