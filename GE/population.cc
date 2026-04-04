@@ -102,6 +102,77 @@ int Population::getRandomNumber()
     return rand () % MAX_RULE;
 }
 
+mt19937 gen(random_device{}());
+
+double randDouble(double a, double b) {
+    uniform_real_distribution<> dist(a, b);
+    return dist(gen);
+}
+
+int randInt(int a, int b) {
+    uniform_int_distribution<> dist(a, b);
+    return dist(gen);
+}
+vector<int> Population::neighbor(const vector<int>& x, int stepSize ) {
+    vector<int> y = x;
+
+    int i = randInt(0, x.size() - 1);
+
+    // αλλαγή σε μία διάσταση
+    y[i] += randInt(-stepSize, stepSize);
+    if(y[i]<0) y[i]=0;
+
+    return y;
+}
+
+vector<int> Population::simulatedAnnealing(
+    vector<int> &x,
+    double T0,
+    double Tmin,
+    double alpha,
+    int iterPerTemp
+    ) {
+    double T = T0;
+
+    vector<int> best = x;
+    double bestVal = fitness(x);
+
+    while (T > Tmin) {
+
+        for (int k = 0; k < iterPerTemp; k++) {
+
+            vector<int> y = neighbor(x);
+
+            double fx = (fitness(x));
+            double fy = (fitness(y));
+
+            double delta = fabs(fy) - fabs(fx);
+
+            if (delta < 0) {
+                // καλύτερη λύση
+                x = y;
+            } else {
+                // πιθανότητα αποδοχής
+                double p = exp(-delta / T);
+
+                if (randDouble(0,1) < p)
+                    x = y;
+            }
+
+            // update best
+            double val = fitness(x);
+            if (fabs(val) < fabs(bestVal)) {
+                best = x;
+                bestVal = val;
+            }
+        }
+        //printf("T=%20.10lf BEST=%20.10lf\n",T,bestVal);
+        // cooling
+        T *= alpha;
+    }
+
+    return best;
+}
 /* Population constructor */
 /* Input: genome count , genome size, pointer to Program instance */
 Population::Population(int gcount,int gsize,Program *p,int seed)
@@ -368,7 +439,6 @@ void	Population::calcFitnessArray()
 
 	double dmin=1e+100;
 	int icount=0;
-    if(generation%10==0) localSearch(0);
 	for(int i=0;i<genome_count;i++)
 	{
 		for(int j=0;j<genome_size;j++) g[j]=genome[i][j];	
@@ -559,7 +629,7 @@ public:
         return f;
 
     }
-    virtual Data	gradient(Data &x)
+    virtual Data	 gradient(Data &x)
     {
 
         Data g;
@@ -841,12 +911,15 @@ again1:
     if(localMethod == GELOCAL_SIMAN)
     {
         double f = fitness_array[pos];
-        IntegerAnneal lt(program);
+        /*IntegerAnneal lt(program);
         lt.setPoint(g,fitness_array[pos]);
         lt.Solve();
-        lt.getPoint(g,fitness_array[pos]);
-        for(int j=0;j<genome_size;j++) genome[pos][j]=g[j];
+        lt.getPoint(g,fitness_array[pos]);*/
 
+        g=simulatedAnnealing(g);
+
+        fitness_array[pos]=fitness(g);
+        for(int j=0;j<genome_size;j++) genome[pos][j]=g[j];
         printf("SIMAN[%d] %lf=>%lf\n",pos,f,fitness_array[pos]);
     }
     else
