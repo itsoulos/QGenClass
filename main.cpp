@@ -72,15 +72,11 @@ void setParams()
     mainParams.addParam(Parameter("pop_gens",2000,10,10000,"Maximum number of generations"));
     mainParams.addParam(Parameter("pop_srate",0.1,0.0,1.0,"Selection rate"));
     mainParams.addParam(Parameter("pop_mrate",0.05,0.0,1.0,"Mutation rate"));
-    mainParams.addParam(Parameter("pop_lsearchiters",20,0,100,"Local search iters"));
-    mainParams.addParam(Parameter("pop_lrate",0.0,0.0,1.0,"Local search rate"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
     QStringList local_list;
     local_list<<"none"<<"crossover"<<"mutate"<<"siman"<<"hill"<<"de"<<"gd"<<"adam";
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
-    mainParams.addParam(Parameter("pop_mutationiters",20,1,100,"Mutation iters for local search"));
-    mainParams.addParam(Parameter("pop_mutationrange",10,1,100,"The range for mutation"));
 
     QStringList fitness_list;
     fitness_list<<"class"<<"average"<<"squared"<<"mixed"<<"mean";
@@ -205,41 +201,14 @@ void run()
     pop=new Population(
                 mainParams.getParam("pop_count").getValue().toInt(),
                 mainParams.getParam("pop_size").getValue().toInt(),
-                program,
-                mainParams.getParam("random_seed").getValue().toInt()
+                program
                 );
     pop->setSelectionRate(mainParams.getParam("pop_srate").getValue().toDouble());
     pop->setMutationRate(mainParams.getParam("pop_mrate").getValue().toDouble());
-    pop->setLocalSearchRate(mainParams.getParam("pop_lrate").getValue().toDouble());
-    pop->setLocalSearchIters(mainParams.getParam("pop_lsearchiters").getValue().toInt());
 
-    pop->setMutationIters(mainParams.getParam("pop_mutationiters").getValue().toInt());
-    pop->setMutationRange(mainParams.getParam("pop_mutationrange").getValue().toInt());
 
     QString method = mainParams.getParam("pop_lmethod").getValue();
-    if(method == "none")
-        pop->setLocalMethod(GELOCAL_NONE);
-    else
-    if(method == "crossover")
-        pop->setLocalMethod(GELOCAL_CROSSOVER);
-    else
-    if(method == "mutate")
-        pop->setLocalMethod(GELOCAL_MUTATE);
-    else
-    if(method == "siman")
-        pop->setLocalMethod(GELOCAL_SIMAN);
-    else
-        if(method == "de")
-        pop->setLocalMethod(GELOCAL_DE);
-    else
-        if(method == "hill")
-        pop->setLocalMethod(GELOCAL_HILL);
-    else
-        if(method == "gd")
-        pop->setLocalMethod(GELOCAL_GD);
-    else
-        if(method == "adam")
-        pop->setLocalMethod(GELOCAL_ADAM);
+    pop->setLocalMethod(method.toStdString());
     QString fmethod = mainParams.getParam("pop_fitnessmethod").getValue();
     if(fmethod == "class")
 	    program->setFitnessMode(FITNESS_CLASS);

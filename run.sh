@@ -1,6 +1,6 @@
 #!/bin/sh
 export LC_ALL=C
-BASEPATH=~/Desktop/ERGASIES/QGenClass/
+BASEPATH=~/TEST/QGenClass/
 PROGRAM=$BASEPATH/runmodel.sh
 DATAFILE=$1
 OUTFILE=$1.out

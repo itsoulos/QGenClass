@@ -351,7 +351,8 @@ double 	ClassProgram::fitness(vector<int> &genome)
         for(unsigned int i=0;i<trainy.size();i++)
 		{
 			if(fabs(outy[i]-NAN_CLASS)>1e-5) continue;
-            double v=program->Eval(trainx[i].data());
+            		double v=program->Eval(trainx[i].data());
+			if(program->EvalError()) return 1e+8;
 			if(isnan(v) || isinf(v) ) return 1e+8;
 			if(fabs(v-1.0)<1e-5) outy[i]=vclass[j];
 		}

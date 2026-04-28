@@ -548,10 +548,10 @@ extern char grammar_file[1024];
 
 		r=newRule();
 		rule[r]->addSymbol(&function);
-    rule[r]->addSymbol(&Lpar);
+    		rule[r]->addSymbol(&Lpar);
 		rule[r]->addSymbol(&Expr);
 		rule[r]->addSymbol(&Rpar);
-		//	Expr.addRule(rule[r]);
+		Expr.addRule(rule[r]);
 
 		r=newRule();
 		rule[r]->addSymbol(&Log);
@@ -591,15 +591,15 @@ extern char grammar_file[1024];
 
 		r=newRule();
 		rule[r]->addSymbol(&Digit0);
-		rule[r]->addSymbol(&Digit0);
 		//rule[r]->addSymbol(&DigitList);
+		rule[r]->addSymbol(&Digit0);
 		DigitList.addRule(rule[r]);
 
 		r=newRule();
 		rule[r]->addSymbol(&Digit0);
 		rule[r]->addSymbol(&Digit0);
 		rule[r]->addSymbol(&Digit0);
-		DigitList.addRule(rule[r]);
+		//DigitList.addRule(rule[r]);
 
 		r=newRule();
 		rule[r]->addSymbol(&DigitList);
