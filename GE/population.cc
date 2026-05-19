@@ -278,23 +278,36 @@ int	Population::getSize() const
 	return genome_size;
 }
 
+void    Population::setCrossItems(int g)
+{
+    if(g>=0)
+        crossitems=g;
+}
+
+void    Population::setLocalItems(int g)
+{
+    if(g>=0)
+        localitems=g;
+}
+
+void    Population::setLocalGens(int g)
+{
+    if(g>=0)
+        localgens=g;
+}
+
 /* Evolve the next generation */
 void        Population::nextGeneration()
 {
 	calcFitnessArray();
-
 	select();
-	
-	
-    	if((generation+1)%50==0) 
+        if((generation+1)%localgens==0)
     	{
-	    localSearch(0);
-	    for(int i=0;i<10;i++)
-	    localSearch(rand()%genome_count);
-	    select();
+            for(int i=0;i<localitems;i++)
+                localSearch(i==0?0:rand()%genome_count);
+            select();
     	}
-	if(generation%10==0)
-	for(int i=0;i<20;i++)
+    for(int i=0;i<crossitems;i++)
 		crossItem(i==0?0:rand() % genome_count);
 	select();
 	crossover();
@@ -311,11 +324,11 @@ void    	Population::replaceWorst()
 	for(int i=0;i<genome_size;i++)
 	{
 		double gamma;
-		gamma=-0.5+2.0*drand48();
+        gamma=-0.5+2.0*rand()*1.0/RAND_MAX;
 		xtrial[i]=(int)(fabs((1.0+gamma)*genome[0][i]-gamma*genome[randpos][i]));
 	}
 	double ftrial = fitness(xtrial);
-	if(ftrial>fitness_array[genome_count-1])
+    if(fabs(ftrial)<fabs(fitness_array[genome_count-1]))
 	{
 		for(int i=0;i<genome_size;i++)
 		genome[genome_count-1][i]=xtrial[i];

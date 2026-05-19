@@ -77,6 +77,9 @@ void setParams()
     local_list<<"none"<<"crossover"<<"mutate"<<"siman"<<"hill"<<"de"<<"gd"<<"adam";
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
+    mainParams.addParam(Parameter("pop_crossitems",10,0,1000,"Number of items participate in local crossover"));
+    mainParams.addParam(Parameter("pop_localgens",100,0,1000,"Number of generations before the application of local search"));
+    mainParams.addParam(Parameter("pop_localitems",10,0,1000,"Number of chromosomes participate in localsearch"));
 
     QStringList fitness_list;
     fitness_list<<"class"<<"average"<<"squared"<<"mixed"<<"mean";
@@ -205,6 +208,9 @@ void run()
                 );
     pop->setSelectionRate(mainParams.getParam("pop_srate").getValue().toDouble());
     pop->setMutationRate(mainParams.getParam("pop_mrate").getValue().toDouble());
+    pop->setCrossItems(mainParams.getParam("pop_crossitems").getValue().toInt());
+    pop->setLocalItems(mainParams.getParam("pop_localitems").getValue().toInt());
+    pop->setLocalGens(mainParams.getParam("pop_localgens").getValue().toInt());
 
 
     QString method = mainParams.getParam("pop_lmethod").getValue();

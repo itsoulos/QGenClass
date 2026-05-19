@@ -36,8 +36,12 @@ class Population
 		int	elitism;
         string localMethod="none";
         void    	localSearch(int gpos);
+        int crossitems=10,localitems=10,localgens=100;
 	public:
 		Population(int gcount,int gsize,Program *p);
+        void    setCrossItems(int g);
+        void    setLocalItems(int g);
+        void    setLocalGens(int g);
 		double 	fitness(vector<int> &g);
 		void	setElitism(int s);
         void    setLocalMethod(string s);

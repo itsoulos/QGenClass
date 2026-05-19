@@ -32,7 +32,10 @@ fi
 ## pop_mutationiters:  The number of iters in mutation local search.
 ## pop_mutationrange:  The magnitude of changes in mutation local search.
 ## pop_lsearchiters:   The number of generations before the application of the local search procedure.
-GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05  --pop_lmethod=mutate  --pop_fitnessmethod=average --pop_classpercent=0.5 --pop_averagepercent=0.5 --pop_squaredpercent=0.00 --random_seed=$SEED"
+## pop_crossitems:     The number of chromosomes that participate in local crossover.
+## pop_localitems:     The number of items that participate in local search.
+## pop_localgens:      The number of generations passed before the application of local search.
+GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05  --pop_lmethod=mutate  --pop_fitnessmethod=class --pop_crossitems=10 --pop_localitems=10 --pop_localgens=100 --pop_classpercent=0.5 --pop_averagepercent=0.5 --pop_squaredpercent=0.00 --random_seed=$SEED"
 # TERMINATION: The termination method used. Available values: maxiters, doublebox, similarity
 TERMINATION=maxiters
 
