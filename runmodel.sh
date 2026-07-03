@@ -35,7 +35,7 @@ fi
 ## pop_crossitems:     The number of chromosomes that participate in local crossover.
 ## pop_localitems:     The number of items that participate in local search.
 ## pop_localgens:      The number of generations passed before the application of local search.
-GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05  --pop_lmethod=mutate  --pop_fitnessmethod=class --pop_crossitems=10 --pop_localitems=10 --pop_localgens=100 --pop_classpercent=0.5 --pop_averagepercent=0.5 --pop_squaredpercent=0.00 --random_seed=$SEED"
+GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05  --pop_lmethod=mutate  --pop_fitnessmethod=class --pop_crossitems=0 --pop_localitems=20 --pop_localgens=50 --pop_classpercent=0.5 --pop_averagepercent=0.5 --pop_squaredpercent=0.00 --random_seed=$SEED"
 # TERMINATION: The termination method used. Available values: maxiters, doublebox, similarity
 TERMINATION=maxiters
 
