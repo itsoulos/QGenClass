@@ -376,16 +376,6 @@ double 	ClassProgram::fitness(vector<int> &genome)
 		}
 	}
 
-	extern int ok_to_print;
-	if(ok_to_print)
-	{
-		printf("TRAIN REPORT=>\n");
-		for(int i=0;i<nclass;i++)
-		{
-            if(belong[i]==0) continue;
-			printf("CLASS[%3d (%3d)] FAIL=%5.2lf%% \n",i,belong[i],fail[i]*100.0/belong[i]);
-		}
-	}
 
         double value1=0.0;
 	double value2=0.0;
@@ -425,6 +415,69 @@ double 	ClassProgram::fitness(vector<int> &genome)
         return (100*(1.0-sqrt(precision * recall)));
     }
     return 0.0;
+}
+
+
+void ClassProgram::getErrorPerClass(vector<int> &genome,
+                      vector<double> &x)
+{
+    outy.resize(trainy.size());
+    pgenome.resize(genome.size()/(nclass-1));
+    double value=0.0;
+    x.resize(nclass);
+    for(int i=0;i<nclass;i++)
+        x[i]=100.0;
+    for(unsigned int i=0;i<outy.size();i++) outy[i]=NAN_CLASS;
+    extern int wrapping;
+    for(int i=0;i<nclass-1;i++)
+    {
+        for(unsigned int j=0;j<pgenome.size();j++)
+            pgenome[j]=genome[i*genome.size()/(nclass-1)+j];
+        int redo=0;
+        string s = printRandomProgram(pgenome,redo);
+        if(redo>=wrapping) return ;
+        pstring[i]=s;
+    }
+
+    for(int j=0;j<nclass-1;j++)
+    {
+        int d=program->Parse(pstring[j]);
+        if(!d) {
+            //			printf("failed %s \n",pstring[j].c_str());
+            return ;
+        }
+        for(unsigned int i=0;i<trainy.size();i++)
+        {
+            if(fabs(outy[i]-NAN_CLASS)>1e-5) continue;
+            double v=program->Eval(trainx[i].data());
+            if(program->EvalError()) return ;
+            if(isnan(v) || isinf(v) ) return ;
+            if(fabs(v-1.0)<1e-5) outy[i]=vclass[j];
+        }
+    }
+
+    vector<int> fail;
+    vector<int> belong;
+    fail.resize(nclass);
+    belong.resize(nclass);
+    for(int i=0;i<nclass;i++)
+        fail[i]=belong[i]=0;
+    for(unsigned int i=0;i<trainy.size();i++)
+    {
+        if(fabs(outy[i]-NAN_CLASS)<1e-5) 	outy[i]=vclass[nclass-1];
+        int pos=findMapper(trainy[i]);
+        value=value+((fabs(findMapper(trainy[i])-outy[i]))>1e-5);
+        belong[pos]++;
+        if(fabs(findMapper(trainy[i])-outy[i])>1e-5)
+        {
+            fail[pos]++;
+        }
+    }
+    for(int i=0;i<nclass;i++)
+    {
+        double f=fail[i]*100.0/belong[i];
+        x[i]=f;
+    }
 }
 
 void	ClassProgram::setFitnessMode(int m)

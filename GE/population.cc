@@ -2,6 +2,7 @@
 # include <stdlib.h>
 # include <string.h>
 # include <math.h>
+# include <GE/classprogram.h>
 # define MAX_RULE	256
 
 mt19937 gen(random_device{}());
@@ -591,6 +592,47 @@ void	Population::mutateItem(int pos)
 	printf("\n");
 }
 
+
+void    Population::mutateItemAtClass(int pos,int classIndex)
+{
+    vector<int> g;
+    g.resize(genome_size);
+    for(int i=0;i<genome_size;i++) g[i]=genome[pos][i];
+    printf("LOCAL PERCLASS[%d] = ",pos);
+    fflush(stdout);
+    ClassProgram *p=(ClassProgram *)program;
+    int partSize = genome_size/(p->getClass()-1);
+    int start  = (classIndex)*partSize;
+    int end = (classIndex+1)*partSize;
+    if(end>=genome_size) end--;
+    for(int j=0;j<10;j++)
+        for(int i=start;i<end;i++)
+        {
+            {
+                int ik=0;
+                double f;
+                do
+                {
+                    g[i]=rand() % MAX_RULE;
+                    ik++;
+                    if(ik==10) break;
+                    f=fitness(g);
+                }while(f<=fitness_array[pos]);
+                if(ik!=10)
+                {
+                    fitness_array[pos]=f;
+                    printf(" %lf ",f);
+
+                    fflush(stdout);
+                    genome[pos][i]=g[i];
+                }
+                else g[i]=genome[pos][i];
+            }
+        }
+    printf("\n");
+
+}
+
 void        Population::localSearch(int pos)
 {
 	vector<int> g;
@@ -600,6 +642,30 @@ void        Population::localSearch(int pos)
     if(localMethod == "crossover")
     {
 	    crossItem(pos);
+    }
+    else
+    if(localMethod == "mutateWorst")
+    {
+        ClassProgram *p=(ClassProgram *)program;
+        vector<double> val;
+        val.resize(p->getClass());
+        p->getErrorPerClass(g,val);
+        int maxIndex=0;
+        double maxValue=val[0];
+        for(int i=0;i<val.size();i++)
+        {
+            if(val[i]>maxValue)
+            {
+                maxIndex = i;
+                maxValue = val[i];
+            }
+        }
+        printf("MUTATE %d Index with Value %lf \n",
+               maxIndex,maxValue);
+        if(maxIndex==p->getClass()-1)
+            mutateItem(pos);
+        else
+        mutateItemAtClass(pos,maxIndex);
     }
     else
     if(localMethod == "mutate")

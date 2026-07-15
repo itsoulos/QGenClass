@@ -78,6 +78,15 @@ class Population
             );
 	void crossItem(int pos);
 	void mutateItem(int pos);
+
+    /**
+     * @brief mutateItemAtClass perform a mutation
+     * at the chromosome at position pos. The area of
+     * mutation is in classIndex.
+     * @param pos
+     * @param classIndex
+     */
+    void mutateItemAtClass(int pos,int classIndex);
 		~Population();
 		
 };

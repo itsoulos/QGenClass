@@ -44,7 +44,15 @@ class ClassProgram	:public Program
         int     getClass() const;
         void    getPrecisionAndRecall(double &precision,double &recall);
         void    getPrecisionAndRecall(Dataset *t,double &precision,double &recall);
-
+        /**
+        * @brief getErrorPerClass returns the error per
+        * class for chromosome g.
+        * @param g The input chromosome
+        * @param x The output vector containing
+        *  the error per class.
+        */
+        void getErrorPerClass(vector<int> &g,
+                              vector<double> &x);
 		~ClassProgram();
 };
 # define __CLASSPROGRAM__H

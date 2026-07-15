@@ -74,7 +74,7 @@ void setParams()
     mainParams.addParam(Parameter("pop_mrate",0.05,0.0,1.0,"Mutation rate"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
     QStringList local_list;
-    local_list<<"none"<<"crossover"<<"mutate"<<"siman"<<"hill"<<"de"<<"gd"<<"adam";
+    local_list<<"none"<<"crossover"<<"mutate"<<"mutateWorst"<<"siman"<<"hill"<<"de"<<"gd"<<"adam";
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
     mainParams.addParam(Parameter("pop_crossitems",10,0,1000,"Number of items participate in local crossover"));
