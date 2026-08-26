@@ -82,7 +82,10 @@ void setParams()
     mainParams.addParam(Parameter("pop_localitems",10,0,1000,"Number of chromosomes participate in localsearch"));
 
     QStringList fitness_list;
-    fitness_list<<"class"<<"average"<<"squared"<<"mixed"<<"mean";
+    fitness_list
+        <<"class"<<"average"<<"squared"<<"mixed"<<"mean"
+        <<"weightedF1"<<"macroF1";
+
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
 
     mainParams.addParam(Parameter("pop_classpercent",1.0,0.0,1.0,"The percentage of the class fitness method in mixed"));
@@ -228,7 +231,14 @@ void run()
         if(fmethod=="mixed")
         program->setFitnessMode(FITNESS_MIXED);
     else
+        if(method == "mean")
         program->setFitnessMode(FITNESS_MEAN);
+    else
+        if(method == "weightedF1")
+        program->setFitnessMode(FITNESS_WEIGHTED_F1);
+    else
+        if(method == "macroF1")
+        program->setFitnessMode(FITNESS_MACRO_F1);
 
     double p1 = mainParams.getParam("pop_classpercent").getValue().toDouble();
     double p2 = mainParams.getParam("pop_averagepercent").getValue().toDouble();
@@ -254,7 +264,7 @@ void run()
                i,bestf,-program->getClassError(genome),s.c_str());
 
 	    if(fabs(bestf)<1e-6) break;
-    }
+
     vector<double> precision;
     vector<double> recall;
     printConfusionMatrix(precision,recall);
@@ -279,6 +289,7 @@ void run()
     printf("CLASS_ERROR: %15.10lf PRECISION: %15.10lf RECALL: %15.10lf F1SCORE: %15.10lf\n",
            -program->getClassError(genome),
            avg_precision,avg_recall,avg_f1score);
+    }
 }
 
 int main(int argc, char *argv[])

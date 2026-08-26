@@ -3,7 +3,8 @@
 # include <string.h>
 # include <math.h>
 # include <GE/classprogram.h>
-# define MAX_RULE	256
+
+int MAX_RULE=256;
 
 mt19937 gen(random_device{}());
 
@@ -90,11 +91,12 @@ Population::Population(int gcount,int gsize,Program *p)
 
 	/* Create the population and based on genome count and size */
 	/* Initialize the genomes to random */
-	double f;
 	genome=new int*[genome_count];
 	children=new int*[genome_count];
-	vector<int> g;
-	g.resize(genome_size);
+    vector<int> g;
+    g.resize(genome_size);
+    ClassProgram *pp=(ClassProgram *)program;
+    if(pp->getDimension()>255) MAX_RULE=pp->getDimension()+1;
 	for(int i=0;i<genome_count;i++)
 	{
 		genome[i]=new int[genome_size];
@@ -178,7 +180,7 @@ void        Population::crossover()
                         parent[i]=max_index;
 			
                 }
-		int pt1,pt2;
+        int pt1;
 		// The one-point crossover is performed here (the point is pt1)
 		pt1=rand() % genome_size;
 		memcpy(children[count_children],
@@ -238,8 +240,7 @@ void    	Population::calcFitnessArray()
 	g.resize(genome_size);
 
 	double dmin=1e+100;
-	int icount=0;
-	for(int i=0;i<genome_count;i++)
+    for(int i=0;i<genome_count;i++)
 	{
 		for(int j=0;j<genome_size;j++) g[j]=genome[i][j];	
 		fitness_array[i]=fitness(g);
@@ -250,7 +251,6 @@ void    	Population::calcFitnessArray()
 		{
 			dmin=fabs(fitness_array[i]);
 		}
-		if(fabs(fitness_array[i])>=1e+100) icount++;	
 		
         if((i+1)%50==0)
 		{

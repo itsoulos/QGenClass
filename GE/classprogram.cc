@@ -60,7 +60,10 @@ ClassProgram::ClassProgram(Dataset *tr,Dataset *tt)
     outy.resize(trainy.size());
 }
 
-
+int ClassProgram::getDimension() const
+{
+    return trainSet->dimension();
+}
 string	ClassProgram::printF(vector<int> &genome)
 {
 	string ret="";
@@ -187,14 +190,20 @@ void ClassProgram::printC(vector<int> &genome, std::string outname){
 	outprogram.close();
 }
 
-void    ClassProgram::getPrecisionAndRecall(double &precision,double &recall)
+void    ClassProgram::getPrecisionAndRecall(double &precision,double &recall,
+                                         double &macroF1, double &weightedF1,
+                                         double &gmean)
 {
-    getPrecisionAndRecall(trainSet,precision,recall);
+    getPrecisionAndRecall(trainSet,precision,recall,macroF1,weightedF1,gmean);
 }
 
 
-void    ClassProgram::getPrecisionAndRecall(Dataset *t,double &avg_precision,double &avg_recall)
+void    ClassProgram::getPrecisionAndRecall(Dataset *t,
+                           double &precision,double &recall,
+                           double &macroF1, double &weightedF1,
+                           double &gmean)
 {
+
     int i,j;
     getOutputs(t,realCached,estCached);
     int N=realCached.size();
@@ -225,8 +234,8 @@ void    ClassProgram::getPrecisionAndRecall(Dataset *t,double &avg_precision,dou
         recallArray[i]=sum==0?-1.0:CM[i][i]/sum;
     }
 
-    avg_precision = 0.0;
-    avg_recall = 0.0;
+   double avg_precision = 0.0;
+   double avg_recall = 0.0;
 
     int total_classes1 = nclass;
     int total_classes2 = nclass;
@@ -248,6 +257,30 @@ void    ClassProgram::getPrecisionAndRecall(Dataset *t,double &avg_precision,dou
         delete[] CM[i];
     }
     delete[] CM;
+    macroF1=0.0;
+    gmean=0.0;
+
+    vector<int> belong;
+    belong.resize(nclass);
+    for(unsigned int i=0;i<trainy.size();i++)
+    {
+        int pos=findMapper(trainy[i]);
+        belong[pos]++;
+    }
+    int total_class = nclass;
+    for(int i=0;i<nclass;i++)
+    {
+        if(recallArray[i]<0) {
+            total_class--;
+            continue;
+        }
+        double f1 = (2.0 * precisionArray[i]*recallArray[i])/(precisionArray[i]+recallArray[i]);
+        macroF1+=f1;
+        gmean+=log(recallArray[i]+0.001);
+        weightedF1+=belong[i]*1.0/trainy.size()*f1;
+    }
+    macroF1/=total_class;
+    gmean = exp (1.0/nclass * gmean);
 }
 
 int	ClassProgram::findMapper(double y)
@@ -410,9 +443,23 @@ double 	ClassProgram::fitness(vector<int> &genome)
     else
     if(fitness_mode==FITNESS_MEAN)
     {
-        double precision=0.0,recall=0.0;
-        getPrecisionAndRecall(precision,recall);
-        return (100*(1.0-sqrt(precision * recall)));
+        double precision=0.0,recall=0.0,macroF1=0.0,weightedF1=0.0,gmean=0.0;
+        getPrecisionAndRecall(precision,recall,macroF1,weightedF1,gmean);
+        return 100.0-100.0 * gmean;
+    }
+    else
+    if(fitness_mode == FITNESS_MACRO_F1)
+    {
+        double precision=0.0,recall=0.0,macroF1=0.0,weightedF1=0.0,gmean=0.0;
+        getPrecisionAndRecall(precision,recall,macroF1,weightedF1,gmean);
+        return 100.0-100.0 * macroF1;
+    }
+    else
+    if(fitness_mode == FITNESS_WEIGHTED_F1)
+    {
+        double precision=0.0,recall=0.0,macroF1=0.0,weightedF1=0.0,gmean=0.0;
+        getPrecisionAndRecall(precision,recall,macroF1,weightedF1,gmean);
+        return 100.0-100.0 * weightedF1;
     }
     return 0.0;
 }

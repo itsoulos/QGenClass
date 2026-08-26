@@ -6,11 +6,13 @@
 # include <string>
 using namespace std;
 
-# define FITNESS_CLASS 	 0x1
-# define FITNESS_AVERAGE 0x2
-# define FITNESS_SQUARED 0x4
-# define FITNESS_MIXED   0x8
-# define FITNESS_MEAN    0xF
+# define FITNESS_CLASS 	      1
+# define FITNESS_AVERAGE      2
+# define FITNESS_SQUARED      4
+# define FITNESS_MIXED        8
+# define FITNESS_MEAN        16
+# define FITNESS_MACRO_F1    32
+# define FITNESS_WEIGHTED_F1 64
 typedef vector<double> Data;
 class ClassProgram	:public Program
 {
@@ -42,8 +44,13 @@ class ClassProgram	:public Program
         void 	getOutputs(Dataset *t,vector<double> &real,vector<double> &est);
         void 	getOutputs(vector<double> &real,vector<double> &est);
         int     getClass() const;
-        void    getPrecisionAndRecall(double &precision,double &recall);
-        void    getPrecisionAndRecall(Dataset *t,double &precision,double &recall);
+        void    getPrecisionAndRecall(double &precision,double &recall,
+                                   double &macroF1, double &weightedF1,
+                                   double &gmean);
+        void    getPrecisionAndRecall(Dataset *t,
+                                   double &precision,double &recall,
+                                   double &macroF1, double &weightedF1,
+                                   double &gmean);
         /**
         * @brief getErrorPerClass returns the error per
         * class for chromosome g.
@@ -53,6 +60,7 @@ class ClassProgram	:public Program
         */
         void getErrorPerClass(vector<int> &g,
                               vector<double> &x);
+        int getDimension() const;
 		~ClassProgram();
 };
 # define __CLASSPROGRAM__H

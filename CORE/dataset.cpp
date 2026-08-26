@@ -2,6 +2,7 @@
 # include <QStringList>
 # include <QFile>
 # include <QTextStream>
+# include <CORE/arffdata.h>
 Dataset::Dataset()
 {
     xpoint.resize(0);
@@ -168,7 +169,8 @@ Dataset::Dataset(QString filename,QString format)
         fscanf(fp,"%d",&d);
         fscanf(fp,"%d",&count);
         ypoint.resize(count);
-
+        bool debug = false;
+        if(count>10000) debug=true;
         xpoint.resize(count);
         for(int i=0;i<count;i++)
         {
@@ -176,6 +178,8 @@ Dataset::Dataset(QString filename,QString format)
             for(int j=0;j<d;j++)
                 fscanf(fp,"%lf",&xpoint[i][j]);
             fscanf(fp,"%lf",&ypoint[i]);
+            if(debug && i%1000==0)
+                printf("Reading %.2lf%% \n",i*100.0/count);
         }
         fclose(fp);
     }
@@ -202,47 +206,16 @@ Dataset::Dataset(QString filename,QString format)
     else
     if(format=="arff")
     {
-        /*Data ypoint;
-        QStringList classNames;
-        int nattributes=0;
-        QFile fp(filename);
-        if(!fp.open(QIODevice::ReadOnly | QIODevice::Text)) return ;
-        QTextStream st(&fp);
-        while(!st.atEnd())
+        ArffData data;
+        data.load(filename.toStdString());
+        xpoint.resize(data.patterns);
+        ypoint.resize(data.patterns);
+        for(int i=0;i<data.patterns;i++)
         {
-            QString line=st.readLine();
-            if(line.size()<=1) continue;
-            if(line.startsWith("@data") || line.startsWith("@relation")) continue;
-            if(line.startsWith("@attribute"))
-            {
-                QStringList list = line.split(QRegExp("[\r\n\t ]+"), QString::SkipEmptyParts);
-                if(list[1]!="class")
-                nattributes++;
-                else
-                {
-                    QString cstring=list[2];
-                    cstring=cstring.mid(1,cstring.size()-2);
-                    classNames=cstring.split(",");
-                }
-            }
-            else
-            {
-                QStringList list = line.split(QRegExp("[\r\n\t ]+"), QString::SkipEmptyParts);
-                if(list.size()<=2)
-                {
-                    continue;
-                }
-                Data xx;
-                for(int i=0;i<list.size()-1;i++)
-                   xx.push_back(list[i].toDouble());
-
-                double yy=classNames.indexOf(list[list.size()-1]);
-
-                xpoint.push_back(xx);
-                ypoint.push_back(yy);
-            }
+            xpoint[i].resize(data.patterns);
+            xpoint[i]=data.xpoint[i];
+            ypoint[i]=data.ypoint[i];
         }
-        fp.close();*/
     }
     makePatternClass();
 }
