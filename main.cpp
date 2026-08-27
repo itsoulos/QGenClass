@@ -231,13 +231,13 @@ void run()
         if(fmethod=="mixed")
         program->setFitnessMode(FITNESS_MIXED);
     else
-        if(method == "mean")
+        if(fmethod == "mean")
         program->setFitnessMode(FITNESS_MEAN);
     else
-        if(method == "weightedF1")
+        if(fmethod == "weightedF1")
         program->setFitnessMode(FITNESS_WEIGHTED_F1);
     else
-        if(method == "macroF1")
+        if(fmethod == "macroF1")
         program->setFitnessMode(FITNESS_MACRO_F1);
 
     double p1 = mainParams.getParam("pop_classpercent").getValue().toDouble();
