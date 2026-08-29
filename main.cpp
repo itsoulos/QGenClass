@@ -74,7 +74,21 @@ void setParams()
     mainParams.addParam(Parameter("pop_mrate",0.05,0.0,1.0,"Mutation rate"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
     QStringList local_list;
-    local_list<<"none"<<"crossover"<<"mutate"<<"mutateWorst"<<"siman"<<"hill"<<"de"<<"gd"<<"adam";
+    local_list<<"none"<<"crossover"<<"mutate"
+               <<"mutateWorst"<<"siman"
+               <<"hill"<<"de"<<"gd"<<"adam"<<"targeted"
+               <<"targetedWorst"<<"targetedBest"<<"constants";
+    mainParams.addParam(
+        Parameter("targeted_iterations",10,0,1000,"Targeted iterations")
+        );
+
+    mainParams.addParam(
+        Parameter("targeted_stagnationlimit",20,0,100,"Targeted stagnation limit")
+        );
+
+    mainParams.addParam(Parameter(
+        "targeted_burstiterations",200,0,1000,"Targeted burst iterations"));
+
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
     mainParams.addParam(Parameter("pop_crossitems",10,0,1000,"Number of items participate in local crossover"));
@@ -214,7 +228,14 @@ void run()
     pop->setCrossItems(mainParams.getParam("pop_crossitems").getValue().toInt());
     pop->setLocalItems(mainParams.getParam("pop_localitems").getValue().toInt());
     pop->setLocalGens(mainParams.getParam("pop_localgens").getValue().toInt());
+    pop->setTargetedIterations(
+        mainParams.getParam("targeted_iterations").getValue().toInt());
 
+    pop->setTargetedStagnationLimit(
+        mainParams.getParam("targeted_stagnationlimit").getValue().toInt());
+
+    pop->setTargetedBurstIterations(
+        mainParams.getParam("targeted_burstiterations").getValue().toInt());
 
     QString method = mainParams.getParam("pop_lmethod").getValue();
     pop->setLocalMethod(method.toStdString());
