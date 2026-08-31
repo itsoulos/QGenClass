@@ -91,7 +91,17 @@ void setParams()
 
     mainParams.addParam(Parameter("pop_lmethod",local_list[0],local_list,"Local search method"));
 
+
+    QStringList crossList;
+    crossList<<"standard"<<"targeted"<<"targetedWorst";
+    mainParams.addParam(
+        Parameter("cross_method",crossList[0],crossList,"Local crossover method")
+        );
     mainParams.addParam(Parameter("pop_crossitems",10,0,1000,"Number of items participate in local crossover"));
+    mainParams.addParam(Parameter("targeted_crossiterations",20,1,100,"Targeted cross iterations"));
+    mainParams.addParam(Parameter("targeted_crosselitefraction",0.2,0.0,1.0,"Targeted cross elite fraction"));
+    mainParams.addParam(Parameter("targeted_crossmaxblock",16,1,100,"Targeted max block"));
+
     mainParams.addParam(Parameter("pop_localgens",100,0,1000,"Number of generations before the application of local search"));
     mainParams.addParam(Parameter("pop_localitems",10,0,1000,"Number of chromosomes participate in localsearch"));
 
@@ -236,6 +246,11 @@ void run()
 
     pop->setTargetedBurstIterations(
         mainParams.getParam("targeted_burstiterations").getValue().toInt());
+
+    pop->setCrossMethod(mainParams.getParam("cross_method").getValue().toStdString());
+    pop->setTargetedCrossIterations(mainParams.getParam("targeted_crossiterations").getValue().toInt());
+    pop->setTargetedCrossEliteFraction(mainParams.getParam("targeted_crosselitefraction").getValue().toDouble());
+    pop->setTargetedCrossMaxBlock(mainParams.getParam("targeted_crossmaxblock").getValue().toInt());
 
     QString method = mainParams.getParam("pop_lmethod").getValue();
     pop->setLocalMethod(method.toStdString());

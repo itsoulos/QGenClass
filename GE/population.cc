@@ -21,6 +21,35 @@ int MAX_RULE = 256;
 
 mt19937 gen(random_device{}());
 
+
+static const char *codonTypeName(
+    CodonType type
+    )
+{
+    switch(type)
+    {
+    case CodonType::FUNCTION:
+        return "FUNCTION";
+
+    case CodonType::BINARY_OPERATOR:
+        return "BINARY_OPERATOR";
+
+    case CodonType::BOOLEAN_OPERATOR:
+        return "BOOLEAN_OPERATOR";
+
+    case CodonType::VARIABLE:
+        return "VARIABLE";
+
+    case CodonType::CONSTANT:
+        return "CONSTANT";
+
+    case CodonType::CLASS_OUTPUT:
+        return "CLASS_OUTPUT";
+
+    default:
+        return "UNKNOWN";
+    }
+}
 // ============================================================
 // RANDOM UTILITIES
 // ============================================================
@@ -720,6 +749,882 @@ int Population::getSize() const
     return genome_size;
 }
 
+
+void Population::setCrossMethod(string method)
+{
+    if(
+        method == "standard" ||
+        method == "targeted" ||
+        method == "targetedWorst"
+        )
+    {
+        crossMethod = method;
+    }
+}
+
+void Population::setTargetedCrossIterations(int n)
+{
+    if(n > 0)
+        targetedCrossIterations = n;
+}
+
+void Population::setTargetedCrossEliteFraction(double x)
+{
+    if(x > 0.0 && x <= 1.0)targetedCrossEliteFraction = x;
+}
+
+void Population::setTargetedCrossMaxBlock(int n)
+{
+    if(n > 0)targetedCrossMaxBlock = n;
+}
+
+
+// ============================================================
+// TARGETED SEMANTIC LOCAL CROSSOVER
+// ============================================================
+
+void Population::targetedCrossItem(
+    int pos,
+    int iterations
+    )
+{
+    if(
+        pos < 0 ||
+        pos >= genome_count
+        )
+        return;
+
+    if(iterations <= 0)
+        return;
+
+    ClassProgram *p =
+        (ClassProgram *)program;
+
+    if(p == nullptr)
+        return;
+
+    // --------------------------------------------------------
+    // Current chromosome
+    // --------------------------------------------------------
+
+    vector<int> current(
+        genome_size
+        );
+
+    for(int i=0;i<genome_size;i++)
+        current[i] = genome[pos][i];
+
+    double bestFitness =
+        fitness(current);
+
+    // --------------------------------------------------------
+    // Elite donor pool
+    //
+    // Population has already been sorted by select().
+    // --------------------------------------------------------
+
+    int eliteCount =
+        static_cast<int>(
+            targetedCrossEliteFraction *
+            genome_count
+            );
+
+    if(eliteCount < 2)
+        eliteCount = 2;
+
+    if(eliteCount > genome_count)
+        eliteCount = genome_count;
+
+    int accepted = 0;
+
+    printf(
+        "TARGETED_CROSS[%d] START fitness=%.10lf\n",
+        pos,
+        bestFitness
+        );
+
+    fflush(stdout);
+
+    // ========================================================
+    // TRIALS
+    // ========================================================
+
+    for(
+        int trial=0;
+        trial<iterations;
+        trial++
+        )
+    {
+        // ----------------------------------------------------
+        // Target trace
+        // ----------------------------------------------------
+
+        vector<CodonTrace> targetTrace;
+
+        p->getCodonTrace(
+            current,
+            targetTrace
+            );
+
+        if(targetTrace.empty())
+            break;
+
+        // ----------------------------------------------------
+        // Keep useful semantic entries only
+        // ----------------------------------------------------
+
+        vector<CodonTrace> usableTarget;
+
+        for(const CodonTrace &e : targetTrace)
+        {
+            if(
+                e.type == CodonType::FUNCTION ||
+                e.type == CodonType::BINARY_OPERATOR ||
+                e.type == CodonType::BOOLEAN_OPERATOR ||
+                e.type == CodonType::VARIABLE ||
+                e.type == CodonType::CONSTANT
+                )
+            {
+                usableTarget.push_back(e);
+            }
+        }
+
+        if(usableTarget.empty())
+            break;
+
+        // ----------------------------------------------------
+        // Pick semantic point in target
+        // ----------------------------------------------------
+
+        const CodonTrace targetEntry =
+            usableTarget[
+                rand() %
+                usableTarget.size()
+        ];
+
+        // ----------------------------------------------------
+        // Pick donor from elite population
+        // ----------------------------------------------------
+
+        int donorPos = -1;
+
+        for(int retry=0;retry<20;retry++)
+        {
+            int d =
+                rand() %
+                eliteCount;
+
+            if(d != pos)
+            {
+                donorPos = d;
+                break;
+            }
+        }
+
+        if(donorPos < 0)
+            continue;
+
+        vector<int> donor(
+            genome_size
+            );
+
+        for(int i=0;i<genome_size;i++)
+            donor[i] = genome[donorPos][i];
+
+        // ----------------------------------------------------
+        // Donor trace
+        // ----------------------------------------------------
+
+        vector<CodonTrace> donorTrace;
+
+        p->getCodonTrace(
+            donor,
+            donorTrace
+            );
+
+        if(donorTrace.empty())
+            continue;
+
+        // ----------------------------------------------------
+        // Find donor entries with SAME semantic type
+        // ----------------------------------------------------
+
+        vector<CodonTrace> compatible;
+
+        for(const CodonTrace &e : donorTrace)
+        {
+            if(
+                e.type ==
+                targetEntry.type
+                )
+            {
+                compatible.push_back(e);
+            }
+        }
+
+        if(compatible.empty())
+            continue;
+
+        const CodonTrace donorEntry =
+            compatible[
+                rand() %
+                compatible.size()
+        ];
+
+        if(
+            targetEntry.genomePos < 0 ||
+            targetEntry.genomePos >= genome_size ||
+            donorEntry.genomePos < 0 ||
+            donorEntry.genomePos >= genome_size
+            )
+            continue;
+
+        // ====================================================
+        // DETERMINE SMALL SEMANTIC BLOCK LENGTH
+        // ====================================================
+
+        int targetNext =
+            genome_size;
+
+        int donorNext =
+            genome_size;
+
+        /*
+         * Find next active semantic codon after selected
+         * position. This approximates the extent of the local
+         * grammatical block.
+         */
+
+        for(const CodonTrace &e : targetTrace)
+        {
+            if(
+                e.genomePos >
+                    targetEntry.genomePos &&
+                e.genomePos <
+                    targetNext
+                )
+            {
+                targetNext =
+                    e.genomePos;
+            }
+        }
+
+        for(const CodonTrace &e : donorTrace)
+        {
+            if(
+                e.genomePos >
+                    donorEntry.genomePos &&
+                e.genomePos <
+                    donorNext
+                )
+            {
+                donorNext =
+                    e.genomePos;
+            }
+        }
+
+        int targetLength =
+            targetNext -
+            targetEntry.genomePos;
+
+        int donorLength =
+            donorNext -
+            donorEntry.genomePos;
+
+        int blockLength =
+            min(
+                targetLength,
+                donorLength
+                );
+
+        blockLength =
+            min(
+                blockLength,
+                targetedCrossMaxBlock
+                );
+
+        if(blockLength < 1)
+            blockLength = 1;
+
+        /*
+         * Do not cross genome boundaries.
+         */
+
+        blockLength =
+            min(
+                blockLength,
+                genome_size -
+                    targetEntry.genomePos
+                );
+
+        blockLength =
+            min(
+                blockLength,
+                genome_size -
+                    donorEntry.genomePos
+                );
+
+        if(blockLength <= 0)
+            continue;
+
+        // ====================================================
+        // BUILD CANDIDATE
+        // ====================================================
+
+        vector<int> candidate =
+            current;
+
+        for(
+            int k=0;
+            k<blockLength;
+            k++
+            )
+        {
+            candidate[
+                targetEntry.genomePos + k
+            ] =
+                donor[
+                    donorEntry.genomePos + k
+            ];
+        }
+
+        double candidateFitness =
+            fitness(candidate);
+
+        // ====================================================
+        // ACCEPT ONLY IMPROVEMENT
+        // ====================================================
+
+        if(
+            candidateFitness >
+            bestFitness
+            )
+        {
+            printf(
+                "TARGETED_CROSS[%d] "
+                "trial=%d "
+                "donor=%d "
+                "type=%s "
+                "targetPos=%d "
+                "donorPos=%d "
+                "length=%d "
+                "fitness=%.10lf->%.10lf\n",
+                pos,
+                trial + 1,
+                donorPos,
+                codonTypeName(
+                    targetEntry.type
+                    ),
+                targetEntry.genomePos,
+                donorEntry.genomePos,
+                blockLength,
+                bestFitness,
+                candidateFitness
+                );
+
+            fflush(stdout);
+
+            current =
+                candidate;
+
+            bestFitness =
+                candidateFitness;
+
+            accepted++;
+        }
+    }
+
+    // ========================================================
+    // COPY BACK
+    // ========================================================
+
+    for(int i=0;i<genome_size;i++)
+        genome[pos][i] = current[i];
+
+    fitness_array[pos] =
+        bestFitness;
+
+    printf(
+        "TARGETED_CROSS[%d] END "
+        "fitness=%.10lf accepted=%d\n",
+        pos,
+        bestFitness,
+        accepted
+        );
+
+    fflush(stdout);
+}
+
+
+// ============================================================
+// TARGETED SEMANTIC CROSSOVER FOR WORST CLASS
+// ============================================================
+
+void Population::targetedCrossWorstItem(
+    int pos,
+    int iterations
+    )
+{
+    if(
+        pos < 0 ||
+        pos >= genome_count
+        )
+        return;
+
+    if(iterations <= 0)
+        return;
+
+    ClassProgram *p =
+        (ClassProgram *)program;
+
+    if(p == nullptr)
+        return;
+
+    const int classCount =
+        p->getClass();
+
+    if(classCount <= 1)
+        return;
+
+    vector<int> current(
+        genome_size
+        );
+
+    for(int i=0;i<genome_size;i++)
+        current[i] = genome[pos][i];
+
+    double bestFitness =
+        fitness(current);
+
+    int eliteCount =
+        static_cast<int>(
+            targetedCrossEliteFraction *
+            genome_count
+            );
+
+    if(eliteCount < 2)
+        eliteCount = 2;
+
+    if(eliteCount > genome_count)
+        eliteCount = genome_count;
+
+    int accepted = 0;
+
+    printf(
+        "TARGETED_CROSS_WORST[%d] START "
+        "fitness=%.10lf\n",
+        pos,
+        bestFitness
+        );
+
+    fflush(stdout);
+
+    for(
+        int trial=0;
+        trial<iterations;
+        trial++
+        )
+    {
+        // ====================================================
+        // FIND CURRENT WORST CLASS
+        // ====================================================
+
+        vector<double> classError;
+
+        p->getErrorPerClass(
+            current,
+            classError
+            );
+
+        if(classError.empty())
+            break;
+
+        int worstClass = -1;
+
+        double worstError =
+            -1.0;
+
+        for(
+            int c=0;
+            c<(int)classError.size();
+            c++
+            )
+        {
+            if(
+                classError[c] >
+                worstError
+                )
+            {
+                worstError =
+                    classError[c];
+
+                worstClass =
+                    c;
+            }
+        }
+
+        if(worstClass < 0)
+            break;
+
+        // ====================================================
+        // CLASS SEGMENT
+        // ====================================================
+
+        const int explicitRules =
+            classCount - 1;
+
+        const int partSize =
+            genome_size /
+            explicitRules;
+
+        bool wholeGenome =
+            (
+                worstClass >=
+                explicitRules
+                );
+
+        int segmentStart = 0;
+        int segmentEnd =
+            genome_size;
+
+        if(!wholeGenome)
+        {
+            segmentStart =
+                worstClass *
+                partSize;
+
+            segmentEnd =
+                (
+                    worstClass + 1
+                    ) *
+                partSize;
+
+            if(
+                worstClass ==
+                explicitRules - 1
+                )
+            {
+                segmentEnd =
+                    genome_size;
+            }
+        }
+
+        // ====================================================
+        // TARGET TRACE
+        // ====================================================
+
+        vector<CodonTrace> targetTrace;
+
+        p->getCodonTrace(
+            current,
+            targetTrace
+            );
+
+        vector<CodonTrace> usableTarget;
+
+        for(const CodonTrace &e : targetTrace)
+        {
+            bool semantic =
+                (
+                    e.type == CodonType::FUNCTION ||
+                    e.type == CodonType::BINARY_OPERATOR ||
+                    e.type == CodonType::BOOLEAN_OPERATOR ||
+                    e.type == CodonType::VARIABLE ||
+                    e.type == CodonType::CONSTANT
+                    );
+
+            if(!semantic)
+                continue;
+
+            if(
+                wholeGenome ||
+                (
+                    e.genomePos >=
+                        segmentStart &&
+                    e.genomePos <
+                        segmentEnd
+                    )
+                )
+            {
+                usableTarget.push_back(e);
+            }
+        }
+
+        if(usableTarget.empty())
+            continue;
+
+        const CodonTrace targetEntry =
+            usableTarget[
+                rand() %
+                usableTarget.size()
+        ];
+
+        // ====================================================
+        // ELITE DONOR
+        // ====================================================
+
+        int donorPos = -1;
+
+        for(int retry=0;retry<20;retry++)
+        {
+            int d =
+                rand() %
+                eliteCount;
+
+            if(d != pos)
+            {
+                donorPos = d;
+                break;
+            }
+        }
+
+        if(donorPos < 0)
+            continue;
+
+        vector<int> donor(
+            genome_size
+            );
+
+        for(int i=0;i<genome_size;i++)
+            donor[i] =
+                genome[donorPos][i];
+
+        vector<CodonTrace> donorTrace;
+
+        p->getCodonTrace(
+            donor,
+            donorTrace
+            );
+
+        // ====================================================
+        // COMPATIBLE DONOR POSITIONS
+        //
+        // Same semantic type and, when there is an explicit
+        // worst-class rule, same class segment.
+        // ====================================================
+
+        vector<CodonTrace> compatible;
+
+        for(const CodonTrace &e : donorTrace)
+        {
+            if(
+                e.type !=
+                targetEntry.type
+                )
+            {
+                continue;
+            }
+
+            if(
+                wholeGenome ||
+                (
+                    e.genomePos >=
+                        segmentStart &&
+                    e.genomePos <
+                        segmentEnd
+                    )
+                )
+            {
+                compatible.push_back(e);
+            }
+        }
+
+        if(compatible.empty())
+            continue;
+
+        const CodonTrace donorEntry =
+            compatible[
+                rand() %
+                compatible.size()
+        ];
+
+        // ====================================================
+        // FIND BLOCK EXTENT
+        // ====================================================
+
+        int targetNext =
+            wholeGenome
+                ?
+                genome_size
+                :
+                segmentEnd;
+
+        int donorNext =
+            wholeGenome
+                ?
+                genome_size
+                :
+                segmentEnd;
+
+        for(const CodonTrace &e : targetTrace)
+        {
+            if(
+                e.genomePos >
+                    targetEntry.genomePos &&
+                e.genomePos <
+                    targetNext
+                )
+            {
+                targetNext =
+                    e.genomePos;
+            }
+        }
+
+        for(const CodonTrace &e : donorTrace)
+        {
+            if(
+                e.genomePos >
+                    donorEntry.genomePos &&
+                e.genomePos <
+                    donorNext
+                )
+            {
+                donorNext =
+                    e.genomePos;
+            }
+        }
+
+        int blockLength =
+            min(
+                targetNext -
+                    targetEntry.genomePos,
+                donorNext -
+                    donorEntry.genomePos
+                );
+
+        blockLength =
+            min(
+                blockLength,
+                targetedCrossMaxBlock
+                );
+
+        if(blockLength < 1)
+            blockLength = 1;
+
+        if(!wholeGenome)
+        {
+            blockLength =
+                min(
+                    blockLength,
+                    segmentEnd -
+                        targetEntry.genomePos
+                    );
+
+            blockLength =
+                min(
+                    blockLength,
+                    segmentEnd -
+                        donorEntry.genomePos
+                    );
+        }
+
+        blockLength =
+            min(
+                blockLength,
+                genome_size -
+                    targetEntry.genomePos
+                );
+
+        blockLength =
+            min(
+                blockLength,
+                genome_size -
+                    donorEntry.genomePos
+                );
+
+        if(blockLength <= 0)
+            continue;
+
+        // ====================================================
+        // CROSS
+        // ====================================================
+
+        vector<int> candidate =
+            current;
+
+        for(
+            int k=0;
+            k<blockLength;
+            k++
+            )
+        {
+            candidate[
+                targetEntry.genomePos + k
+            ] =
+                donor[
+                    donorEntry.genomePos + k
+            ];
+        }
+
+        double candidateFitness =
+            fitness(candidate);
+
+        if(
+            candidateFitness >
+            bestFitness
+            )
+        {
+            printf(
+                "TARGETED_CROSS_WORST[%d] "
+                "trial=%d "
+                "worstClass=%d "
+                "error=%.4lf "
+                "donor=%d "
+                "type=%s "
+                "targetPos=%d "
+                "donorPos=%d "
+                "length=%d "
+                "fitness=%.10lf->%.10lf\n",
+                pos,
+                trial + 1,
+                worstClass,
+                worstError,
+                donorPos,
+                codonTypeName(
+                    targetEntry.type
+                    ),
+                targetEntry.genomePos,
+                donorEntry.genomePos,
+                blockLength,
+                bestFitness,
+                candidateFitness
+                );
+
+            fflush(stdout);
+
+            current =
+                candidate;
+
+            bestFitness =
+                candidateFitness;
+
+            accepted++;
+        }
+    }
+
+    // ========================================================
+    // COPY BACK
+    // ========================================================
+
+    for(int i=0;i<genome_size;i++)
+        genome[pos][i] =
+            current[i];
+
+    fitness_array[pos] =
+        bestFitness;
+
+    printf(
+        "TARGETED_CROSS_WORST[%d] END "
+        "fitness=%.10lf accepted=%d\n",
+        pos,
+        bestFitness,
+        accepted
+        );
+
+    fflush(stdout);
+}
+
+
 // ============================================================
 // SET CROSS ITEMS
 // ============================================================
@@ -870,20 +1775,22 @@ void Population::nextGeneration()
     // LOCAL CROSSOVER
     // --------------------------------------------------------
 
-    for (
-        int i = 0;
-        i < crossitems;
-        i++
-        )
+    for(int i=0;i<crossitems;i++)
     {
-        crossItem(
-            i == 0
-                ?
-                0
-                :
-                rand() %
-                    genome_count
-            );
+        int pos =(i == 0?0:rand() %genome_count);
+        if(crossMethod =="targeted")
+        {
+            targetedCrossItem(pos,targetedCrossIterations);
+        }
+        else if(crossMethod =="targetedWorst")
+        {
+            targetedCrossWorstItem(pos,targetedCrossIterations);
+        }
+        else
+        {
+            // Original QGenClass method.
+            crossItem(pos);
+        }
     }
 
     select();

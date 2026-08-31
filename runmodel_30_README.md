@@ -2,110 +2,113 @@
 
 ## Overview
 
-`runmodel_30.sh` is a Bash script for running repeated QGenClass
-classification experiments with different random seeds.
+`runmodel_30_updated.sh` runs repeated QGenClass classification
+experiments with different random seeds and summarizes their results.
 
-The script is designed to make experimental evaluation easier by:
+The current script supports:
 
--   running the same dataset multiple times;
--   automatically changing the random seed between runs;
--   supporting the available QGenClass local-search methods;
--   storing a separate log for every run;
--   extracting the final classification metrics from QGenClass output;
--   measuring the execution time of each run;
--   calculating average, standard deviation, minimum, and maximum values
-    across all runs.
-
-By default, the script performs **30 independent runs**.
+-   repeated experiments (30 runs by default);
+-   a different random seed for every run;
+-   selectable local-search methods;
+-   selectable fitness methods;
+-   standard and targeted local-crossover methods;
+-   targeted local-search parameters;
+-   targeted crossover parameters;
+-   separate log files for every run;
+-   automatic extraction of classification metrics;
+-   execution-time measurement;
+-   final average, sample standard deviation, minimum, and maximum
+    statistics.
 
 ------------------------------------------------------------------------
 
 ## Requirements
 
-The script assumes that:
-
-1.  QGenClass has already been compiled.
-2.  The executable is available as:
+The script assumes that the QGenClass executable is available as:
 
 ``` bash
 ./QGenClass
 ```
 
-3.  The datasets are stored in:
+The default dataset directory is:
 
 ``` text
-~/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding
+$HOME/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding
 ```
 
-4.  Every dataset consists of two files:
-
-``` text
-dataset.train
-dataset.test
-```
-
-For example:
+A dataset named `ionosphere_1`, for example, must contain:
 
 ``` text
 ionosphere_1.train
 ionosphere_1.test
 ```
 
-5.  The training and test files use the QGenClass `data` format.
+By default both files use QGenClass `data` format.
 
-------------------------------------------------------------------------
-
-## Making the Script Executable
-
-After copying or downloading the script, make it executable:
+Make the script executable with:
 
 ``` bash
-chmod +x runmodel_30.sh
+chmod +x runmodel_30_updated.sh
 ```
 
 ------------------------------------------------------------------------
 
-## Basic Syntax
-
-The command-line syntax is:
+# Command-Line Syntax
 
 ``` bash
-./runmodel_30.sh DATASET [REPETITIONS] [BASE_SEED] [LOCAL_METHOD] [FITNESS_METHOD]
+./runmodel_30_updated.sh DATASET [REPETITIONS] [BASE_SEED] [LOCAL_METHOD] [FITNESS_METHOD] [CROSS_METHOD]
 ```
 
 Only `DATASET` is required.
 
-The remaining parameters are optional.
-
-------------------------------------------------------------------------
-
-## Command-Line Parameters
-
-### `DATASET`
-
-The dataset name without the `.train` or `.test` suffix.
-
-For example, if the files are:
+The defaults are:
 
 ``` text
-ionosphere_1.train
-ionosphere_1.test
+REPETITIONS    = 30
+BASE_SEED      = 1
+LOCAL_METHOD   = targeted
+FITNESS_METHOD = class
+CROSS_METHOD   = targeted
 ```
 
-use:
+Therefore:
 
 ``` bash
-./runmodel_30.sh ionosphere_1
+./runmodel_30_updated.sh ionosphere_1
 ```
 
-The script automatically constructs the complete training and testing
-filenames.
+is equivalent to:
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
+```
 
 ------------------------------------------------------------------------
 
-### `REPETITIONS`
+# Command-Line Parameters
 
-Number of independent experiments.
+## DATASET
+
+Dataset name without `.train` or `.test`.
+
+Example:
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1
+```
+
+uses:
+
+``` text
+.../ionosphere_1.train
+.../ionosphere_1.test
+```
+
+------------------------------------------------------------------------
+
+## REPETITIONS
+
+Number of independent QGenClass runs.
 
 Default:
 
@@ -116,18 +119,18 @@ Default:
 Example:
 
 ``` bash
-./runmodel_30.sh ionosphere_1 50
+./runmodel_30_updated.sh ionosphere_1 50
 ```
 
-This performs 50 independent experiments.
+performs 50 runs.
 
 The value must be a positive integer.
 
 ------------------------------------------------------------------------
 
-### `BASE_SEED`
+## BASE_SEED
 
-Random seed used for the first experiment.
+Random seed for the first run.
 
 Default:
 
@@ -135,54 +138,45 @@ Default:
 1
 ```
 
-The seed is increased by one after every run.
+The script increments it by one after each run.
 
-For example:
+For:
 
 ``` bash
-./runmodel_30.sh ionosphere_1 30 100
+./runmodel_30_updated.sh ionosphere_1 30 100 targeted class targeted
 ```
 
-uses:
+the seeds are:
 
 ``` text
-Run 1  -> seed 100
-Run 2  -> seed 101
-Run 3  -> seed 102
-...
-Run 30 -> seed 129
+100, 101, 102, ..., 129
 ```
 
-This makes the experiments reproducible while ensuring that every run
-starts from a different random state.
+This gives different but reproducible random sequences for the repeated
+experiments.
 
 ------------------------------------------------------------------------
 
-### `LOCAL_METHOD`
+# Local Search
 
-Selects the QGenClass local-search method.
+## LOCAL_METHOD
 
-Default:
+The fourth command-line argument selects the local-search operator.
 
-``` text
-targeted
-```
-
-Supported values in the script are:
+Supported values are:
 
   -----------------------------------------------------------------------
-  Method                              Description
+  Method                              Purpose
   ----------------------------------- -----------------------------------
-  `none`                              No local-search operator
+  `none`                              Disable local search
 
-  `crossover`                         Local improvement based on
-                                      crossover
+  `crossover`                         Crossover-based local improvement
 
   `mutate`                            Mutation-based local search
 
   `siman`                             Simulated annealing
 
-  `hill`                              Hill-climbing local search
+  `hill`                              Hill climbing
 
   `de`                                Differential-evolution-based local
                                       search
@@ -191,41 +185,51 @@ Supported values in the script are:
 
   `adam`                              Adam-style local optimization
 
-  `mutateWorst`                       Mutation concentrated on the class
-                                      with the largest error
+  `mutateWorst`                       Mutation concentrated on the
+                                      worst-performing class
 
-  `targeted`                          Semantic targeted mutation of
-                                      active codons
+  `targeted`                          Targeted semantic mutation
 
-  `targetedWorst`                     Targeted mutation concentrated on
-                                      the worst-performing class
+  `targetedWorst`                     Targeted semantic mutation focused
+                                      on the worst class
 
-  `targetedBest`                      Best-improvement targeted search
-                                      over active semantic mutations
+  `targetedBest`                      Best-improvement targeted local
+                                      search
 
   `constants`                         Local optimization restricted to
                                       numerical constants
   -----------------------------------------------------------------------
 
-Example:
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targetedWorst class
-```
-
-------------------------------------------------------------------------
-
-### `FITNESS_METHOD`
-
-Selects the QGenClass fitness method.
-
 Default:
 
 ``` text
-class
+targeted
 ```
 
-Supported values in the script are:
+Example:
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedWorst class targeted
+```
+
+### Numerical-constant optimization
+
+To optimize only numerical constants:
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 constants class targeted
+```
+
+This selects `constants` as the local-search method while keeping
+targeted crossover enabled.
+
+------------------------------------------------------------------------
+
+# Fitness Method
+
+## FITNESS_METHOD
+
+Supported values are:
 
 ``` text
 class
@@ -237,102 +241,75 @@ macroF1
 weightedF1
 ```
 
+Default:
+
+``` text
+class
+```
+
 Example:
 
 ``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted macroF1
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted macroF1 targeted
 ```
 
 ------------------------------------------------------------------------
 
-## Default Execution
+# Local Crossover
 
-Running:
+## CROSS_METHOD
 
-``` bash
-./runmodel_30.sh ionosphere_1
-```
+The sixth command-line argument controls the local crossover strategy.
 
-is equivalent to:
+Supported values are:
 
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted class
-```
+  -----------------------------------------------------------------------
+  Method                              Description
+  ----------------------------------- -----------------------------------
+  `standard`                          Original QGenClass local crossover
 
-Therefore the default experiment uses:
+  `targeted`                          Targeted semantic crossover
+
+  `targetedWorst`                     Targeted semantic crossover focused
+                                      on the worst-performing class
+  -----------------------------------------------------------------------
+
+Default:
 
 ``` text
-Dataset       : ionosphere_1
-Repetitions   : 30
-Base seed     : 1
-Local method  : targeted
-Fitness       : class
+targeted
 ```
+
+### Standard crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class standard
+```
+
+### Targeted crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
+```
+
+### Worst-class targeted crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedWorst class targetedWorst
+```
+
+The last example uses both worst-class targeted local search and
+worst-class targeted crossover.
 
 ------------------------------------------------------------------------
 
-## Examples
+# Genetic Algorithm Parameters
 
-### 30 runs using targeted search
+The following parameters are configured through environment variables.
 
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted class
-```
+## POP_COUNT
 
-### 30 runs using targetedWorst
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targetedWorst class
-```
-
-### 30 runs using targetedBest
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targetedBest class
-```
-
-### Optimize only numerical constants
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 constants class
-```
-
-### Use Macro-F1 as the fitness method
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted macroF1
-```
-
-### Start the seeds at 1000
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1000 targeted class
-```
-
-### Perform only five runs for a quick test
-
-``` bash
-./runmodel_30.sh ionosphere_1 5 1 targeted class
-```
-
-------------------------------------------------------------------------
-
-# QGenClass Parameters
-
-Most QGenClass parameters are controlled by environment variables in the
-script.
-
-Their default values are described below.
-
-------------------------------------------------------------------------
-
-## Population Size
-
-Environment variable:
-
-``` text
-POP_COUNT
-```
+Number of chromosomes in the population.
 
 Default:
 
@@ -340,7 +317,7 @@ Default:
 500
 ```
 
-It is passed to QGenClass as:
+QGenClass option:
 
 ``` text
 --pop_count
@@ -349,18 +326,14 @@ It is passed to QGenClass as:
 Example:
 
 ``` bash
-POP_COUNT=1000 ./runmodel_30.sh ionosphere_1 30 1 targeted class
+POP_COUNT=1000 ./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-## Chromosome Size
+## POP_SIZE
 
-Environment variable:
-
-``` text
-POP_SIZE
-```
+Chromosome size.
 
 Default:
 
@@ -368,7 +341,7 @@ Default:
 200
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --pop_size
@@ -377,18 +350,14 @@ It is passed as:
 Example:
 
 ``` bash
-POP_SIZE=400 ./runmodel_30.sh ionosphere_1
+POP_SIZE=400 ./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-## Number of Generations
+## POP_GENS
 
-Environment variable:
-
-``` text
-POP_GENS
-```
+Maximum number of generations.
 
 Default:
 
@@ -396,7 +365,7 @@ Default:
 2000
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --pop_gens
@@ -405,18 +374,14 @@ It is passed as:
 Example:
 
 ``` bash
-POP_GENS=5000 ./runmodel_30.sh ionosphere_1
+POP_GENS=5000 ./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-## Selection Rate
+## POP_SRATE
 
-Environment variable:
-
-``` text
-POP_SRATE
-```
+Selection rate.
 
 Default:
 
@@ -424,7 +389,7 @@ Default:
 0.1
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --pop_srate
@@ -432,13 +397,9 @@ It is passed as:
 
 ------------------------------------------------------------------------
 
-## Mutation Rate
+## POP_MRATE
 
-Environment variable:
-
-``` text
-POP_MRATE
-```
+Mutation rate.
 
 Default:
 
@@ -446,7 +407,7 @@ Default:
 0.05
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --pop_mrate
@@ -455,20 +416,16 @@ It is passed as:
 Example:
 
 ``` bash
-POP_MRATE=0.10 ./runmodel_30.sh ionosphere_1
+POP_MRATE=0.02 ./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-# Local Search Parameters
+# Local-Search Parameters
 
-## Number of Local-Search Individuals
+## POP_LOCALITEMS
 
-Environment variable:
-
-``` text
-POP_LOCALITEMS
-```
+Number of population members participating in local search.
 
 Default:
 
@@ -476,30 +433,17 @@ Default:
 20
 ```
 
-It controls how many population members participate in local
-improvement.
-
-It is passed as:
+QGenClass option:
 
 ``` text
 --pop_localitems
 ```
 
-Example:
-
-``` bash
-POP_LOCALITEMS=10 ./runmodel_30.sh ionosphere_1
-```
-
 ------------------------------------------------------------------------
 
-## Local-Search Interval
+## POP_LOCALGENS
 
-Environment variable:
-
-``` text
-POP_LOCALGENS
-```
+Number of generations between local-search applications.
 
 Default:
 
@@ -507,7 +451,7 @@ Default:
 50
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --pop_localgens
@@ -516,18 +460,16 @@ It is passed as:
 Example:
 
 ``` bash
-POP_LOCALGENS=20 ./runmodel_30.sh ionosphere_1
+POP_LOCALGENS=20 ./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-## Targeted Iterations
+# Targeted Local-Search Parameters
 
-Environment variable:
+## TARGETED_ITERATIONS
 
-``` text
-TARGETED_ITERATIONS
-```
+Number of targeted local-search iterations.
 
 Default:
 
@@ -535,31 +477,24 @@ Default:
 50
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --targeted_iterations
 ```
 
-It controls the number of local-search iterations used by the targeted
-methods.
-
 Example:
 
 ``` bash
 TARGETED_ITERATIONS=100 \
-./runmodel_30.sh ionosphere_1 30 1 targeted class
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
 ```
 
 ------------------------------------------------------------------------
 
-## Targeted Stagnation Limit
+## TARGETED_STAGNATION_LIMIT
 
-Environment variable:
-
-``` text
-TARGETED_STAGNATION_LIMIT
-```
+Stagnation threshold used by the targeted-search mechanism.
 
 Default:
 
@@ -567,32 +502,24 @@ Default:
 20
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --targeted_stagnationlimit
 ```
 
-This parameter is used by the stagnation-detection mechanism. A targeted
-search burst can be activated after the specified number of generations
-without improvement.
-
 Example:
 
 ``` bash
 TARGETED_STAGNATION_LIMIT=10 \
-./runmodel_30.sh ionosphere_1 30 1 targetedBest class
+./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-## Targeted Burst Iterations
+## TARGETED_BURST_ITERATIONS
 
-Environment variable:
-
-``` text
-TARGETED_BURST_ITERATIONS
-```
+Number of iterations used for a targeted search burst.
 
 Default:
 
@@ -600,35 +527,142 @@ Default:
 200
 ```
 
-It is passed as:
+QGenClass option:
 
 ``` text
 --targeted_burstiterations
 ```
 
-It controls the strength of the targeted local-search burst used after
-stagnation.
-
 Example:
 
 ``` bash
 TARGETED_BURST_ITERATIONS=500 \
-./runmodel_30.sh ionosphere_1 30 1 targetedBest class
+./runmodel_30_updated.sh ionosphere_1
 ```
+
+------------------------------------------------------------------------
+
+# Targeted Crossover Parameters
+
+## POP_CROSSITEMS
+
+Number of chromosomes participating in local crossover.
+
+Default:
+
+``` text
+10
+```
+
+QGenClass option:
+
+``` text
+--pop_crossitems
+```
+
+Example:
+
+``` bash
+POP_CROSSITEMS=20 \
+./runmodel_30_updated.sh ionosphere_1
+```
+
+------------------------------------------------------------------------
+
+## TARGETED_CROSS_ITERATIONS
+
+Number of targeted crossover attempts.
+
+Default:
+
+``` text
+20
+```
+
+QGenClass option:
+
+``` text
+--targeted_crossiterations
+```
+
+Example:
+
+``` bash
+TARGETED_CROSS_ITERATIONS=50 \
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
+```
+
+Increasing this value gives targeted crossover more opportunities to
+find an improving candidate, but also increases computational cost.
+
+------------------------------------------------------------------------
+
+## TARGETED_CROSS_ELITE_FRACTION
+
+Fraction of the population used as the elite donor pool by targeted
+crossover.
+
+Default:
+
+``` text
+0.2
+```
+
+QGenClass option:
+
+``` text
+--targeted_crosselitefraction
+```
+
+With:
+
+``` text
+0.2
+```
+
+the targeted crossover uses the top 20% of the population as its donor
+pool.
+
+Example:
+
+``` bash
+TARGETED_CROSS_ELITE_FRACTION=0.10 \
+./runmodel_30_updated.sh ionosphere_1
+```
+
+------------------------------------------------------------------------
+
+## TARGETED_CROSS_MAX_BLOCK
+
+Maximum number of codons copied by a targeted crossover operation.
+
+Default:
+
+``` text
+16
+```
+
+QGenClass option:
+
+``` text
+--targeted_crossmaxblock
+```
+
+Example:
+
+``` bash
+TARGETED_CROSS_MAX_BLOCK=8 \
+./runmodel_30_updated.sh ionosphere_1
+```
+
+A smaller value makes crossover more local, while a larger value permits
+larger genotype modifications.
 
 ------------------------------------------------------------------------
 
 # Fitness Weight Parameters
 
-The script also defines:
-
-``` text
-POP_CLASSPERCENT
-POP_AVERAGEPERCENT
-POP_SQUAREDPERCENT
-```
-
-with defaults:
+The script defines:
 
 ``` text
 POP_CLASSPERCENT   = 0.50
@@ -636,7 +670,7 @@ POP_AVERAGEPERCENT = 0.50
 POP_SQUAREDPERCENT = 0.00
 ```
 
-They are passed to QGenClass as:
+These are passed as:
 
 ``` text
 --pop_classpercent
@@ -644,8 +678,8 @@ They are passed to QGenClass as:
 --pop_squaredpercent
 ```
 
-These parameters are particularly relevant when the selected QGenClass
-fitness method uses a combination of fitness components.
+They are especially relevant when using a fitness mode that combines
+multiple components.
 
 Example:
 
@@ -653,20 +687,42 @@ Example:
 POP_CLASSPERCENT=0.7 \
 POP_AVERAGEPERCENT=0.3 \
 POP_SQUAREDPERCENT=0.0 \
-./runmodel_30.sh ionosphere_1 30 1 targeted mixed
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted mixed targeted
 ```
 
 ------------------------------------------------------------------------
 
-# SMOTE Parameters
+# Dataset Parameters
 
-## Enable SMOTE
+## TRAIN_FORMAT
 
-Environment variable:
+Default:
 
 ``` text
-ENABLE_SMOTE
+data
 ```
+
+Passed as:
+
+``` text
+--train_format
+```
+
+## TEST_FORMAT
+
+Default:
+
+``` text
+data
+```
+
+Passed as:
+
+``` text
+--test_format
+```
+
+## ENABLE_SMOTE
 
 Default:
 
@@ -674,7 +730,7 @@ Default:
 no
 ```
 
-It is passed as:
+Passed as:
 
 ``` text
 --enable_smote
@@ -683,19 +739,10 @@ It is passed as:
 Example:
 
 ``` bash
-ENABLE_SMOTE=yes \
-./runmodel_30.sh ionosphere_1
+ENABLE_SMOTE=yes ./runmodel_30_updated.sh ionosphere_1
 ```
 
-------------------------------------------------------------------------
-
-## Number of SMOTE Neighbors
-
-Environment variable:
-
-``` text
-SMOTE_K
-```
+## SMOTE_K
 
 Default:
 
@@ -703,7 +750,7 @@ Default:
 5
 ```
 
-It is passed as:
+Passed as:
 
 ``` text
 --smote_k
@@ -714,94 +761,160 @@ Example:
 ``` bash
 ENABLE_SMOTE=yes \
 SMOTE_K=7 \
-./runmodel_30.sh ionosphere_1
+./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-# Changing Multiple Parameters
+# Paths
 
-Environment variables make it possible to configure an experiment
-without editing the script.
+## DATAPATH
 
-For example:
+Default dataset directory:
+
+``` text
+$HOME/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding
+```
+
+Override it with:
 
 ``` bash
-POP_COUNT=1000 \
-POP_SIZE=300 \
-POP_GENS=5000 \
-POP_MRATE=0.02 \
-POP_LOCALITEMS=10 \
-POP_LOCALGENS=25 \
-TARGETED_ITERATIONS=100 \
-TARGETED_STAGNATION_LIMIT=15 \
-TARGETED_BURST_ITERATIONS=400 \
-./runmodel_30.sh ionosphere_1 30 100 targetedBest macroF1
+DATAPATH=/home/user/datasets \
+./runmodel_30_updated.sh ionosphere_1
 ```
-
-This is useful for automated parameter studies because the original
-script does not have to be modified for each experiment.
 
 ------------------------------------------------------------------------
 
-# Output Directory
+## PROGRAM
 
-By default, results are stored in:
+Default executable:
 
 ``` text
-results/
+./QGenClass
 ```
 
-The directory is created automatically if it does not already exist.
+Override it with:
 
-The output directory can be changed using:
+``` bash
+PROGRAM=/home/user/QGenClass/QGenClass \
+./runmodel_30_updated.sh ionosphere_1
+```
+
+------------------------------------------------------------------------
+
+## RESULTSDIR
+
+Default:
 
 ``` text
-RESULTSDIR
+results
 ```
 
 Example:
 
 ``` bash
-RESULTSDIR=my_experiments \
-./runmodel_30.sh ionosphere_1
+RESULTSDIR=experiment_results \
+./runmodel_30_updated.sh ionosphere_1
 ```
 
 ------------------------------------------------------------------------
 
-# Log Files
+# Output Files
 
-Every repetition has its own log file.
+For a configuration such as:
 
-The filename contains:
-
--   dataset;
--   local-search method;
--   fitness method;
--   random seed.
-
-For example:
-
-``` text
-results/run_ionosphere_1_targeted_class_seed1.log
-results/run_ionosphere_1_targeted_class_seed2.log
-results/run_ionosphere_1_targeted_class_seed3.log
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
 ```
 
-This makes it possible to inspect the complete QGenClass output for
-every individual experiment.
+the experiment tag is:
+
+``` text
+ionosphere_1_targeted_class_targeted
+```
+
+The script creates:
+
+``` text
+results/results_ionosphere_1_targeted_class_targeted.txt
+results/summary_ionosphere_1_targeted_class_targeted.txt
+```
+
+and individual run logs such as:
+
+``` text
+results/run_ionosphere_1_targeted_class_targeted_seed1.log
+results/run_ionosphere_1_targeted_class_targeted_seed2.log
+...
+results/run_ionosphere_1_targeted_class_targeted_seed30.log
+```
+
+------------------------------------------------------------------------
+
+# Progress Output
+
+During execution the script displays the current run:
+
+``` text
+RUN 1 / 30
+SEED = 1
+```
+
+and selected QGenClass progress information.
+
+It recognizes output associated with:
+
+``` text
+TARGETED
+TARGETED_WORST
+TARGETED_BEST
+CONSTANTS
+TARGETED_CROSS
+TARGETED_CROSS_WORST
+```
+
+The final classification metric line is also displayed for each run.
+
+------------------------------------------------------------------------
+
+# Metrics
+
+The script extracts the final QGenClass line of the form:
+
+``` text
+CLASS_ERROR: value PRECISION: value RECALL: value F1SCORE: value
+```
+
+It records:
+
+-   Class Error
+-   Accuracy
+-   Precision
+-   Recall
+-   F1 Score
+-   Execution Time
+
+Accuracy is calculated from the percentage class error:
+
+\[ Accuracy = 1 - `\frac{ClassError}{100}`{=tex} \]
+
+For example, if:
+
+``` text
+CLASS_ERROR = 11.4285714286
+```
+
+then:
+
+``` text
+Accuracy = 0.8857142857
+```
 
 ------------------------------------------------------------------------
 
 # Detailed Results File
 
-The script creates a results file such as:
-
-``` text
-results/results_ionosphere_1_targeted_class.txt
-```
-
-The columns are:
+The results file contains:
 
 ``` text
 Run
@@ -815,7 +928,7 @@ TimeSeconds
 LogFile
 ```
 
-For example:
+Example structure:
 
 ``` text
 # Run Seed ClassError Accuracy Precision Recall F1Score TimeSeconds LogFile
@@ -825,65 +938,18 @@ For example:
 
 ------------------------------------------------------------------------
 
-# Metrics Extracted from QGenClass
+# Final Statistics
 
-The script searches each run log for the final line having the form:
-
-``` text
-CLASS_ERROR: value PRECISION: value RECALL: value F1SCORE: value
-```
-
-For example:
-
-``` text
-CLASS_ERROR: 11.4285714286 PRECISION: 0.9130434783 RECALL: 0.8750000000 F1SCORE: 0.8936170213
-```
-
-The script extracts:
-
--   Class Error
--   Precision
--   Recall
--   F1 Score
-
-Accuracy is then calculated from the percentage class error as:
-
-``` text
-Accuracy = 1 - ClassError / 100
-```
-
-For example:
-
-``` text
-ClassError = 11.4285714286%
-```
-
-gives:
-
-``` text
-Accuracy = 0.8857142857
-```
-
-------------------------------------------------------------------------
-
-# Summary File
-
-After all repetitions finish, the script creates a summary file such as:
-
-``` text
-results/summary_ionosphere_1_targeted_class.txt
-```
-
-For every metric, it reports:
+After all runs finish, the script reports:
 
 ``` text
 Average
-Standard deviation
+Std.Dev.
 Minimum
 Maximum
 ```
 
-The summary contains statistics for:
+for:
 
 ``` text
 Class Error (%)
@@ -891,41 +957,16 @@ Accuracy
 Precision
 Recall
 F1 Score
-Execution Time
+Time (sec)
 ```
 
-A typical summary has the form:
+For a metric (x) measured over (N) runs, the mean is:
 
-``` text
-================================================================================
- FINAL STATISTICS
-================================================================================
+\[ `\bar`{=tex}{x} = `\frac{1}{N}`{=tex}`\sum`{=tex}\_{i=1}\^{N}x_i \]
 
-Metric                      Average       Std.Dev.        Minimum        Maximum
---------------------------------------------------------------------------------
-Class Error (%)            ...
-Accuracy                   ...
-Precision                  ...
-Recall                     ...
-F1 Score                   ...
-Time (sec)                 ...
+The script uses the sample standard deviation:
 
-Number of runs = 30
-================================================================================
-```
-
-------------------------------------------------------------------------
-
-# Standard Deviation
-
-For (N) runs with metric values (x_1,x_2,`\ldots`{=tex},x_N), the script
-first calculates the sample mean:
-
-\[ `\bar`{=tex}{x}=`\frac{1}{N}`{=tex}`\sum`{=tex}\_{i=1}\^{N}x_i \]
-
-and then the sample standard deviation:
-
-\[ s= `\sqrt{
+\[ s = `\sqrt{
 \frac{
 \sum_{i=1}^{N}(x_i-\bar{x})^2
 }{
@@ -933,256 +974,219 @@ N-1
 }
 }`{=tex} \]
 
-The sample standard deviation is used when more than one run is
-available.
+when more than one run is available.
 
 ------------------------------------------------------------------------
 
-# Execution Time
+# Useful Experiment Examples
 
-The script measures both:
+## Baseline: no local search, standard crossover
 
-1.  the execution time of every individual run;
-2.  the total execution time of the complete experiment.
-
-A run may therefore finish with output similar to:
-
-``` text
-[RUN 1] RESULTS
--------------------------------------------------------------------------------
- Class error : 11.4285714286 %
- Accuracy    : 0.8857142857
- Precision   : 0.9130434783
- Recall      : 0.8750000000
- F1 score    : 0.8936170213
- Time        : 00:01:12
--------------------------------------------------------------------------------
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 none class standard
 ```
 
-At the end of all repetitions, the total execution time is also
-displayed.
+## Targeted local search with standard crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class standard
+```
+
+## Targeted local search and targeted crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
+```
+
+## Worst-class targeted search and crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedWorst class targetedWorst
+```
+
+## Best-improvement local search with targeted crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedBest class targeted
+```
+
+## Constant optimization with targeted crossover
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 constants class targeted
+```
+
+## Macro-F1 optimization
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted macroF1 targeted
+```
 
 ------------------------------------------------------------------------
 
-# Dataset Path
+# Comparing Crossover Methods
 
-The default dataset directory is:
+A controlled comparison can be made by keeping the same dataset, seeds,
+local-search method, and fitness method while changing only
+`CROSS_METHOD`:
 
-``` text
-$HOME/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class standard
+
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
+
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targetedWorst
 ```
 
-It can be changed without modifying the script by setting `DATAPATH`.
+Because all three experiments use the same seed sequence, their
+aggregate results are easier to compare.
+
+------------------------------------------------------------------------
+
+# Comparing Local-Search Methods
+
+Similarly:
+
+``` bash
+./runmodel_30_updated.sh ionosphere_1 30 1 none class targeted
+
+./runmodel_30_updated.sh ionosphere_1 30 1 mutateWorst class targeted
+
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
+
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedWorst class targeted
+
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedBest class targeted
+
+./runmodel_30_updated.sh ionosphere_1 30 1 constants class targeted
+```
+
+------------------------------------------------------------------------
+
+# Changing Several Parameters at Once
 
 Example:
 
 ``` bash
-DATAPATH=/home/user/datasets \
-./runmodel_30.sh ionosphere_1
+POP_COUNT=1000 \
+POP_SIZE=300 \
+POP_GENS=5000 \
+POP_MRATE=0.02 \
+POP_LOCALITEMS=10 \
+POP_LOCALGENS=25 \
+TARGETED_ITERATIONS=100 \
+TARGETED_STAGNATION_LIMIT=10 \
+TARGETED_BURST_ITERATIONS=500 \
+POP_CROSSITEMS=20 \
+TARGETED_CROSS_ITERATIONS=50 \
+TARGETED_CROSS_ELITE_FRACTION=0.20 \
+TARGETED_CROSS_MAX_BLOCK=8 \
+./runmodel_30_updated.sh ionosphere_1 30 100 targetedBest macroF1 targeted
 ```
 
-The script then looks for:
-
-``` text
-/home/user/datasets/ionosphere_1.train
-/home/user/datasets/ionosphere_1.test
-```
+This allows parameter studies without editing the script itself.
 
 ------------------------------------------------------------------------
 
-# QGenClass Executable Path
+# Recommended Workflow
 
-The default executable is:
-
-``` text
-./QGenClass
-```
-
-A different executable can be selected using the `PROGRAM` environment
-variable.
-
-Example:
-
-``` bash
-PROGRAM=/home/user/QGenClass/build/QGenClass \
-./runmodel_30.sh ionosphere_1
-```
-
-------------------------------------------------------------------------
-
-# Comparing Local Search Methods
-
-One of the main purposes of the script is to make different local-search
-strategies easy to compare under the same experimental conditions.
-
-For example:
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 none class
-
-./runmodel_30.sh ionosphere_1 30 1 mutateWorst class
-
-./runmodel_30.sh ionosphere_1 30 1 targeted class
-
-./runmodel_30.sh ionosphere_1 30 1 targetedWorst class
-
-./runmodel_30.sh ionosphere_1 30 1 targetedBest class
-
-./runmodel_30.sh ionosphere_1 30 1 constants class
-```
-
-Because all commands use the same base seed and number of repetitions,
-the methods are evaluated with corresponding seed sequences.
-
-The resulting summary files can then be compared.
-
-------------------------------------------------------------------------
-
-# Comparing Fitness Methods
-
-The same local-search algorithm can also be evaluated with different
-fitness methods.
-
-For example:
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted class
-
-./runmodel_30.sh ionosphere_1 30 1 targeted mean
-
-./runmodel_30.sh ionosphere_1 30 1 targeted macroF1
-
-./runmodel_30.sh ionosphere_1 30 1 targeted weightedF1
-```
-
-------------------------------------------------------------------------
-
-# Recommended Experimental Workflow
-
-For a quick test, first use a small number of repetitions:
+For a quick configuration check:
 
 ``` bash
 POP_GENS=100 \
-./runmodel_30.sh ionosphere_1 2 1 targeted class
+./runmodel_30_updated.sh ionosphere_1 2 1 targeted class targeted
 ```
 
-After confirming that the configuration works correctly, run the full
-experiment:
+After confirming that everything works, run the full experiment:
 
 ``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted class
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
 ```
 
-For comparing local-search methods, keep all parameters and seeds
-unchanged and modify only `LOCAL_METHOD`.
+When comparing algorithms, keep the same:
 
-For example:
+-   dataset;
+-   number of repetitions;
+-   base seed;
+-   population size;
+-   chromosome size;
+-   number of generations;
+-   mutation and selection rates.
 
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted class
-./runmodel_30.sh ionosphere_1 30 1 targetedWorst class
-./runmodel_30.sh ionosphere_1 30 1 targetedBest class
-./runmodel_30.sh ionosphere_1 30 1 constants class
-```
+Change only the algorithmic component under investigation.
 
-This produces a more controlled comparison because every method is
-evaluated using the same sequence of random seeds.
+For example, to study crossover, change only `CROSS_METHOD`.
 
 ------------------------------------------------------------------------
 
 # Error Checking
 
-Before starting the experiments, the script verifies:
+Before execution, the script checks:
 
--   that the number of repetitions is valid;
--   that the base seed is valid;
--   that the requested local-search method is supported by the script;
--   that the requested fitness method is supported by the script;
+-   that `REPETITIONS` is a positive integer;
+-   that `BASE_SEED` is a non-negative integer;
+-   that the selected local-search method is recognized;
+-   that the selected fitness method is recognized;
+-   that the selected crossover method is recognized;
 -   that the QGenClass executable exists and is executable;
 -   that the training file exists;
 -   that the test file exists.
 
-If QGenClass exits with a non-zero status, the experiment stops and the
-corresponding log file is reported.
+The experiment stops if QGenClass returns a non-zero exit status.
 
-The script also stops if the final QGenClass metric line cannot be found
-or parsed.
+It also stops if the final `CLASS_ERROR` metric line cannot be found or
+parsed.
 
 ------------------------------------------------------------------------
 
 # Quick Reference
 
-## Default run
+Default 30-run experiment:
 
 ``` bash
-./runmodel_30.sh ionosphere_1
+./runmodel_30_updated.sh ionosphere_1
 ```
 
-## Targeted search
+Targeted search + targeted crossover:
 
 ``` bash
-./runmodel_30.sh ionosphere_1 30 1 targeted class
+./runmodel_30_updated.sh ionosphere_1 30 1 targeted class targeted
 ```
 
-## Targeted worst-class search
+Worst-class targeted search + worst-class targeted crossover:
 
 ``` bash
-./runmodel_30.sh ionosphere_1 30 1 targetedWorst class
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedWorst class targetedWorst
 ```
 
-## Best-improvement targeted search
+Constant optimization:
 
 ``` bash
-./runmodel_30.sh ionosphere_1 30 1 targetedBest class
+./runmodel_30_updated.sh ionosphere_1 30 1 constants class targeted
 ```
 
-## Numerical-constant optimization
-
-``` bash
-./runmodel_30.sh ionosphere_1 30 1 constants class
-```
-
-## Larger population
+Larger experiment:
 
 ``` bash
 POP_COUNT=1000 \
-./runmodel_30.sh ionosphere_1
-```
-
-## More generations
-
-``` bash
 POP_GENS=5000 \
-./runmodel_30.sh ionosphere_1
-```
-
-## Stronger targeted search
-
-``` bash
 TARGETED_ITERATIONS=100 \
-TARGETED_STAGNATION_LIMIT=10 \
-TARGETED_BURST_ITERATIONS=500 \
-./runmodel_30.sh ionosphere_1 30 1 targetedBest class
-```
-
-## Enable SMOTE
-
-``` bash
-ENABLE_SMOTE=yes \
-SMOTE_K=5 \
-./runmodel_30.sh ionosphere_1
+TARGETED_CROSS_ITERATIONS=50 \
+./runmodel_30_updated.sh ionosphere_1 30 1 targetedBest macroF1 targeted
 ```
 
 ------------------------------------------------------------------------
 
 ## Notes
 
-The script documents the command-line options and output format used by
-the current QGenClass experiment runner. If the QGenClass command-line
-parser is changed, the corresponding option names in the script should
-be updated as well.
+This document describes the current `runmodel_30_updated.sh` interface
+and the QGenClass options passed by that script.
 
-The aggregate metrics are derived from the final `CLASS_ERROR`,
-`PRECISION`, `RECALL`, and `F1SCORE` line printed by QGenClass.
-Therefore, changes to that output format may require updating the
-metric-parsing section of the script.
+The aggregate metrics depend on the final QGenClass output line:
+
+``` text
+CLASS_ERROR: ... PRECISION: ... RECALL: ... F1SCORE: ...
+```
+
+If the QGenClass reporting format changes, the metric-parsing section of
+the script may also need to be updated.

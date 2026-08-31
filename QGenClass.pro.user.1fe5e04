@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 16.0.1, 2026-08-31T10:10:15. -->
+<!-- Written by QtCreator 16.0.1, 2026-08-29T10:37:11. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{68c2c053-5b6a-4a71-b840-662c9b7046ad}</value>
+  <value type="QByteArray">{1fe5e048-239b-4d25-b628-b7c8f23a29b9}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -94,7 +94,7 @@
    <value type="QString" key="DeviceType">Desktop</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Qt 5.15.15 in PATH (qt5)</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Qt 5.15.15 in PATH (qt5)</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{995972b5-cbd3-4758-a71d-a26746c0a9c7}</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{d39f20d4-84bf-46d8-95b7-7ddff97376fa}</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>

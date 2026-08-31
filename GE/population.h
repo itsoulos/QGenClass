@@ -94,6 +94,22 @@ private:
 
 
     // ============================================================
+    // LOCAL CROSSOVER METHOD
+    // ============================================================
+
+    string crossMethod = "standard";
+
+    // Number of candidate crossover attempts.
+    int targetedCrossIterations = 50;
+
+    // Fraction of the sorted population used as donor pool.
+    // 0.20 means donors come from the best 20%.
+    double targetedCrossEliteFraction = 0.20;
+
+    // Maximum number of codons copied in one semantic block.
+    int targetedCrossMaxBlock = 16;
+
+    // ============================================================
     // TARGETED ADAPTIVE WEIGHTS
     // ============================================================
 
@@ -442,35 +458,24 @@ public:
      * @param pos Population chromosome position.
      * @param classIndex Class segment to modify.
      */
-    void mutateItemAtClass(
-        int pos,
-        int classIndex
-        );
+    void mutateItemAtClass(int pos,int classIndex);
 
 
-    void targetedWorstLocalSearch(
-        int pos,
-        int iterations = 100
-        );
+    void targetedWorstLocalSearch(int pos,int iterations = 100);
+    void targetedBestLocalSearch(int pos,int iterations = 100);
 
-    void targetedBestLocalSearch(
-        int pos,
-        int iterations = 100
-        );
-
-    void setTargetedStagnationLimit(
-        int n
-        );
-
-    void setTargetedBurstIterations(
-        int n
-        );
-
+    void setTargetedStagnationLimit(int n);
+    void setTargetedBurstIterations(int n);
     void printTargetedStatistics() const;
-    void constantsLocalSearch(
-        int pos,
-        int iterations = 100
-        );
+    void constantsLocalSearch(int pos,int iterations = 100);
+
+
+    void setCrossMethod(string method);
+    void setTargetedCrossIterations(int n);
+    void setTargetedCrossEliteFraction(double x);
+    void setTargetedCrossMaxBlock(int n);
+    void targetedCrossItem(int pos,int iterations = 50);
+    void targetedCrossWorstItem(int pos,int iterations = 50);
     // ========================================================
     // DESTRUCTOR
     // ========================================================
