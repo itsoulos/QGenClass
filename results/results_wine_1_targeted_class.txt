@@ -1,2 +1,0 @@
-# Run Seed ClassError Accuracy Precision Recall F1Score TimeSeconds LogFile
-1 1 11.7647058824 0.8823529412 0.8750000000 0.8611111111 0.8680000000 25 results/run_wine_1_targeted_class_seed1.log

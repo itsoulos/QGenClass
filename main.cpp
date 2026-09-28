@@ -292,6 +292,7 @@ void run()
         pop->evaluateBestFitness();
         double bestf=pop->getBestFitness();
         string s = program->printF(genome);
+	if(fabs(bestf)>1e+7) continue;
         if(testSet==NULL)
             printf("GENERATION=%5d FITNESS=%10.4lg%%\nPROGRAMS=\n%s",
                 i,bestf,s.c_str());

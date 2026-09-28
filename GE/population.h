@@ -259,39 +259,18 @@ public:
     // CONSTRUCTOR
     // ========================================================
 
-    Population(
-        int gcount,
-        int gsize,
-        Program *p
-        );
+    Population(int gcount,int gsize,Program *p);
 
     // ========================================================
     // BASIC SETTINGS
     // ========================================================
 
-    void setCrossItems(
-        int g
-        );
-
-    void setLocalItems(
-        int g
-        );
-
-    void setLocalGens(
-        int g
-        );
-
-    double fitness(
-        vector<int> &g
-        );
-
-    void setElitism(
-        int s
-        );
-
-    void setLocalMethod(
-        string s
-        );
+    void    setCrossItems(int g);
+    void    setLocalItems(int g);
+    void    setLocalGens(int g);
+    double  fitness(vector<int> &g);
+    void    setElitism(int s);
+    void    setLocalMethod(string s);
 
     // ========================================================
     // NEW:
@@ -306,9 +285,7 @@ public:
      *
      *     population.setTargetedIterations(100);
      */
-    void setTargetedIterations(
-        int n
-        );
+    void setTargetedIterations(int n);
 
     /**
      * @brief Performs targeted genotype local search on the
@@ -333,41 +310,27 @@ public:
      * @param pos Position of chromosome in population.
      * @param iterations Number of local-search iterations.
      */
-    void targetedLocalSearch(
-        int pos,
-        int iterations = 100
-        );
+    void targetedLocalSearch(int pos,int iterations = 100);
 
     // ========================================================
     // POPULATION INFORMATION
     // ========================================================
 
     int getGeneration() const;
-
     int getCount() const;
-
     int getSize() const;
-
     // ========================================================
     // EVOLUTION
     // ========================================================
 
     void nextGeneration();
-
     // ========================================================
     // MUTATION / SELECTION PARAMETERS
     // ========================================================
 
-    void setMutationRate(
-        double r
-        );
-
-    void setSelectionRate(
-        double r
-        );
-
+    void setMutationRate(double r);
+    void setSelectionRate(double r);
     double getSelectionRate() const;
-
     double getMutationRate() const;
 
     // ========================================================
@@ -375,9 +338,7 @@ public:
     // ========================================================
 
     double getBestFitness() const;
-
     double evaluateBestFitness();
-
     vector<int> getBestGenome() const;
 
     // ========================================================
@@ -385,24 +346,15 @@ public:
     // ========================================================
 
     void reset();
-
     // ========================================================
     // EXISTING INTEGER LOCAL SEARCH METHODS
     // ========================================================
 
-    vector<int> discreteGradient(
-        vector<int>& x
-        );
+    vector<int> discreteGradient(vector<int>& x);
 
-    vector<int> discreteStep(
-        vector<int>& x,
-        vector<int>& grad
-        );
+    vector<int> discreteStep(vector<int>& x,vector<int>& grad);
 
-    void integerLocalSearch(
-        vector<int> &x,
-        int maxSteps = 20
-        );
+    void integerLocalSearch(vector<int> &x,int maxSteps = 20);
 
     // ========================================================
     // INTEGER ADAM
@@ -442,13 +394,8 @@ public:
     // EXISTING MEMETIC OPERATORS
     // ========================================================
 
-    void crossItem(
-        int pos
-        );
-
-    void mutateItem(
-        int pos
-        );
+    void crossItem(int pos);
+    void mutateItem(int pos);
 
     /**
      * @brief Performs mutation on chromosome at population

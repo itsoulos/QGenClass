@@ -54,20 +54,12 @@ private:
 
     Data outy;
 
-    int fitness_mode =
-        FITNESS_CLASS;
-
-    double class_percent =
-        1.0;
-
-    double average_percent =
-        0.0;
-
-    double squared_percent =
-        0.0;
+    int fitness_mode =FITNESS_CLASS;
+    double class_percent =1.0;
+    double average_percent =0.0;
+    double squared_percent =0.0;
 
     Data realCached;
-
     Data estCached;
 
 public:
@@ -76,44 +68,25 @@ public:
     // CONSTRUCTOR
     // ========================================================
 
-    ClassProgram(
-        Dataset *tr,
-        Dataset *tt
-        );
+    ClassProgram(Dataset *tr,Dataset *tt);
 
     // ========================================================
     // FITNESS CONFIGURATION
     // ========================================================
 
-    void setFitnessMode(
-        int m
-        );
+    void setFitnessMode(int m);
 
-    void setFitnessPercentages(
-        double p1,
-        double p2,
-        double p3
-        );
+    void setFitnessPercentages(double p1,double p2,double p3);
 
     // ========================================================
     // PHENOTYPE / OUTPUT
     // ========================================================
 
-    string printF(
-        vector<int> &genome
-        );
+    string printF(vector<int> &genome);
 
-    void printPython(
-        vector<int> &genome,
-        std::string outname =
-        "classifier.py"
-        );
+    void printPython(vector<int> &genome,std::string outname ="classifier.py");
 
-    void printC(
-        vector<int> &genome,
-        std::string outname =
-        "classifier.h"
-        );
+    void printC(vector<int> &genome,std::string outname ="classifier.h");
 
     // ========================================================
     // TARGETED GENOTYPE MUTATION SUPPORT
@@ -155,36 +128,22 @@ public:
     // MAPPER
     // ========================================================
 
-    int findMapper(
-        double x
-        );
+    int findMapper(double x);
 
     // ========================================================
     // FITNESS
     // ========================================================
 
-    virtual double fitness(
-        vector<int> &genome
-        );
-
-    double getClassError(
-        vector<int> &genome
-        );
+    virtual double fitness(vector<int> &genome);
+    double getClassError(vector<int> &genome);
 
     // ========================================================
     // OUTPUTS
     // ========================================================
 
-    void getOutputs(
-        Dataset *t,
-        vector<double> &real,
-        vector<double> &est
-        );
+    void getOutputs(Dataset *t,vector<double> &real,vector<double> &est);
 
-    void getOutputs(
-        vector<double> &real,
-        vector<double> &est
-        );
+    void getOutputs(vector<double> &real,vector<double> &est);
 
     // ========================================================
     // CLASS INFORMATION

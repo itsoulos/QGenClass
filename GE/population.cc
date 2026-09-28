@@ -22,9 +22,7 @@ int MAX_RULE = 256;
 mt19937 gen(random_device{}());
 
 
-static const char *codonTypeName(
-    CodonType type
-    )
+static const char *codonTypeName(CodonType type)
 {
     switch(type)
     {
@@ -54,10 +52,7 @@ static const char *codonTypeName(
 // RANDOM UTILITIES
 // ============================================================
 
-static double targetedSuccessRate(
-    long attempts,
-    long accepted
-    )
+static double targetedSuccessRate(long attempts,long accepted)
 {
     /*
      * Laplace smoothing.
@@ -66,14 +61,11 @@ static double targetedSuccessRate(
      * from receiving zero probability.
      */
 
-    return
-        (accepted + 1.0) /
-        (attempts + 2.0);
+    return (accepted + 1.0)/(attempts + 2.0);
 }
 double randDouble(
     double a,
-    double b
-    )
+    double b)
 {
     uniform_real_distribution<> dist(a, b);
 
@@ -94,33 +86,15 @@ int randInt(
 // NEIGHBOR
 // ============================================================
 
-vector<int> Population::neighbor(
-    const vector<int>& x,
-    int stepSize
-    )
+vector<int> Population::neighbor(const vector<int>& x,int stepSize)
 {
     vector<int> y = x;
 
-    if (x.empty())
-        return y;
+    if (x.empty())return y;
 
-    int i =
-        randInt(
-            0,
-            static_cast<int>(
-                x.size()
-                ) - 1
-            );
-
-    y[i] +=
-        randInt(
-            -stepSize,
-            stepSize
-            );
-
-    if (y[i] < 0)
-        y[i] = 0;
-
+    int i =randInt(0,static_cast<int>(x.size()) - 1);
+    y[i] +=randInt(-stepSize,stepSize);
+    if (y[i] < 0)y[i] = 0;
     return y;
 }
 
@@ -137,32 +111,18 @@ vector<int> Population::simulatedAnnealing(
     )
 {
     double T = T0;
-
     vector<int> best = x;
-
-    double bestVal =
-        fitness(x);
+    double bestVal =fitness(x);
 
     while (T > Tmin)
     {
-        for (
-            int k = 0;
-            k < iterPerTemp;
-            k++
-            )
+        for (int k = 0;k < iterPerTemp;k++)
         {
-            vector<int> y =
-                neighbor(x);
+            vector<int> y =neighbor(x);
+            double fx =fitness(x);
+            double fy =fitness(y);
 
-            double fx =
-                fitness(x);
-
-            double fy =
-                fitness(y);
-
-            double delta =
-                fabs(fy) -
-                fabs(fx);
+            double delta =fabs(fy) -fabs(fx);
 
             if (delta < 0)
             {
@@ -170,41 +130,21 @@ vector<int> Population::simulatedAnnealing(
             }
             else
             {
-                double p =
-                    exp(
-                        -delta / T
-                        );
-
-                if (
-                    randDouble(
-                        0,
-                        1
-                        ) < p
-                    )
+                double p =exp(-delta / T);
+                if (randDouble(0,1) < p)
                 {
                     x = y;
                 }
             }
 
-            double val =
-                fitness(x);
-
-            if (
-                fabs(val) <
-                fabs(bestVal)
-                )
+            double val =fitness(x);
+            if (fabs(val) <fabs(bestVal))
             {
                 best = x;
                 bestVal = val;
             }
         }
-
-        printf(
-            "T=%20.10lf BEST=%20.10lf\n",
-            T,
-            bestVal
-            );
-
+        printf("T=%20.10lf BEST=%20.10lf\n",T,bestVal);
         T *= alpha;
     }
 
@@ -229,71 +169,32 @@ Population::Population(
     generation = 0;
     program = p;
 
-    previousBestFitness =
-        -1e+100;
-
-    generationsWithoutImprovement =
-        0;
-
+    previousBestFitness =-1e+100;
+    generationsWithoutImprovement =0;
     genome = new int*[genome_count];
-
-    children =
-        new int*[
-            genome_count
-    ];
-
+    children =new int*[genome_count];
     vector<int> g;
+    g.resize(genome_size);
 
-    g.resize(
-        genome_size
-        );
+    ClassProgram *pp =(ClassProgram *)program;
 
-    ClassProgram *pp =
-        (ClassProgram *)program;
-
-    if (
-        pp->getDimension() >
-        255
-        )
+    if (pp->getDimension() >255)
     {
-        MAX_RULE =
-            pp->getDimension() +
-            1;
+        MAX_RULE =pp->getDimension() +1;
     }
 
-    for (
-        int i = 0;
-        i < genome_count;
-        i++
-        )
+    for (int i = 0;i < genome_count;i++)
     {
-        genome[i] =
-            new int[
-                genome_size
-        ];
+        genome[i] =new int[genome_size];
+        children[i] =new int[genome_size];
 
-        children[i] =
-            new int[
-                genome_size
-        ];
-
-        for (
-            int j = 0;
-            j < genome_size;
-            j++
-            )
+        for (int j = 0;j < genome_size;j++)
         {
-            g[j] =
-                genome[i][j] =
-                rand() %
-                MAX_RULE;
+            g[j] =genome[i][j] =rand() %MAX_RULE;
         }
     }
 
-    fitness_array =
-        new double[
-            genome_count
-    ];
+    fitness_array =new double[genome_count];
 }
 
 // ============================================================
@@ -303,37 +204,19 @@ Population::Population(
 void Population::reset()
 {
     generation = 0;
-    previousBestFitness =
-        -1e+100;
-
-    generationsWithoutImprovement =
-        0;
-    for (
-        int i = 0;
-        i < genome_count;
-        i++
-        )
+    previousBestFitness =-1e+100;
+    generationsWithoutImprovement =0;
+    for (int i = 0;i < genome_count;i++)
     {
-        for (
-            int j = 0;
-            j < genome_size;
-            j++
-            )
+        for (int j = 0;j < genome_size;j++)
         {
-            genome[i][j] =
-                rand() %
-                MAX_RULE;
+            genome[i][j] =rand() %MAX_RULE;
         }
     }
 
-    for (
-        int i = 0;
-        i < genome_count;
-        i++
-        )
+    for (int i = 0;i < genome_count;i++)
     {
-        fitness_array[i] =
-            -1e+100;
+        fitness_array[i] =-1e+100;
     }
 }
 
@@ -353,12 +236,9 @@ void Population::reset()
 //     LARGER FITNESS IS BETTER.
 // ============================================================
 
-double Population::fitness(
-    vector<int> &g
-    )
+double Population::fitness(vector<int> &g)
 {
-    return
-        -program->fitness(g);
+    return -program->fitness(g);
 }
 
 // ============================================================
@@ -367,59 +247,23 @@ double Population::fitness(
 
 void Population::select()
 {
-    int itemp[
-        genome_size
-    ];
+    int itemp[genome_size];
 
-    for (
-        int i = 0;
-        i < genome_count;
-        i++
-        )
+    for (int i = 0;i < genome_count;i++)
     {
-        for (
-            int j = 0;
-            j <
-            genome_count - 1;
-            j++
-            )
+        for (int j = 0;j <genome_count - 1;j++)
         {
-            if (
-                fitness_array[j + 1] >
-                fitness_array[j]
-                )
+            if (fitness_array[j + 1] >fitness_array[j])
             {
                 double dtemp;
+                dtemp =fitness_array[j];
+                fitness_array[j] =fitness_array[j + 1];
+                fitness_array[j + 1] =dtemp;
 
-                dtemp =
-                    fitness_array[j];
+                memcpy(itemp,genome[j],genome_size *sizeof(int));
+                memcpy(genome[j],genome[j + 1],genome_size *sizeof(int));
 
-                fitness_array[j] =
-                    fitness_array[j + 1];
-
-                fitness_array[j + 1] =
-                    dtemp;
-
-                memcpy(
-                    itemp,
-                    genome[j],
-                    genome_size *
-                        sizeof(int)
-                    );
-
-                memcpy(
-                    genome[j],
-                    genome[j + 1],
-                    genome_size *
-                        sizeof(int)
-                    );
-
-                memcpy(
-                    genome[j + 1],
-                    itemp,
-                    genome_size *
-                        sizeof(int)
-                    );
+                memcpy(genome[j + 1],itemp,genome_size *sizeof(int));
             }
         }
     }
@@ -432,170 +276,55 @@ void Population::select()
 void Population::crossover()
 {
     int parent[2];
-
-    int nchildren =
-        static_cast<int>(
-            (
-                1.0 -
-                selection_rate
-                ) *
-            genome_count
-            );
-
-    if (
-        !(nchildren % 2 == 0)
-        )
+    int nchildren =static_cast<int>((1.0 -selection_rate) *genome_count);
+    if (!(nchildren % 2 == 0))
     {
         nchildren++;
     }
-
-    const int tournament_size =
-        (
-            genome_count <= 100
-            )
-            ?
-            4
-            :
-            20;
-
+    const int tournament_size =(genome_count <= 100)?4:20;
     int count_children = 0;
 
     while (1)
     {
-        for (
-            int i = 0;
-            i < 2;
-            i++
-            )
+        for (int i = 0;i < 2;i++)
         {
-            double max_fitness =
-                -1e+10;
-
-            int max_index =
-                -1;
-
+            double max_fitness =-1e+10;
+            int max_index =-1;
             int r;
-
-            for (
-                int j = 0;
-                j < tournament_size;
-                j++
-                )
+            for (int j = 0;j < tournament_size;j++)
             {
-                r =
-                    rand() %
-                    genome_count;
-
-                if (
-                    j == 0 ||
-                    fitness_array[r] >
-                        max_fitness
-                    )
+                r =rand() %genome_count;
+                if (j == 0 ||fitness_array[r] >max_fitness)
                 {
-                    max_index =
-                        r;
-
-                    max_fitness =
-                        fitness_array[r];
+                    max_index =r;
+                    max_fitness =fitness_array[r];
                 }
             }
-
-            parent[i] =
-                max_index;
+            parent[i] =max_index;
         }
-
         int pt1;
+        pt1 =rand() %genome_size;
+        memcpy(children[count_children],genome[parent[0]],pt1 *sizeof(int));
 
-        pt1 =
-            rand() %
-            genome_size;
+        memcpy(&children[count_children][pt1],&genome[parent[1]][pt1],(genome_size -pt1) *sizeof(int));
 
-        memcpy(
-            children[
-                count_children
-        ],
-            genome[
-                parent[0]
-        ],
-            pt1 *
-                sizeof(int)
-            );
+        memcpy(children[count_children +1],genome[parent[1]],pt1 *sizeof(int));
 
-        memcpy(
-            &children[
-                count_children
-        ][pt1],
-            &genome[
-                parent[1]
-        ][pt1],
-            (
-                genome_size -
-                pt1
-                ) *
-                sizeof(int)
-            );
+        memcpy(&children[count_children +1][pt1],&genome[parent[0]][pt1],(genome_size -pt1) *sizeof(int));
 
-        memcpy(
-            children[
-                count_children +
-                1
-        ],
-            genome[
-                parent[1]
-        ],
-            pt1 *
-                sizeof(int)
-            );
-
-        memcpy(
-            &children[
-                count_children +
-                1
-        ][pt1],
-            &genome[
-                parent[0]
-        ][pt1],
-            (
-                genome_size -
-                pt1
-                ) *
-                sizeof(int)
-            );
-
-        count_children +=
-            2;
-
-        if (
-            count_children >=
-            nchildren
-            )
+        count_children +=2;
+        if (count_children >=nchildren)
         {
             break;
         }
     }
 
     vector<int> g;
+    g.resize(genome_size);
 
-    g.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < nchildren;
-        i++
-        )
+    for (int i = 0;i < nchildren;i++)
     {
-        memcpy(
-            genome[
-                genome_count -
-                i -
-                1
-        ],
-            children[i],
-            genome_size *
-                sizeof(int)
-            );
+        memcpy(genome[genome_count -i -1],children[i],genome_size *sizeof(int));
     }
 }
 
@@ -603,9 +332,7 @@ void Population::crossover()
 // ELITISM
 // ============================================================
 
-void Population::setElitism(
-    int s
-    )
+void Population::setElitism(int s)
 {
     elitism = s;
 }
@@ -616,44 +343,18 @@ void Population::setElitism(
 
 void Population::mutate()
 {
-    int start =
-        elitism *
-        static_cast<int>(
-            genome_count *
-            selection_rate
-            );
+    int start =elitism *static_cast<int>(genome_count *selection_rate);
+    start =elitism;
+    start =1;
 
-    start =
-        elitism;
-
-    start =
-        1;
-
-    for (
-        int i = start;
-        i < genome_count;
-        i++
-        )
+    for (int i = start;i < genome_count;i++)
     {
-        for (
-            int j = 0;
-            j < genome_size;
-            j++
-            )
+        for (int j = 0;j < genome_size;j++)
         {
-            double r =
-                rand() *
-                1.0 /
-                RAND_MAX;
-
-            if (
-                r <
-                mutation_rate
-                )
+            double r =rand() *1.0 /RAND_MAX;
+            if (r <mutation_rate)
             {
-                genome[i][j] =
-                    rand() %
-                    MAX_RULE;
+                genome[i][j] =rand() %MAX_RULE;
             }
         }
     }
@@ -666,57 +367,26 @@ void Population::mutate()
 void Population::calcFitnessArray()
 {
     vector<int> g;
+    g.resize(genome_size);
 
-    g.resize(
-        genome_size
-        );
+    double dmin =1e+100;
 
-    double dmin =
-        1e+100;
-
-    for (
-        int i = 0;
-        i < genome_count;
-        i++
-        )
+    for (int i = 0;i < genome_count;i++)
     {
-        for (
-            int j = 0;
-            j < genome_size;
-            j++
-            )
+        for (int j = 0;j < genome_size;j++)
         {
-            g[j] =
-                genome[i][j];
+            g[j] =genome[i][j];
         }
 
-        fitness_array[i] =
-            fitness(g);
+        fitness_array[i] =fitness(g);
 
-        if (
-            fabs(
-                fitness_array[i]
-                ) < dmin
-            )
+        if (fabs(fitness_array[i]) < dmin)
         {
-            dmin =
-                fabs(
-                    fitness_array[i]
-                    );
+            dmin =fabs(fitness_array[i]);
         }
-
-        if (
-            (i + 1) %
-                50 ==
-            0
-            )
+        if ((i + 1) %50 ==0)
         {
-            printf(
-                " %d:%.5lg ",
-                i + 1,
-                dmin
-                );
-
+            printf(" %d:%.5lg ",i + 1,dmin);
             fflush(stdout);
         }
     }
@@ -753,10 +423,9 @@ int Population::getSize() const
 void Population::setCrossMethod(string method)
 {
     if(
-        method == "standard" ||
-        method == "targeted" ||
-        method == "targetedWorst"
-        )
+        method == "standard"
+        ||method == "targeted"
+        ||method == "targetedWorst")
     {
         crossMethod = method;
     }
@@ -764,8 +433,7 @@ void Population::setCrossMethod(string method)
 
 void Population::setTargetedCrossIterations(int n)
 {
-    if(n > 0)
-        targetedCrossIterations = n;
+    if(n > 0)targetedCrossIterations = n;
 }
 
 void Population::setTargetedCrossEliteFraction(double x)
@@ -783,39 +451,23 @@ void Population::setTargetedCrossMaxBlock(int n)
 // TARGETED SEMANTIC LOCAL CROSSOVER
 // ============================================================
 
-void Population::targetedCrossItem(
-    int pos,
-    int iterations
-    )
+void Population::targetedCrossItem(int pos,int iterations)
 {
-    if(
-        pos < 0 ||
-        pos >= genome_count
-        )
-        return;
+    if(pos < 0 ||pos >= genome_count)return;
+    if(iterations <= 0)return;
+    ClassProgram *p =(ClassProgram *)program;
 
-    if(iterations <= 0)
-        return;
-
-    ClassProgram *p =
-        (ClassProgram *)program;
-
-    if(p == nullptr)
-        return;
+    if(p == nullptr) return;
 
     // --------------------------------------------------------
     // Current chromosome
     // --------------------------------------------------------
 
-    vector<int> current(
-        genome_size
-        );
+    vector<int> current(genome_size);
 
-    for(int i=0;i<genome_size;i++)
-        current[i] = genome[pos][i];
+    for(int i=0;i<genome_size;i++)current[i] = genome[pos][i];
 
-    double bestFitness =
-        fitness(current);
+    double bestFitness =fitness(current);
 
     // --------------------------------------------------------
     // Elite donor pool
@@ -824,36 +476,21 @@ void Population::targetedCrossItem(
     // --------------------------------------------------------
 
     int eliteCount =
-        static_cast<int>(
-            targetedCrossEliteFraction *
-            genome_count
-            );
+        static_cast<int>(targetedCrossEliteFraction *genome_count);
 
-    if(eliteCount < 2)
-        eliteCount = 2;
-
-    if(eliteCount > genome_count)
-        eliteCount = genome_count;
+    if(eliteCount < 2)eliteCount = 2;
+    if(eliteCount > genome_count)eliteCount = genome_count;
 
     int accepted = 0;
 
     printf(
-        "TARGETED_CROSS[%d] START fitness=%.10lf\n",
-        pos,
-        bestFitness
-        );
-
+        "TARGETED_CROSS[%d] START fitness=%.10lf\n",pos,bestFitness);
     fflush(stdout);
-
     // ========================================================
     // TRIALS
     // ========================================================
 
-    for(
-        int trial=0;
-        trial<iterations;
-        trial++
-        )
+    for(int trial=0;trial<iterations;trial++)
     {
         // ----------------------------------------------------
         // Target trace
@@ -861,13 +498,8 @@ void Population::targetedCrossItem(
 
         vector<CodonTrace> targetTrace;
 
-        p->getCodonTrace(
-            current,
-            targetTrace
-            );
-
-        if(targetTrace.empty())
-            break;
+        p->getCodonTrace(current,targetTrace);
+        if(targetTrace.empty())break;
 
         // ----------------------------------------------------
         // Keep useful semantic entries only
@@ -889,18 +521,14 @@ void Population::targetedCrossItem(
             }
         }
 
-        if(usableTarget.empty())
-            break;
+        if(usableTarget.empty())break;
 
         // ----------------------------------------------------
         // Pick semantic point in target
         // ----------------------------------------------------
 
         const CodonTrace targetEntry =
-            usableTarget[
-                rand() %
-                usableTarget.size()
-        ];
+            usableTarget[rand() %usableTarget.size()];
 
         // ----------------------------------------------------
         // Pick donor from elite population
@@ -910,9 +538,7 @@ void Population::targetedCrossItem(
 
         for(int retry=0;retry<20;retry++)
         {
-            int d =
-                rand() %
-                eliteCount;
+            int d =rand() %eliteCount;
 
             if(d != pos)
             {
@@ -921,12 +547,9 @@ void Population::targetedCrossItem(
             }
         }
 
-        if(donorPos < 0)
-            continue;
+        if(donorPos < 0)continue;
 
-        vector<int> donor(
-            genome_size
-            );
+        vector<int> donor(genome_size);
 
         for(int i=0;i<genome_size;i++)
             donor[i] = genome[donorPos][i];
@@ -937,13 +560,9 @@ void Population::targetedCrossItem(
 
         vector<CodonTrace> donorTrace;
 
-        p->getCodonTrace(
-            donor,
-            donorTrace
-            );
+        p->getCodonTrace(donor,donorTrace);
 
-        if(donorTrace.empty())
-            continue;
+        if(donorTrace.empty()) continue;
 
         // ----------------------------------------------------
         // Find donor entries with SAME semantic type
@@ -953,23 +572,16 @@ void Population::targetedCrossItem(
 
         for(const CodonTrace &e : donorTrace)
         {
-            if(
-                e.type ==
-                targetEntry.type
-                )
+            if(e.type ==targetEntry.type)
             {
                 compatible.push_back(e);
             }
         }
 
-        if(compatible.empty())
-            continue;
+        if(compatible.empty()) continue;
 
         const CodonTrace donorEntry =
-            compatible[
-                rand() %
-                compatible.size()
-        ];
+            compatible[rand() %compatible.size()];
 
         if(
             targetEntry.genomePos < 0 ||
@@ -983,11 +595,9 @@ void Population::targetedCrossItem(
         // DETERMINE SMALL SEMANTIC BLOCK LENGTH
         // ====================================================
 
-        int targetNext =
-            genome_size;
+        int targetNext =genome_size;
 
-        int donorNext =
-            genome_size;
+        int donorNext =genome_size;
 
         /*
          * Find next active semantic codon after selected
@@ -997,108 +607,65 @@ void Population::targetedCrossItem(
 
         for(const CodonTrace &e : targetTrace)
         {
-            if(
-                e.genomePos >
-                    targetEntry.genomePos &&
-                e.genomePos <
-                    targetNext
-                )
+            if(e.genomePos >targetEntry.genomePos
+                && e.genomePos <targetNext)
             {
-                targetNext =
-                    e.genomePos;
+                targetNext =e.genomePos;
             }
         }
 
         for(const CodonTrace &e : donorTrace)
         {
-            if(
-                e.genomePos >
-                    donorEntry.genomePos &&
-                e.genomePos <
-                    donorNext
-                )
+            if(e.genomePos >donorEntry.genomePos &&
+                e.genomePos <donorNext)
             {
-                donorNext =
-                    e.genomePos;
+                donorNext =e.genomePos;
             }
         }
 
         int targetLength =
-            targetNext -
-            targetEntry.genomePos;
+            targetNext -targetEntry.genomePos;
 
         int donorLength =
-            donorNext -
-            donorEntry.genomePos;
+            donorNext -donorEntry.genomePos;
 
-        int blockLength =
-            min(
-                targetLength,
-                donorLength
-                );
+        int blockLength = min(targetLength,donorLength);
 
-        blockLength =
-            min(
-                blockLength,
-                targetedCrossMaxBlock
-                );
+        blockLength =min(blockLength,targetedCrossMaxBlock);
 
-        if(blockLength < 1)
-            blockLength = 1;
+        if(blockLength < 1) blockLength = 1;
 
         /*
          * Do not cross genome boundaries.
          */
 
         blockLength =
-            min(
-                blockLength,
-                genome_size -
-                    targetEntry.genomePos
-                );
+            min(blockLength,genome_size -targetEntry.genomePos);
 
         blockLength =
-            min(
-                blockLength,
-                genome_size -
-                    donorEntry.genomePos
-                );
+            min(blockLength,genome_size -donorEntry.genomePos);
 
-        if(blockLength <= 0)
-            continue;
+        if(blockLength <= 0) continue;
 
         // ====================================================
         // BUILD CANDIDATE
         // ====================================================
 
-        vector<int> candidate =
-            current;
+        vector<int> candidate =current;
 
-        for(
-            int k=0;
-            k<blockLength;
-            k++
-            )
+        for(int k=0;k<blockLength;k++)
         {
-            candidate[
-                targetEntry.genomePos + k
-            ] =
-                donor[
-                    donorEntry.genomePos + k
-            ];
+            candidate[targetEntry.genomePos + k] =
+                donor[donorEntry.genomePos + k];
         }
 
-        double candidateFitness =
-            fitness(candidate);
+        double candidateFitness =fitness(candidate);
 
         // ====================================================
         // ACCEPT ONLY IMPROVEMENT
         // ====================================================
 
-        if(
-            candidateFitness >
-            bestFitness
-            )
+        if(candidateFitness >bestFitness)
         {
             printf(
                 "TARGETED_CROSS[%d] "
@@ -1124,12 +691,8 @@ void Population::targetedCrossItem(
 
             fflush(stdout);
 
-            current =
-                candidate;
-
-            bestFitness =
-                candidateFitness;
-
+            current =candidate;
+            bestFitness =candidateFitness;
             accepted++;
         }
     }
@@ -1138,11 +701,9 @@ void Population::targetedCrossItem(
     // COPY BACK
     // ========================================================
 
-    for(int i=0;i<genome_size;i++)
-        genome[pos][i] = current[i];
+    for(int i=0;i<genome_size;i++) genome[pos][i] = current[i];
 
-    fitness_array[pos] =
-        bestFitness;
+    fitness_array[pos] = bestFitness;
 
     printf(
         "TARGETED_CROSS[%d] END "
@@ -1160,53 +721,30 @@ void Population::targetedCrossItem(
 // TARGETED SEMANTIC CROSSOVER FOR WORST CLASS
 // ============================================================
 
-void Population::targetedCrossWorstItem(
-    int pos,
-    int iterations
-    )
+void Population::targetedCrossWorstItem(int pos,int iterations)
 {
-    if(
-        pos < 0 ||
-        pos >= genome_count
-        )
-        return;
+    if(pos < 0 ||pos >= genome_count)return;
+    if(iterations <= 0)return;
+    ClassProgram *p =(ClassProgram *)program;
 
-    if(iterations <= 0)
-        return;
+    if(p == nullptr)return;
 
-    ClassProgram *p =
-        (ClassProgram *)program;
+    const int classCount =p->getClass();
 
-    if(p == nullptr)
-        return;
+    if(classCount <= 1)return;
 
-    const int classCount =
-        p->getClass();
+    vector<int> current(genome_size);
 
-    if(classCount <= 1)
-        return;
+    for(int i=0;i<genome_size;i++)current[i] = genome[pos][i];
 
-    vector<int> current(
-        genome_size
-        );
-
-    for(int i=0;i<genome_size;i++)
-        current[i] = genome[pos][i];
-
-    double bestFitness =
-        fitness(current);
+    double bestFitness =fitness(current);
 
     int eliteCount =
-        static_cast<int>(
-            targetedCrossEliteFraction *
-            genome_count
-            );
+        static_cast<int>(targetedCrossEliteFraction *genome_count);
 
-    if(eliteCount < 2)
-        eliteCount = 2;
+    if(eliteCount < 2)eliteCount = 2;
 
-    if(eliteCount > genome_count)
-        eliteCount = genome_count;
+    if(eliteCount > genome_count) eliteCount = genome_count;
 
     int accepted = 0;
 
@@ -1219,11 +757,7 @@ void Population::targetedCrossWorstItem(
 
     fflush(stdout);
 
-    for(
-        int trial=0;
-        trial<iterations;
-        trial++
-        )
+    for(int trial=0;trial<iterations;trial++)
     {
         // ====================================================
         // FIND CURRENT WORST CLASS
@@ -1231,81 +765,42 @@ void Population::targetedCrossWorstItem(
 
         vector<double> classError;
 
-        p->getErrorPerClass(
-            current,
-            classError
-            );
+        p->getErrorPerClass(current,classError);
 
-        if(classError.empty())
-            break;
+        if(classError.empty()) break;
 
         int worstClass = -1;
+        double worstError =-1.0;
 
-        double worstError =
-            -1.0;
-
-        for(
-            int c=0;
-            c<(int)classError.size();
-            c++
-            )
+        for(int c=0;c<(int)classError.size();c++)
         {
-            if(
-                classError[c] >
-                worstError
-                )
+            if(classError[c] >worstError)
             {
-                worstError =
-                    classError[c];
-
-                worstClass =
-                    c;
+                worstError =classError[c];
+                worstClass =c;
             }
         }
 
-        if(worstClass < 0)
-            break;
+        if(worstClass < 0) break;
 
         // ====================================================
         // CLASS SEGMENT
         // ====================================================
 
-        const int explicitRules =
-            classCount - 1;
-
-        const int partSize =
-            genome_size /
-            explicitRules;
-
-        bool wholeGenome =
-            (
-                worstClass >=
-                explicitRules
-                );
+        const int explicitRules = classCount - 1;
+        const int partSize =genome_size /explicitRules;
+        bool wholeGenome =(worstClass >=explicitRules);
 
         int segmentStart = 0;
-        int segmentEnd =
-            genome_size;
-
+        int segmentEnd =genome_size;
         if(!wholeGenome)
         {
-            segmentStart =
-                worstClass *
-                partSize;
+            segmentStart = worstClass *partSize;
+            segmentEnd =(worstClass + 1) *partSize;
 
-            segmentEnd =
-                (
-                    worstClass + 1
-                    ) *
-                partSize;
-
-            if(
-                worstClass ==
-                explicitRules - 1
-                )
+            if(worstClass ==explicitRules - 1)
             {
-                segmentEnd =
-                    genome_size;
+                segmentEnd =genome_size;
             }
         }
 
@@ -1314,14 +809,9 @@ void Population::targetedCrossWorstItem(
         // ====================================================
 
         vector<CodonTrace> targetTrace;
-
-        p->getCodonTrace(
-            current,
-            targetTrace
-            );
+        p->getCodonTrace(current,targetTrace);
 
         vector<CodonTrace> usableTarget;
-
         for(const CodonTrace &e : targetTrace)
         {
             bool semantic =
@@ -1333,31 +823,21 @@ void Population::targetedCrossWorstItem(
                     e.type == CodonType::CONSTANT
                     );
 
-            if(!semantic)
-                continue;
+            if(!semantic) continue;
 
             if(
                 wholeGenome ||
-                (
-                    e.genomePos >=
-                        segmentStart &&
-                    e.genomePos <
-                        segmentEnd
-                    )
-                )
+                (e.genomePos >=segmentStart &&
+                    e.genomePos <segmentEnd))
             {
                 usableTarget.push_back(e);
             }
         }
 
-        if(usableTarget.empty())
-            continue;
+        if(usableTarget.empty()) continue;
 
         const CodonTrace targetEntry =
-            usableTarget[
-                rand() %
-                usableTarget.size()
-        ];
+            usableTarget[rand() %usableTarget.size()];
 
         // ====================================================
         // ELITE DONOR
@@ -1367,9 +847,7 @@ void Population::targetedCrossWorstItem(
 
         for(int retry=0;retry<20;retry++)
         {
-            int d =
-                rand() %
-                eliteCount;
+            int d =rand() %eliteCount;
 
             if(d != pos)
             {
@@ -1378,23 +856,16 @@ void Population::targetedCrossWorstItem(
             }
         }
 
-        if(donorPos < 0)
-            continue;
+        if(donorPos < 0) continue;
 
-        vector<int> donor(
-            genome_size
-            );
+        vector<int> donor(genome_size);
 
         for(int i=0;i<genome_size;i++)
-            donor[i] =
-                genome[donorPos][i];
+            donor[i] =genome[donorPos][i];
 
         vector<CodonTrace> donorTrace;
 
-        p->getCodonTrace(
-            donor,
-            donorTrace
-            );
+        p->getCodonTrace(donor,donorTrace);
 
         // ====================================================
         // COMPATIBLE DONOR POSITIONS
@@ -1407,10 +878,7 @@ void Population::targetedCrossWorstItem(
 
         for(const CodonTrace &e : donorTrace)
         {
-            if(
-                e.type !=
-                targetEntry.type
-                )
+            if(e.type !=targetEntry.type)
             {
                 continue;
             }
@@ -1418,36 +886,24 @@ void Population::targetedCrossWorstItem(
             if(
                 wholeGenome ||
                 (
-                    e.genomePos >=
-                        segmentStart &&
-                    e.genomePos <
-                        segmentEnd
-                    )
-                )
+                    e.genomePos >=segmentStart &&
+                    e.genomePos <segmentEnd))
             {
                 compatible.push_back(e);
             }
         }
 
-        if(compatible.empty())
-            continue;
+        if(compatible.empty()) continue;
 
         const CodonTrace donorEntry =
-            compatible[
-                rand() %
-                compatible.size()
-        ];
+            compatible[rand() %compatible.size()];
 
         // ====================================================
         // FIND BLOCK EXTENT
         // ====================================================
 
         int targetNext =
-            wholeGenome
-                ?
-                genome_size
-                :
-                segmentEnd;
+            wholeGenome?genome_size:segmentEnd;
 
         int donorNext =
             wholeGenome
