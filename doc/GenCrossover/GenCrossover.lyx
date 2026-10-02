@@ -117,6 +117,22 @@
 % \end{itemize}
 %}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{algorithm}
+\usepackage{listings}
+\usepackage{float}
+
+\lstdefinestyle{bnfstyle}{
+    basicstyle=\ttfamily\small,
+    columns=fullflexible,
+    keepspaces=true,
+    numbers=none,
+    frame=none,
+    breaklines=true,
+    showstringspaces=false,
+    aboveskip=0.3em,
+    belowskip=0.3em,
+    xleftmargin=0em
+}
 \end_preamble
 \options journal,article,submit,moreauthors
 \use_default_options false
@@ -348,12 +364,1299 @@ Grammatical Evolution;
 Introduction
 \end_layout
 
+\begin_layout Standard
+Genetic Algorithms (GAs) are stochastic optimization methods whose foundations can be traced back to the pioneering work of Holland 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "holland"
+literal "false"
+
+\end_inset
+
+.
+ They constitute an important class of evolutionary computation techniques 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ec_review"
+literal "false"
+
+\end_inset
+
+,
+ drawing inspiration from the principles of natural evolution.
+ A typical Genetic Algorithm starts with a population of candidate solutions to the optimization problem under consideration.
+ This population is progressively improved over successive generations through evolutionary operators such as selection,
+ crossover,
+ and mutation 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "gen1,gen2,gen3"
+literal "false"
+
+\end_inset
+
+.
+ These operators enable the exploration of the search space while promoting the propagation of promising solutions throughout the population.
+ Due to their flexibility and ability to address complex optimization problems without requiring explicit gradient information,
+ Genetic Algorithms have been successfully applied across a broad range of domains.
+ Representative applications include network optimization 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ga_problem1"
+literal "false"
+
+\end_inset
+
+,
+ robotics 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ga_problem2,ga_problem3"
+literal "false"
+
+\end_inset
+
+,
+ energy-related problems 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ga_problem4,ga_problem5"
+literal "false"
+
+\end_inset
+
+,
+ medical applications 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Doewes,Choudhury"
+literal "false"
+
+\end_inset
+
+,
+ and agricultural problems 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Chen"
+literal "false"
+
+\end_inset
+
+,
+ among many others.
+\end_layout
+
+\begin_layout Standard
+Grammatical Evolution (GE) 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge1"
+literal "false"
+
+\end_inset
+
+ is a specialized form of Genetic Algorithms that employs integer-valued chromosomes.
+ Each chromosome consists of a sequence of integer codons that are used to select among the production rules defined by a given Backus–Naur Form (BNF) grammar 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "bnf1"
+literal "false"
+
+\end_inset
+
+.
+ Through a genotype-to-phenotype mapping process,
+ these codons guide the derivation of syntactically valid expressions or programs.
+ The primary objective of Grammatical Evolution is therefore to evolve programs or expressions in a target language whose syntax is specified by the underlying grammar.
+\end_layout
+
+\begin_layout Standard
+Grammatical Evolution has been successfully applied to a wide range of real-world problems across diverse scientific and engineering domains.
+ Representative applications include data fitting 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_program1,ge_program2"
+literal "false"
+
+\end_inset
+
+,
+ credit classification 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_credit"
+literal "false"
+
+\end_inset
+
+,
+ network intrusion detection 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_intrusion"
+literal "false"
+
+\end_inset
+
+,
+ the solution of differential equations 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_de"
+literal "false"
+
+\end_inset
+
+,
+ drinking water quality monitoring 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_water"
+literal "false"
+
+\end_inset
+
+,
+ and the automatic construction of optimization methods 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_ant"
+literal "false"
+
+\end_inset
+
+.
+ GE has also been employed in trigonometric problems 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_trig"
+literal "false"
+
+\end_inset
+
+,
+ automatic music composition 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_music"
+literal "false"
+
+\end_inset
+
+,
+ neural network design 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_nn,ge_nn2"
+literal "false"
+
+\end_inset
+
+,
+ and computer games 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_pacman,ge_supermario"
+literal "false"
+
+\end_inset
+
+.
+ Additional applications can be found in energy demand modeling 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_energy"
+literal "false"
+
+\end_inset
+
+,
+ combinatorial optimization 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_comb"
+literal "false"
+
+\end_inset
+
+,
+ security and cryptography 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ge_crypt"
+literal "false"
+
+\end_inset
+
+,
+ automatic decision tree construction 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_decision"
+literal "false"
+
+\end_inset
+
+,
+ analog circuit design 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_analog"
+literal "false"
+
+\end_inset
+
+,
+ taxonomy discovery from Wikipedia 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_wikipedia"
+literal "false"
+
+\end_inset
+
+,
+ algorithmic trading 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_trading"
+literal "false"
+
+\end_inset
+
+,
+ bioinformatics 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_bio"
+literal "false"
+
+\end_inset
+
+,
+ and human glycemia modeling 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_glykemia"
+literal "false"
+
+\end_inset
+
+.
+ The diversity of these applications demonstrates the flexibility of Grammatical Evolution as a general-purpose evolutionary framework for addressing complex problems in different domains.
+\end_layout
+
+\begin_layout Standard
+Among the techniques that have been proposed based on Grammatical Evolution is a recently introduced rule construction method 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "genclassMain"
+literal "false"
+
+\end_inset
+
+,
+ for which a software implementation 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "genclassSoftx"
+literal "false"
+
+\end_inset
+
+ is also publicly available through the application's website 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://github.com/itsoulos/GenClass/
+\end_layout
+
+\end_inset
+
+(accessed on 2 October 2026).
+ This method automatically constructs programs for data classification using a representation that closely resembles the C programming language.
+ Consequently,
+ the generated classification programs are human-readable and can be easily inspected and interpreted,
+ providing a considerable advantage in applications where model interpretability is important.
+ The rule construction method has been successfully applied to a variety of real-world classification problems,
+ including pollution-related applications
+\begin_inset CommandInset citation
+LatexCommand citep
+key "genclassPollution"
+literal "false"
+
+\end_inset
+
+ and network-related problems 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "genClassNetwork"
+literal "false"
+
+\end_inset
+
+,
+ among others.
+\end_layout
+
+\begin_layout Standard
+The aforementioned method employs Grammatical Evolution to evolve classification programs that minimize the classification error on a given dataset.
+ More specifically,
+ the classification error can be defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+E_{C}(C)=100\times\frac{1}{M}\sum^{M}_{i=1}\mathbb{I}\left(C\left(\mathbf{x}_{i}\right)\neq y_{i}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where the corresponding training set is defined as 
+\begin_inset Formula $T=\left\{ (\mathbf{x}_{1},y_{1}),(\mathbf{x}_{2},y_{2}),\ldots,(\mathbf{x}_{M},y_{M})\right\} .$
+\end_inset
+
+ Here,
+ 
+\begin_inset Formula $M$
+\end_inset
+
+ denotes the number of patterns in the training set,
+ 
+\begin_inset Formula $\mathbf{x}_{i}$
+\end_inset
+
+ represents the input feature vector of the (
+\begin_inset Formula $i$
+\end_inset
+
+)-th pattern,
+ and 
+\begin_inset Formula $y_{i}$
+\end_inset
+
+ denotes its corresponding target class label.
+ The function 
+\begin_inset Formula $C(\mathbf{x}_{i})$
+\end_inset
+
+ represents the class predicted by the classification program generated through Grammatical Evolution,
+ while (
+\begin_inset Formula $\mathbb{I}(\cdot)$
+\end_inset
+
+) is the indicator function,
+ which takes the value 1 when its argument is true and 0 otherwise.
+ Therefore,
+ 
+\begin_inset Formula $E_{C}(C)$
+\end_inset
+
+ expresses the percentage of training patterns that are incorrectly classified by the generated program.
+\end_layout
+
+\begin_layout Standard
+Although the aforementioned technique has demonstrated particularly promising performance,
+ even when applied to challenging data classification problems,
+ it still exhibits several limitations that may adversely affect the effectiveness of the evolutionary search process.
+ One of the most important issues is premature convergence,
+ where the population rapidly loses genetic diversity and converges before sufficiently exploring the search space.
+ As a consequence,
+ potentially useful genetic material may disappear from the population,
+ reducing the ability of the evolutionary process to discover alternative and potentially more effective classification rules.
+\end_layout
+
+\begin_layout Standard
+Another important limitation is the tendency of the evolutionary search to become trapped in local minima of the classification error function,
+ or,
+ more generally,
+ to stagnate in suboptimal regions of the search space.
+ In such cases,
+ the evolutionary operators may fail to generate sufficiently diverse or beneficial modifications to the existing chromosomes,
+ preventing the algorithm from escaping these regions and discovering solutions with lower classification error.
+ These limitations become particularly important in complex classification problems characterized by large or highly irregular search spaces,
+ where effective exploration and preservation of population diversity are essential for obtaining high-quality classification rules.
+ Consequently,
+ improving the search capabilities of the method and enhancing the exchange of useful genetic information among candidate solutions constitute important directions for further improving its classification performance.
+\end_layout
+
+\begin_layout Standard
+In the present work,
+ advanced crossover techniques are introduced in order to alleviate the aforementioned limitations and improve the search capabilities of the original method.
+ These techniques are applied at each generation to a relatively small number of chromosomes selected randomly from the genetic population.
+ Restricting their application to a subset of the population allows the proposed operators to enhance the exploration of the search space without substantially increasing the computational cost of the evolutionary process or excessively disrupting the population structure.
+\end_layout
+
+\begin_layout Standard
+The randomly selected chromosomes are subjected to additional crossover operations designed to generate new combinations of genetic material and,
+ consequently,
+ potentially more effective classification programs.
+ The introduction of such combinations can increase population diversity and provide the evolutionary process with additional opportunities to escape from suboptimal regions of the search space.
+ This mechanism is particularly important when the population has begun to converge and the conventional evolutionary operators are no longer able to produce sufficiently diverse candidate solutions.
+\end_layout
+
+\begin_layout Standard
+Furthermore,
+ the random selection of chromosomes ensures that the additional crossover operations are not systematically restricted to a particular subset of the population.
+ In this way,
+ different candidate solutions can participate in the enhanced crossover process during successive generations,
+ while the majority of the population continues to evolve according to the standard evolutionary procedure.
+ The proposed strategy therefore attempts to achieve a balance between exploration and exploitation:
+ it introduces additional diversity and explores new combinations of genetic material,
+ while preserving the evolutionary information already accumulated by the population.
+\end_layout
+
+\begin_layout Standard
+In the present work,
+ three crossover strategies are considered:
+ 
+\series bold
+Standard
+\series default
+,
+ 
+\series bold
+Targeted
+\series default
+ and 
+\series bold
+TargetedWorst
+\series default
+ crossover.
+ Standard crossover follows a purely stochastic strategy,
+ in which the exchanged chromosome regions are selected without exploiting information obtained from the evaluation of the generated classification programs.
+ Targeted crossover,
+ on the other hand,
+ makes use of information collected during the evolutionary process to identify chromosome regions where crossover may be more beneficial.
+ TargetedWorst extends this idea by focusing the crossover operation on regions associated with poorly performing components of the corresponding classification program.
+ Thus,
+ the three strategies represent progressively more informed crossover mechanisms,
+ ranging from purely random recombination to crossover operations guided by the performance of the evolved solutions.
+ A detailed description of each strategy is provided in the following subsections.
+\end_layout
+
+\begin_layout Standard
+The remainder of this article is organized as follows.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Materials-and-Methods"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ introduces the original rule construction method and describes the proposed crossover techniques in detail.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Results"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ presents the classification datasets used in the experimental evaluation,
+ followed by the experimental results and the corresponding statistical analysis.
+ Finally,
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Conclusions"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ summarizes the main findings of the study and outlines the conclusions drawn from the experimental evaluation.
+\end_layout
+
 \begin_layout Section
 Materials and Methods
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Materials-and-Methods"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This section first provides a detailed description of the rule construction method and subsequently introduces the proposed crossover techniques designed to enhance its evolutionary search process.
+\end_layout
+
+\begin_layout Subsection
+The rule construction method
+\end_layout
+
+\begin_layout Standard
+The rule construction method,
+ hereafter referred to as GenClass,
+ generates classification rules expressed in a C-like language according to the BNF grammar presented in Algorithm 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+ref{alg:genclass_bnf}
+\end_layout
+
+\end_inset
+
+.
+ The grammar shown in the algorithm is an extended representation of the original BNF grammar,
+ in which each alternative production rule associated with a non-terminal symbol is assigned a corresponding production index.
+ These indices are subsequently used during the genotype-to-phenotype mapping process to determine the production rules selected by the integer-valued chromosomes of GenClass.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{algorithm}[H]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{BNF grammar employed by the GenClass method.}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{alg:genclass_bnf}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{lstlisting}[style=bnfstyle]
+\end_layout
+
+\begin_layout Plain Layout
+<S> ::= if (<BEXPR>) CLASS=0 else CLASS=1                (0)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<BEXPR> ::= <VARIABLE><BOOLOP><EXPR>                     (0)
+\end_layout
+
+\begin_layout Plain Layout
+          | !(<BEXPR>)                                   (1)
+\end_layout
+
+\begin_layout Plain Layout
+          | <VARIABLE><BOOLOP><EXPR>&<BEXPR>             (2)
+\end_layout
+
+\begin_layout Plain Layout
+          | <VARIABLE><BOOLOP><EXPR>|<BEXPR>             (3)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<BOOLOP> ::= >                                            (0)
+\end_layout
+
+\begin_layout Plain Layout
+           | >=                                           (1)
+\end_layout
+
+\begin_layout Plain Layout
+           | <                                            (2)
+\end_layout
+
+\begin_layout Plain Layout
+           | <=                                           (3)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<EXPR> ::= (<EXPR><BINARYOP><EXPR>)                      (0)
+\end_layout
+
+\begin_layout Plain Layout
+         | <FUNCTION>(<EXPR>)                             (1)
+\end_layout
+
+\begin_layout Plain Layout
+         | <TERMINAL>                                     (2)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<BINARYOP> ::= +                                          (0)
+\end_layout
+
+\begin_layout Plain Layout
+             | -                                          (1)
+\end_layout
+
+\begin_layout Plain Layout
+             | *                                          (2)
+\end_layout
+
+\begin_layout Plain Layout
+             | /                                          (3)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<FUNCTION> ::= sin | cos | exp | log                   (0-3)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<TERMINAL> ::= <VARIABLE>                                 (0)
+\end_layout
+
+\begin_layout Plain Layout
+             | <DIGITLIST>.<DIGITLIST>                    (1)
+\end_layout
+
+\begin_layout Plain Layout
+             | (-<DIGITLIST>.<DIGITLIST>)                 (2)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<VARIABLE> ::= x1 | x2 | ...
+ | xD                      (0-D-1)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<DIGITLIST> ::= <DIGIT>                                   (0)
+\end_layout
+
+\begin_layout Plain Layout
+              | <DIGIT><DIGIT>                            (1)
+\end_layout
+
+\begin_layout Plain Layout
+              | <DIGIT><DIGIT><DIGIT>                     (2)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+<DIGIT> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9    (0-9)
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{algorithm}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The genotype-to-phenotype mapping process employed by GenClass is illustrated in Figure 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{fig:genclass_mapping}
+\end_layout
+
+\end_inset
+
+.
+ Each chromosome consists of a sequence of integer-valued codons,
+ which are sequentially used to select production rules from the BNF grammar.
+ Starting from the initial non-terminal symbol 
+\begin_inset Formula $\langle S\rangle$
+\end_inset
+
+,
+ the mapping process identifies the next non-terminal to be expanded and determines the corresponding production rule according to
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+r=c_{i}\bmod N,
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $c_{i}$
+\end_inset
+
+ denotes the current integer codon,
+ 
+\begin_inset Formula $N$
+\end_inset
+
+ is the number of alternative production rules available for the corresponding non-terminal symbol,
+ and 
+\begin_inset Formula $r$
+\end_inset
+
+ is the index of the selected production.
+ The selected production is then applied and the mapping process proceeds to the next non-terminal symbol using the next chromosome codon.
+ This procedure is repeated until no non-terminal symbols remain and a complete syntactically valid classification program is generated.
+\end_layout
+
+\begin_layout Standard
+As an illustrative example,
+ Fig.~
+\backslash
+ref{fig:genclass_mapping} demonstrates the successive mapping of an integer chromosome to the production rules of Algorithm 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{alg:genclass_bnf}
+\end_layout
+
+\end_inset
+
+.
+ For instance,
+ when the non-terminal 
+\begin_inset Formula $\langle BEXPR\rangle$
+\end_inset
+
+ is expanded,
+ four alternative productions are available.
+ Therefore,
+ for a codon value of 
+\begin_inset Formula $7$
+\end_inset
+
+,
+ production 
+\begin_inset Formula $7\bmod4=3$
+\end_inset
+
+ is selected.
+ Similarly,
+ the remaining codons are successively consumed to expand the resulting non-terminal symbols until the final classification rule is obtained.
+ In this way,
+ the integer-valued genotype is transformed into an executable and human-readable C-like classification program.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename mapping.png
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Illustration of the genotype-to-phenotype mapping process employed by GenClass.
+ Integer-valued codons are sequentially mapped to BNF production rules using the modulo operation until a complete classification program is generated.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:genclass_mapping"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The main steps of the algorithm that produces classification programs are listed subsequently.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Initialization step
+\series default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\series bold
+Initialize
+\series default
+ the Genetic Algorithm parameters:
+ 
+\begin_inset Formula $N_{c}$
+\end_inset
+
+,
+ the population size (number of chromosomes);
+ 
+\begin_inset Formula $N_{g}$
+\end_inset
+
+,
+ the maximum number of generations;
+ 
+\begin_inset Formula $p_{s}$
+\end_inset
+
+,
+ the selection rate;
+ and 
+\begin_inset Formula $p_{m}$
+\end_inset
+
+,
+ the mutation rate.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Generate 
+\series default
+the initial population of 
+\begin_inset Formula $N_{c}$
+\end_inset
+
+ chromosomes,
+ 
+\begin_inset Formula $g_{i},\;i=1,\ldots,N_{c}$
+\end_inset
+
+,
+ where each chromosome consists of a sequence of randomly generated integer-valued codons.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Set
+\series default
+ 
+\begin_inset Formula $k=0$
+\end_inset
+
+,
+ the generation counter.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\series bold
+Fitness calculation step
+\series default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\series bold
+For
+\series default
+ 
+\begin_inset Formula $i=1,\ldots,N_{c}$
+\end_inset
+
+ 
+\series bold
+do
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\series bold
+Map
+\series default
+ each chromosome 
+\begin_inset Formula $g_{i}$
+\end_inset
+
+ to its corresponding classification program
+\begin_inset Formula $C_{i}$
+\end_inset
+
+ through the genotype-to-phenotype mapping process defined by the BNF grammar presented in Algorithm 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{alg:genclass_bnf}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Evaluate
+\series default
+ the generated classification program 
+\begin_inset Formula $C_{i}$
+\end_inset
+
+ on the training set and compute its classification error.
+ The resulting error value,
+ denoted by 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+,
+ is used as the fitness value of the corresponding chromosome 
+\begin_inset Formula $g_{i}$
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\series bold
+End For
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\series bold
+Application of genetic operations
+\series default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\series bold
+Selection
+\series default
+:
+ Rank the chromosomes according to their fitness values in ascending order.
+ The 
+\begin_inset Formula $(1-p_{s})N_{c}$
+\end_inset
+
+ chromosomes with the lowest fitness values are directly transferred to the next generation without modification,
+ while the remaining 
+\begin_inset Formula $p_{s}N_{c}$
+\end_inset
+
+ chromosomes are replaced by new offspring generated through the crossover and mutation operators.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Crossover
+\series default
+:
+ Generate pairs of offspring by applying the one-point crossover operator.
+ For each pair of offspring,
+ denoted as 
+\begin_inset Formula $O_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $O_{2}$
+\end_inset
+
+,
+ two parent chromosomes,
+ 
+\begin_inset Formula $P_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $P_{2}$
+\end_inset
+
+,
+ are selected from the current population using tournament selection.
+ A crossover point is then randomly selected along the chromosomes,
+ and the genetic material located after this point is exchanged between the two parents.
+ Consequently,
+ 
+\begin_inset Formula $O_{1}$
+\end_inset
+
+ inherits the first part of 
+\begin_inset Formula $P_{1}$
+\end_inset
+
+ and the second part of 
+\begin_inset Formula $P_{2}$
+\end_inset
+
+,
+ whereas 
+\begin_inset Formula $O_{2}$
+\end_inset
+
+ inherits the first part of 
+\begin_inset Formula $P_{2}$
+\end_inset
+
+ and the second part of 
+\begin_inset Formula $P_{1}$
+\end_inset
+
+.
+ A graphical illustration of the one-point crossover operation is provided in Figure 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{fig:onePoint}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Mutation
+\series default
+:
+ For each gene
+\begin_inset Formula $g_{i,j}$
+\end_inset
+
+ of chromosome 
+\begin_inset Formula $g_{i}$
+\end_inset
+
+,
+ a random number 
+\begin_inset Formula $r\in[0,1]$
+\end_inset
+
+ is generated.
+ If 
+\begin_inset Formula $r\leq p_{m}$
+\end_inset
+
+,
+ where 
+\begin_inset Formula $p_{m}$
+\end_inset
+
+ denotes the mutation rate,
+ the corresponding gene is replaced by a randomly generated integer value within the predefined range of admissible codon values.
+ Otherwise,
+ the gene remains unchanged.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\series bold
+Termination check step
+\series default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\series bold
+Set
+\series default
+ 
+\begin_inset Formula $k=k+1$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+If
+\series default
+ 
+\begin_inset Formula $k\le N_{g}$
+\end_inset
+
+ 
+\series bold
+then go to
+\series default
+ Fitness Calculation step 
+\series bold
+else
+\series default
+ terminate.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename onepoint.png
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+An example of the one - point crossover method.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:onePoint"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+The proposed crossover methods
 \end_layout
 
 \begin_layout Section
 Results
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Results"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -805,11 +2108,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
-
-\begin_layout Plain Layout
-
-\end_layout
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -5447,6 +6746,89 @@ AVERAGE
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename tbl3_summary.png
+	lyxscale 20
+	scale 43
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Statistical comparison of the proposed method (STANDARD) against the other classifiers over 31 datasets.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:standart_vs_others"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note:
+ 
+\shape italic
+Box plots:
+ box = interquartile range,
+ thick line = median,
+ whiskers = 1.5 × IQR,
+ diamond = mean,
+ dots = datasets,
+ grey lines join the same dataset.
+ Forest plots:
+ Hodges-Lehmann median paired difference in error,
+ error(B) − error(A),
+ with 95% CI;
+ right of the dashed line,
+ A has lower error;
+ labels give the Holm-adjusted Wilcoxon p-value and the wins/ties/losses of A.
+ Rank panels:
+ mean Friedman rank (1 = best) ± CD/2 (Nemenyi);
+ non-overlapping bars differ at 
+\begin_inset Formula $α$
+\end_inset
+
+ = 0.05.
+ Bottom right:
+ per-dataset paired differences (blue:
+ A better,
+ red:
+ B better) or,
+ for $N_K$,
+ the trend with bootstrap 95% CI.
+ Stars:
+ *** p < 0.001,
+ ** p < 0.01,
+ * p < 0.05,
+ ns = not significant.
+\end_layout
+
 \begin_layout Subsection
 Crossover methods 
 \end_layout
@@ -5457,7 +6839,7 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -6742,6 +8124,52 @@ AVERAGE
 </cell>
 </row>
 </lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename tbl4_summary.png
+	lyxscale 20
+	scale 43
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Statistical comparison of the three 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:crossover_strategies"
+
+\end_inset
+
+ (STANDARD,
+ TARGETED,
+ TARGETEDWORST).
+\end_layout
 
 \end_inset
 
@@ -8371,8 +9799,59 @@ AVERAGE
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename tbl5_summary.png
+	lyxscale 20
+	scale 43
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Effect of the number of chromosomes (NK) participating in the crossover on the proposed method.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:effect_of_NK"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Conclusions
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Conclusions"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -8433,6 +9912,1055 @@ Keep empty!
 
 \begin_layout References Title
 References
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "holland"
+literal "false"
+
+\end_inset
+
+J.H.
+ Holland,
+ Genetic algorithms.
+ Scientific american 
+\series bold
+267
+\series default
+,
+ pp.
+ 66-73,
+ 1992.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ec_review"
+literal "false"
+
+\end_inset
+
+N.
+ Yusup,
+ A.
+ M.
+ Zain,
+ S.
+ Z.
+ M.
+ Hashim,
+ Evolutionary techniques in optimizing machining parameters:
+ Review and recent applications (2007–2011),
+ Expert Systems with Applications 
+\series bold
+39.10
+\series default
+,
+ pp.
+ 9909-9927,
+ 2012.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "gen1"
+literal "false"
+
+\end_inset
+
+J.
+ Stender,
+ Parallel Genetic Algorithms:Theory & Applications.
+ Edition:
+ IOS Press,
+ 1993.
+ 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "gen2"
+literal "true"
+
+\end_inset
+
+D.
+ Goldberg,
+ Genetic Algorithms in Search,
+ Optimization and Machine Learning,
+ Addison-Wesley Publishing Company,
+ Reading,
+ Massachussets,
+ 1989.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "gen3"
+literal "true"
+
+\end_inset
+
+Z.
+ Michaelewicz,
+ Genetic Algorithms + Data Structures = Evolution Programs.
+ Springer - Verlag,
+ Berlin,
+ 1996.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ga_problem1"
+literal "false"
+
+\end_inset
+
+Y.H.
+ Santana,
+ R.M.
+ Alonso,
+ G.G.
+ Nieto,
+ L.
+ Martens,
+ W.
+ Joseph,
+ D.
+ Plets,
+ Indoor genetic algorithm-based 5G network planning using a machine learning model for path loss estimation,
+ Appl.
+ Sci.
+ 
+\series bold
+12
+\series default
+,
+ 3923.
+ 2022.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ga_problem2"
+literal "false"
+
+\end_inset
+
+X.
+ Liu,
+ D.
+ Jiang,
+ B.
+ Tao,
+ G.
+ Jiang,
+ Y.
+ Sun,
+ J.
+ Kong,
+ B.
+ Chen,
+ Genetic algorithm-based trajectory optimization for digital twin robots,
+ Front.
+ Bioeng.
+ Biotechnol 
+\series bold
+9
+\series default
+,
+ 793782,
+ 2022.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ga_problem3"
+literal "false"
+
+\end_inset
+
+K.
+ Nonoyama,
+ Z.Liu,
+ T.
+ Fujiwara,
+ M.M.
+ Alam,
+ T.
+ Nishi,
+ Energy-efficient robot configuration and motion planning using genetic algorithm and particle swarm optimization,
+ Energies 
+\series bold
+15
+\series default
+,
+ 2074,
+ 2022.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ga_problem4"
+literal "false"
+
+\end_inset
+
+K.
+ Liu,
+ B.
+ Deng,
+ Q.
+ Shen,
+ J.
+ Yang,
+ Y.
+ Li,
+ Optimization based on genetic algorithms on energy conservation potential of a high speed SI engine fueled with butanol–gasoline blends,
+ Energy Rep.
+ 
+\series bold
+8
+\series default
+,
+ pp.
+ 69–80,
+ 2022.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ga_problem5"
+literal "false"
+
+\end_inset
+
+G.
+ Zhou,
+ S.
+ Zhu,
+ S.
+ Luo,
+ Location optimization of electric vehicle charging stations:
+ Based on cost model and genetic algorithm,
+ Energy 
+\series bold
+247
+\series default
+,
+ 123437,
+ 2022.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Doewes"
+literal "false"
+
+\end_inset
+
+Doewes,
+ R.I.;
+ Nair,
+ R.;
+ Sharma,
+ T.
+ Diagnosis of COVID-19 through blood sample using ensemble genetic algorithms and machine learning classifier.
+ World J.
+ Eng.
+ 2022,
+ 19,
+ 175–182.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Choudhury"
+literal "false"
+
+\end_inset
+
+ Choudhury,
+ S.;
+ Rana,
+ M.;
+ Chakraborty,
+ A.;
+ Majumder,
+ S.;
+ Roy,
+ S.;
+ RoyChowdhury,
+ A.;
+ Datta,
+ S.
+ Design of patient specific basal dental implant using Finite Element method and Artificial Neural Network technique.
+ J.
+ Eng.
+ Med.
+ 2022,
+ 236,
+ 1375–1387.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Chen"
+literal "false"
+
+\end_inset
+
+ Chen,
+ Q.;
+ Hu,
+ X.
+ Design of intelligent control system for agricultural greenhouses based on adaptive improved genetic algorithm for multi-energy supply system.
+ Energy Rep.
+ 2022,
+ 8,
+ 12126–12138.
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring 999
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge1"
+literal "true"
+
+\end_inset
+
+M.
+ O’Neill,
+ C.
+ Ryan,
+ Grammatical evolution,
+ IEEE Trans.
+ Evol.
+ Comput.
+ 
+\series bold
+5,
+\series default
+pp.
+ 349–358,
+ 2001.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "bnf1"
+literal "false"
+
+\end_inset
+
+J.
+ W.
+ Backus.
+ The Syntax and Semantics of the Proposed International Algebraic Language of the Zurich ACM-GAMM Conference.
+ Proceedings of the International Conference on Information Processing,
+ UNESCO,
+ 1959,
+ pp.125-132.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_program1"
+literal "false"
+
+\end_inset
+
+C.
+ Ryan,
+ J.
+ Collins,
+ M.
+ O’Neill,
+ Grammatical evolution:
+ Evolving programs for an arbitrary language.
+ In:
+ Banzhaf,
+ W.,
+ Poli,
+ R.,
+ Schoenauer,
+ M.,
+ Fogarty,
+ T.C.
+ (eds) Genetic Programming.
+ EuroGP 1998.
+ Lecture Notes in Computer Science,
+ vol 1391.
+ Springer,
+ Berlin,
+ Heidelberg,
+ 1998.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_program2"
+literal "false"
+
+\end_inset
+
+M.
+ O’Neill,
+ M.,
+ C.
+ Ryan,
+ Evolving Multi-line Compilable C Programs.
+ In:
+ Poli,
+ R.,
+ Nordin,
+ P.,
+ Langdon,
+ W.B.,
+ Fogarty,
+ T.C.
+ (eds) Genetic Programming.
+ EuroGP 1999.
+ Lecture Notes in Computer Science,
+ vol 1598.
+ Springer,
+ Berlin,
+ Heidelberg,
+ 1999.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_credit"
+literal "false"
+
+\end_inset
+
+A.
+ Brabazon,
+ M.
+ O'Neill,
+ Credit classification using grammatical evolution,
+ Informatica 
+\series bold
+30.3
+\series default
+,
+ 2006.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_intrusion"
+literal "false"
+
+\end_inset
+
+S.
+ Şen,
+ J.A.
+ Clark.
+ A grammatical evolution approach to intrusion detection on mobile ad hoc networks,
+ In:
+ Proceedings of the second ACM conference on Wireless network security,
+ 2009.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_de"
+literal "false"
+
+\end_inset
+
+I.G.
+ Tsoulos,
+ I.E.
+ Lagaris,
+ Solving differential equations with genetic programming,
+ Genet Program Evolvable Mach 
+\series bold
+7
+\series default
+,
+ pp.
+ 33–54,
+ 2006.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_water"
+literal "false"
+
+\end_inset
+
+L.
+ Chen,
+ C.H.
+ Tan,
+ S.J.
+ Kao,
+ T.S.
+ Wang,
+ Improvement of remote monitoring on water quality in a subtropical reservoir by incorporating grammatical evolution with parallel genetic algorithms into satellite imagery,
+ Water Research 
+\series bold
+ 42
+\series default
+,
+ pp.
+ 296-306,
+ 2008.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_ant"
+literal "false"
+
+\end_inset
+
+J.
+ Tavares,
+ F.B.
+ Pereira,
+ Automatic Design of Ant Algorithms with Grammatical Evolution.
+ In:
+ Moraglio,
+ A.,
+ Silva,
+ S.,
+ Krawiec,
+ K.,
+ Machado,
+ P.,
+ Cotta,
+ C.
+ (eds) Genetic Programming.
+ EuroGP 2012.
+ Lecture Notes in Computer Science,
+ vol 7244.
+ Springer,
+ Berlin,
+ Heidelberg,
+ 2012.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_trig"
+literal "false"
+
+\end_inset
+
+C.
+ Ryan,
+ M.
+ O’Neill,
+ J.J.
+ Collins,
+ Grammatical evolution:
+ Solving trigonometric identities,
+ proceedings of Mendel.
+ Vol.
+ 98.
+ 1998.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_music"
+literal "false"
+
+\end_inset
+
+A.O.
+ Puente,
+ R.
+ S.
+ Alfonso,
+ M.
+ A.
+ Moreno,
+ Automatic composition of music by means of grammatical evolution,
+ In:
+ APL '02:
+ Proceedings of the 2002 conference on APL:
+ array processing languages:
+ lore,
+ problems,
+ and applications July 2002 Pages 148–155.
+ 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_nn"
+literal "false"
+
+\end_inset
+
+Lídio Mauro Limade Campo,
+ R.
+ Célio Limã Oliveira,Mauro Roisenberg,
+ Optimization of neural networks through grammatical evolution and a genetic algorithm,
+ Expert Systems with Applications 
+\series bold
+56
+\series default
+,
+ pp.
+ 368-384,
+ 2016.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_nn2"
+literal "false"
+
+\end_inset
+
+K.
+ Soltanian,
+ A.
+ Ebnenasir,
+ M.
+ Afsharchi,
+ Modular Grammatical Evolution for the Generation of Artificial Neural Networks,
+ Evolutionary Computation 
+\series bold
+30
+\series default
+,
+ pp 291–327,
+ 2022.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_pacman"
+literal "false"
+
+\end_inset
+
+E.
+ Galván-López,
+ J.M.
+ Swafford,
+ M.
+ O’Neill,
+ A.
+ Brabazon,
+ Evolving a Ms.
+ PacMan Controller Using Grammatical Evolution.
+ In:
+ ,
+ et al.
+ Applications of Evolutionary Computation.
+ EvoApplications 2010.
+ Lecture Notes in Computer Science,
+ vol 6024.
+ Springer,
+ Berlin,
+ Heidelberg,
+ 2010.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_supermario"
+literal "false"
+
+\end_inset
+
+N.
+ Shaker,
+ M.
+ Nicolau,
+ G.
+ N.
+ Yannakakis,
+ J.
+ Togelius,
+ M.
+ O'Neill,
+ Evolving levels for Super Mario Bros using grammatical evolution,
+ 2012 IEEE Conference on Computational Intelligence and Games (CIG),
+ 2012,
+ pp.
+ 304-31.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_energy"
+literal "false"
+
+\end_inset
+
+D.
+ Martínez-Rodríguez,
+ J.
+ M.
+ Colmenar,
+ J.
+ I.
+ Hidalgo,
+ R.J.
+ Villanueva Micó,
+ S.
+ Salcedo-Sanz,
+ Particle swarm grammatical evolution for energy demand estimation,
+ Energy Science and Engineering 
+\series bold
+8
+\series default
+,
+ pp.
+ 1068-1079,
+ 2020.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_comb"
+literal "false"
+
+\end_inset
+
+N.
+ R.
+ Sabar,
+ M.
+ Ayob,
+ G.
+ Kendall,
+ R.
+ Qu,
+ Grammatical Evolution Hyper-Heuristic for Combinatorial Optimization Problems,
+ IEEE Transactions on Evolutionary Computation 
+\series bold
+17
+\series default
+,
+ pp.
+ 840-861,
+ 2013.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_crypt"
+literal "false"
+
+\end_inset
+
+C.
+ Ryan,
+ M.
+ Kshirsagar,
+ G.
+ Vaidya,
+ G.
+ et al.
+ Design of a cryptographically secure pseudo random number generator with grammatical evolution.
+ Sci Rep 
+\series bold
+12
+\series default
+,
+ 8602,
+ 2022.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_decision"
+literal "false"
+
+\end_inset
+
+P.J.
+ Pereira,
+ P.
+ Cortez,
+ R.
+ Mendes,
+ Multi-objective Grammatical Evolution of Decision Trees for Mobile Marketing user conversion prediction,
+ Expert Systems with Applications 
+\series bold
+168
+\series default
+,
+ 114287,
+ 2021.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_analog"
+literal "false"
+
+\end_inset
+
+F.
+ Castejón,
+ E.J.
+ Carmona,
+ Automatic design of analog electronic circuits using grammatical evolution,
+ Applied Soft Computing 
+\series bold
+62
+\series default
+,
+ pp.
+ 1003-1018,
+ 2018.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_wikipedia"
+literal "false"
+
+\end_inset
+
+L.
+ Araujo,
+ J.
+ Martinez-Romo,
+ A.
+ Duque,
+ Discovering taxonomies in Wikipedia by means of grammatical evolution.
+ Soft Comput 
+\series bold
+22
+\series default
+,
+ pp.
+ 2907–2919,
+ 2018.
+ 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_trading"
+literal "false"
+
+\end_inset
+
+C.
+ Martín,
+ D.
+ Quintana,
+ P.
+ Isasi,
+ Grammatical Evolution-based ensembles for algorithmic trading,
+ Applied Soft Computing 
+\series bold
+84
+\series default
+,
+ 105713,
+ 2019.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_bio"
+literal "false"
+
+\end_inset
+
+Moore,
+ J.H.,
+ Sipper,
+ M.
+ (2018).
+ Grammatical Evolution Strategies for Bioinformatics and Systems Genomics.
+ In:
+ Ryan,
+ C.,
+ O'Neill,
+ M.,
+ Collins,
+ J.
+ (eds) Handbook of Grammatical Evolution.
+ Springer,
+ Cham.
+ https://doi.org/10.1007/978-3-319-78717-6_16
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ge_glykemia"
+literal "false"
+
+\end_inset
+
+Hidalgo,
+ J.
+ I.,
+ Colmenar,
+ J.
+ M.,
+ Risco-Martin,
+ J.
+ L.,
+ Cuesta-Infante,
+ A.,
+ Maqueda,
+ E.,
+ Botella,
+ M.,
+ & Rubio,
+ J.
+ A.
+ (2014).
+ Modeling glycemia in humans by means of grammatical evolution.
+ Applied Soft Computing,
+ 20,
+ 40-53.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "(2020)"
+key "genclassMain"
+literal "false"
+
+\end_inset
+
+Tsoulos,
+ I.
+ G.
+ (2020).
+ Creating classification rules using grammatical evolution.
+ International Journal of Computational Intelligence Studies,
+ 9(1-2),
+ 161-171.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "(2020)"
+key "genclassSoftx"
+literal "false"
+
+\end_inset
+
+Anastasopoulos,
+ N.;
+ Tsoulos,
+ I.G.;
+ Tzallas,
+ A.
+ GenClass:
+ A parallel tool for data classification based on Grammatical Evolution.
+ SoftwareX 2021,
+ 16,
+ 100830.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "genclassPollution"
+literal "false"
+
+\end_inset
+
+Spyrou,
+ E.
+ D.,
+ Stylios,
+ C.,
+ & Tsoulos,
+ I.
+ (2023).
+ Classification of CO Environmental Parameter for Air Pollution Monitoring with Grammatical Evolution.
+ Algorithms,
+ 16(6),
+ 300.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "(2023)"
+key "genClassNetwork"
+literal "false"
+
+\end_inset
+
+Margariti,
+ S.
+ V.,
+ Tsoulos,
+ I.
+ G.,
+ Kiousi,
+ E.,
+ & Stergiou,
+ E.
+ (2024).
+ Traffic Classification in Software-Defined Networking Using Genetic Programming Tools.
+ Future Internet,
+ 16(9),
+ 338.
 \end_layout
 
 \begin_layout Bibliography
