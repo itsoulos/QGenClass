@@ -902,8 +902,7 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
         // FIND BLOCK EXTENT
         // ====================================================
 
-        int targetNext =
-            wholeGenome?genome_size:segmentEnd;
+        int targetNext =wholeGenome?genome_size:segmentEnd;
 
         int donorNext =
             wholeGenome
@@ -915,14 +914,10 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
         for(const CodonTrace &e : targetTrace)
         {
             if(
-                e.genomePos >
-                    targetEntry.genomePos &&
-                e.genomePos <
-                    targetNext
-                )
+                e.genomePos >targetEntry.genomePos &&
+                e.genomePos <targetNext)
             {
-                targetNext =
-                    e.genomePos;
+                targetNext =e.genomePos;
             }
         }
 
@@ -932,11 +927,9 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
                 e.genomePos >
                     donorEntry.genomePos &&
                 e.genomePos <
-                    donorNext
-                )
+                    donorNext)
             {
-                donorNext =
-                    e.genomePos;
+                donorNext =e.genomePos;
             }
         }
 
@@ -949,44 +942,24 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
                 );
 
         blockLength =
-            min(
-                blockLength,
-                targetedCrossMaxBlock
-                );
+            min(blockLength,targetedCrossMaxBlock);
 
-        if(blockLength < 1)
-            blockLength = 1;
+        if(blockLength < 1)blockLength = 1;
 
         if(!wholeGenome)
         {
             blockLength =
-                min(
-                    blockLength,
-                    segmentEnd -
-                        targetEntry.genomePos
-                    );
+                min(blockLength,segmentEnd -targetEntry.genomePos);
 
             blockLength =
-                min(
-                    blockLength,
-                    segmentEnd -
-                        donorEntry.genomePos
-                    );
+                min(blockLength,segmentEnd -donorEntry.genomePos);
         }
 
         blockLength =
-            min(
-                blockLength,
-                genome_size -
-                    targetEntry.genomePos
-                );
+            min(blockLength,genome_size -targetEntry.genomePos);
 
         blockLength =
-            min(
-                blockLength,
-                genome_size -
-                    donorEntry.genomePos
-                );
+            min(blockLength,genome_size -donorEntry.genomePos);
 
         if(blockLength <= 0)
             continue;
@@ -995,30 +968,16 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
         // CROSS
         // ====================================================
 
-        vector<int> candidate =
-            current;
+        vector<int> candidate =current;
 
-        for(
-            int k=0;
-            k<blockLength;
-            k++
-            )
+        for(int k=0;k<blockLength;k++)
         {
-            candidate[
-                targetEntry.genomePos + k
-            ] =
-                donor[
-                    donorEntry.genomePos + k
-            ];
+            candidate[targetEntry.genomePos + k] =donor[donorEntry.genomePos + k];
         }
 
-        double candidateFitness =
-            fitness(candidate);
+        double candidateFitness =fitness(candidate);
 
-        if(
-            candidateFitness >
-            bestFitness
-            )
+        if(candidateFitness >bestFitness)
         {
             printf(
                 "TARGETED_CROSS_WORST[%d] "
@@ -1048,12 +1007,9 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
 
             fflush(stdout);
 
-            current =
-                candidate;
+            current =candidate;
 
-            bestFitness =
-                candidateFitness;
-
+            bestFitness =candidateFitness;
             accepted++;
         }
     }
@@ -1063,11 +1019,9 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
     // ========================================================
 
     for(int i=0;i<genome_size;i++)
-        genome[pos][i] =
-            current[i];
+        genome[pos][i] =current[i];
 
-    fitness_array[pos] =
-        bestFitness;
+    fitness_array[pos] =bestFitness;
 
     printf(
         "TARGETED_CROSS_WORST[%d] END "
@@ -1085,9 +1039,7 @@ void Population::targetedCrossWorstItem(int pos,int iterations)
 // SET CROSS ITEMS
 // ============================================================
 
-void Population::setCrossItems(
-    int g
-    )
+void Population::setCrossItems(int g)
 {
     if (g >= 0)
         crossitems = g;
@@ -1097,9 +1049,7 @@ void Population::setCrossItems(
 // SET LOCAL ITEMS
 // ============================================================
 
-void Population::setLocalItems(
-    int g
-    )
+void Population::setLocalItems(int g)
 {
     if (g >= 0)
         localitems = g;
@@ -1109,9 +1059,7 @@ void Population::setLocalItems(
 // SET LOCAL GENERATIONS
 // ============================================================
 
-void Population::setLocalGens(
-    int g
-    )
+void Population::setLocalGens(int g)
 {
     if (g >= 0)
         localgens = g;
@@ -1122,9 +1070,7 @@ void Population::setLocalGens(
 // TARGETED ITERATIONS
 // ============================================================
 
-void Population::setTargetedIterations(
-    int n
-    )
+void Population::setTargetedIterations(int n)
 {
     if (n > 0)
         targetedIterations = n;
@@ -1173,9 +1119,7 @@ void Population::nextGeneration()
 
     if(
         targetedStagnationLimit > 0 &&
-        generationsWithoutImprovement >=
-            targetedStagnationLimit
-        )
+        generationsWithoutImprovement >=targetedStagnationLimit)
     {
         printf(
             "\nTARGETED STAGNATION BURST "
@@ -1191,40 +1135,22 @@ void Population::nextGeneration()
      * Apply intensive targeted search to the best individual.
      */
 
-        targetedBestLocalSearch(
-            0,
-            targetedBurstIterations
-            );
+        targetedBestLocalSearch(0,targetedBurstIterations);
 
         /*
      * Optionally refine several other chromosomes.
      */
 
-        int extra =
-            min(
-                localitems,
-                genome_count
-                );
-
-        for(
-            int i=1;
-            i<extra;
-            i++
-            )
+        int extra =min(localitems,genome_count);
+        for(int i=1;i<extra;i++)
         {
-            targetedBestLocalSearch(
-                i,
-                targetedBurstIterations/2
-                );
+            targetedBestLocalSearch(i,targetedBurstIterations/2);
         }
 
         select();
 
-        previousBestFitness =
-            fitness_array[0];
-
-        generationsWithoutImprovement =
-            0;
+        previousBestFitness =fitness_array[0];
+        generationsWithoutImprovement =0;
     }
 
     // --------------------------------------------------------
@@ -1250,7 +1176,6 @@ void Population::nextGeneration()
     }
 
     select();
-
     crossover();
 
     if (generation)
@@ -1266,77 +1191,32 @@ void Population::nextGeneration()
 void Population::replaceWorst()
 {
     vector<int> xtrial;
-
-    xtrial.resize(
-        genome_size
-        );
+    xtrial.resize(genome_size);
 
     int randpos;
+    randpos =rand() %genome_count;
 
-    randpos =
-        rand() %
-        genome_count;
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    for (int i = 0;i < genome_size;i++)
     {
         double gamma;
-
-        gamma =
-            -0.5 +
-            2.0 *
-                rand() *
-                1.0 /
-                RAND_MAX;
+        gamma =-0.5 +2.0 *rand() *1.0 /RAND_MAX;
 
         xtrial[i] =
             static_cast<int>(
-                fabs(
-                    (
-                        1.0 +
-                        gamma
-                        ) *
-                        genome[0][i] -
-                    gamma *
-                        genome[randpos][i]
-                    )
-                );
+                fabs((1.0 +gamma) *
+                        genome[0][i] -gamma *genome[randpos][i]));
     }
 
-    double ftrial =
-        fitness(xtrial);
-
+    double ftrial =fitness(xtrial);
     if (
-        fabs(ftrial) <
-        fabs(
-            fitness_array[
-                genome_count -
-                1
-    ]
-            )
-        )
+        fabs(ftrial) <fabs(fitness_array[genome_count -1]))
     {
-        for (
-            int i = 0;
-            i < genome_size;
-            i++
-            )
+        for (int i = 0;i < genome_size;i++)
         {
-            genome[
-                genome_count -
-                1
-            ][i] =
-                xtrial[i];
+            genome[genome_count -1][i] =xtrial[i];
         }
 
-        fitness_array[
-            genome_count -
-            1
-        ] =
-            ftrial;
+        fitness_array[genome_count -1] =ftrial;
     }
 }
 
@@ -1344,14 +1224,9 @@ void Population::replaceWorst()
 // MUTATION RATE
 // ============================================================
 
-void Population::setMutationRate(
-    double r
-    )
+void Population::setMutationRate(double r)
 {
-    if (
-        r >= 0 &&
-        r <= 1
-        )
+    if (r >= 0 &&r <= 1)
     {
         mutation_rate = r;
     }
@@ -1361,14 +1236,9 @@ void Population::setMutationRate(
 // SELECTION RATE
 // ============================================================
 
-void Population::setSelectionRate(
-    double r
-    )
+void Population::setSelectionRate(double r)
 {
-    if (
-        r >= 0 &&
-        r <= 1
-        )
+    if (r >= 0 &&r <= 1)
     {
         selection_rate = r;
     }
@@ -1390,8 +1260,7 @@ double Population::getMutationRate() const
 
 double Population::getBestFitness() const
 {
-    return
-        fitness_array[0];
+    return fitness_array[0];
 }
 
 // ============================================================
@@ -1401,19 +1270,10 @@ double Population::getBestFitness() const
 vector<int> Population::getBestGenome() const
 {
     vector<int> g;
-
-    g.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    g.resize(genome_size);
+    for (int i = 0;i < genome_size;i++)
     {
-        g[i] =
-            genome[0][i];
+        g[i] =genome[0][i];
     }
 
     return g;
@@ -1423,80 +1283,42 @@ vector<int> Population::getBestGenome() const
 // DISCRETE GRADIENT
 // ============================================================
 
-vector<int> Population::discreteGradient(
-    vector<int>& x
-    )
+vector<int> Population::discreteGradient(vector<int>& x)
 {
-    int n =
-        static_cast<int>(
-            x.size()
-            );
+    int n =static_cast<int>(x.size());
 
     vector<int> grad(n);
 
-    double fx =
-        fitness(x);
-
-    for (
-        int i = 0;
-        i < n;
-        i++
-        )
+    double fx =fitness(x);
+    for (int i = 0;i < n;i++)
     {
-        vector<int> x_plus =
-            x;
+        vector<int> x_plus =x;
+        vector<int> x_minus =x;
+        x_plus[i] +=1;
+        x_minus[i] -=1;
 
-        vector<int> x_minus =
-            x;
-
-        x_plus[i] +=
-            1;
-
-        x_minus[i] -=
-            1;
-
-        if (
-            x_minus[i] <
-            0
-            )
+        if (x_minus[i] <0)
         {
-            x_minus[i] =
-                0;
+            x_minus[i] =0;
         }
 
-        double f_plus =
-            fitness(
-                x_plus
-                );
+        double f_plus =fitness(x_plus);
 
-        double f_minus =
-            fitness(
-                x_minus
-                );
+        double f_minus =fitness(x_minus);
 
-        if (
-            fabs(f_plus) <
-            fabs(fx)
-            )
+        if (fabs(f_plus) <fabs(fx))
         {
-            grad[i] =
-                +1;
+            grad[i] =+1;
         }
-        else if (
-            fabs(f_minus) <
-            fabs(fx)
-            )
+        else if (fabs(f_minus) <fabs(fx))
         {
-            grad[i] =
-                -1;
+            grad[i] =-1;
         }
         else
         {
-            grad[i] =
-                0;
+            grad[i] =0;
         }
     }
-
     return grad;
 }
 
@@ -1504,25 +1326,12 @@ vector<int> Population::discreteGradient(
 // DISCRETE STEP
 // ============================================================
 
-vector<int> Population::discreteStep(
-    vector<int>& x,
-    vector<int>& grad
-    )
+vector<int> Population::discreteStep(vector<int>& x,vector<int>& grad)
 {
-    vector<int> res =
-        x;
-
-    for (
-        int i = 0;
-        i <
-        static_cast<int>(
-            x.size()
-            );
-        i++
-        )
+    vector<int> res =x;
+    for (int i = 0;i <static_cast<int>(x.size());i++)
     {
-        res[i] +=
-            grad[i];
+        res[i] +=grad[i];
     }
 
     return res;
@@ -1532,76 +1341,36 @@ vector<int> Population::discreteStep(
 // INTEGER LOCAL SEARCH
 // ============================================================
 
-void Population::integerLocalSearch(
-    vector<int> &x,
-    int maxSteps
-    )
+void Population::integerLocalSearch(vector<int> &x,int maxSteps)
 {
-    double bestVal =
-        fitness(x);
+    double bestVal =fitness(x);
+    int stepSize =100;
 
-    int stepSize =
-        100;
-
-    for (
-        int step = 0;
-        step < maxSteps;
-        step++
-        )
+    for (int step = 0;step < maxSteps;step++)
     {
-        vector<int> grad =
-            discreteGradient(x);
-
-        vector<int> candidate =
-            x;
+        vector<int> grad =discreteGradient(x);
+        vector<int> candidate =x;
 
         for (
-            int i = 0;
-            i <
-            static_cast<int>(
-                x.size()
-                );
-            i++
-            )
+            int i = 0;i <static_cast<int>(x.size());i++)
         {
-            candidate[i] +=
-                grad[i] *
-                stepSize;
-
-            if (
-                candidate[i] <
-                0
-                )
+            candidate[i] +=grad[i] *stepSize;
+            if (candidate[i] <0)
             {
-                candidate[i] =
-                    0;
+                candidate[i] =0;
             }
         }
 
-        double val =
-            fitness(
-                candidate
-                );
+        double val =fitness(candidate);
 
-        if (
-            fabs(val) <
-            fabs(bestVal)
-            )
+        if (fabs(val) <fabs(bestVal))
         {
-            x =
-                candidate;
-
-            bestVal =
-                val;
+            x =candidate;
+            bestVal =val;
         }
         else
         {
-            stepSize =
-                max(
-                    1,
-                    stepSize /
-                        2
-                    );
+            stepSize =max(1,stepSize /2);
         }
 
         printf(
@@ -1625,36 +1394,15 @@ vector<int> Population::integerAdam(
     double eps
     )
 {
-    int n =
-        static_cast<int>(
-            x.size()
-            );
+    int n = static_cast<int>(x.size());
 
-    vector<double>
-        m(
-            n,
-            0.0
-            );
+    vector<double> m(n,0.0);
+    vector<double> v(n,0.0);
+    double bestVal =fitness(x);
 
-    vector<double>
-        v(
-            n,
-            0.0
-            );
-
-    double bestVal =
-        fitness(x);
-
-    for (
-        int t = 1;
-        t <= steps;
-        t++
-        )
+    for (int t = 1;t <= steps;t++)
     {
-        vector<int> g_int =
-            discreteGradient(
-                x
-                );
+        vector<int> g_int =discreteGradient(x);
 
         printf(
             "ADAM[%d] TRY: %20.10lf\n",
@@ -1664,113 +1412,41 @@ vector<int> Population::integerAdam(
 
         vector<double> g(n);
 
-        for (
-            int i = 0;
-            i < n;
-            i++
-            )
+        for (int i = 0;i < n;i++)
         {
-            g[i] =
-                static_cast<double>(
-                    g_int[i]
-                    );
+            g[i] =static_cast<double>(g_int[i]);
         }
 
         // ----------------------------------------------------
         // Moments
         // ----------------------------------------------------
 
-        for (
-            int i = 0;
-            i < n;
-            i++
-            )
+        for (int i = 0;i < n;i++)
         {
-            m[i] =
-                beta1 *
-                    m[i] +
-                (
-                    1 -
-                    beta1
-                    ) *
-                    g[i];
-
-            v[i] =
-                beta2 *
-                    v[i] +
-                (
-                    1 -
-                    beta2
-                    ) *
-                    g[i] *
-                    g[i];
+            m[i] =beta1 *m[i] +(1 -beta1) *g[i];
+            v[i] =beta2 *v[i] +(1 -beta2) *g[i] *g[i];
         }
 
         // ----------------------------------------------------
         // Bias correction
         // ----------------------------------------------------
 
-        vector<double>
-            m_hat(n);
+        vector<double>m_hat(n);
+        vector<double>v_hat(n);
 
-        vector<double>
-            v_hat(n);
-
-        for (
-            int i = 0;
-            i < n;
-            i++
-            )
+        for (int i = 0;i < n;i++)
         {
-            m_hat[i] =
-                m[i] /
-                (
-                    1 -
-                    pow(
-                        beta1,
-                        t
-                        )
-                    );
-
-            v_hat[i] =
-                v[i] /
-                (
-                    1 -
-                    pow(
-                        beta2,
-                        t
-                        )
-                    );
+            m_hat[i] =m[i] /(1 -pow(beta1,t));
+            v_hat[i] =v[i] /(1 -pow(beta2,t));
         }
 
-        vector<int> candidate =
-            x;
+        vector<int> candidate =x;
 
-        for (
-            int i = 0;
-            i < n;
-            i++
-            )
+        for (int i = 0;i < n;i++)
         {
-            double step =
-                alpha *
-                m_hat[i] /
-                (
-                    sqrt(
-                        v_hat[i]
-                        ) +
-                    eps
-                    );
-
-            double p =
-                fabs(step);
-
-            if (
-                rand() *
-                    1.0 /
-                    RAND_MAX <
-                p
-                )
+            double step =alpha *m_hat[i] /(sqrt(v_hat[i]) +eps);
+            double p =fabs(step);
+            if (rand() *1.0 /RAND_MAX <p)
             {
                 candidate[i] +=
                     (
@@ -1782,36 +1458,22 @@ vector<int> Population::integerAdam(
                         );
             }
 
-            if (
-                candidate[i] <
-                0
-                )
+            if (candidate[i] <0)
             {
-                candidate[i] =
-                    0;
+                candidate[i] =0;
             }
         }
 
-        double val =
-            fitness(
-                candidate
-                );
+        double val =fitness(candidate);
 
-        if (
-            fabs(val) <
-            fabs(bestVal)
-            )
+        if (fabs(val) <fabs(bestVal))
         {
-            x =
-                candidate;
-
-            bestVal =
-                val;
+            x =candidate;
+            bestVal =val;
         }
         else
         {
-            alpha *=
-                0.7;
+            alpha *=0.7;
         }
     }
 
@@ -1832,8 +1494,7 @@ vector<int> Population::integerAdam(
 int Population::codonForRule(
     int oldCodon,
     int ruleCount,
-    int desiredRule
-    )
+    int desiredRule)
 {
     if (ruleCount <= 0)
         return oldCodon;
@@ -1841,29 +1502,16 @@ int Population::codonForRule(
     if (desiredRule < 0)
         return oldCodon;
 
-    desiredRule %=
-        ruleCount;
+    desiredRule %=ruleCount;
 
     if (oldCodon < 0)
         oldCodon = 0;
 
-    int quotient =
-        oldCodon /
-        ruleCount;
+    int quotient =oldCodon /ruleCount;
 
-    int candidate =
-        quotient *
-            ruleCount +
-        desiredRule;
-
-    int best =
-        candidate;
-
-    int bestDistance =
-        abs(
-            candidate -
-            oldCodon
-            );
+    int candidate =quotient *ruleCount +desiredRule;
+    int best =candidate;
+    int bestDistance =abs(candidate -oldCodon);
 
     // --------------------------------------------------------
     // Candidate from previous modulo block
@@ -1871,32 +1519,16 @@ int Population::codonForRule(
 
     if (quotient > 0)
     {
-        int lower =
-            (
-                quotient -
-                1
-                ) *
-                ruleCount +
-            desiredRule;
+        int lower =(quotient -1) *ruleCount +desiredRule;
 
         if (lower >= 0)
         {
-            int distance =
-                abs(
-                    lower -
-                    oldCodon
-                    );
+            int distance =abs(lower -oldCodon);
 
-            if (
-                distance <
-                bestDistance
-                )
+            if (distance <bestDistance)
             {
-                best =
-                    lower;
-
-                bestDistance =
-                    distance;
+                best =lower;
+                bestDistance =distance;
             }
         }
     }
@@ -1905,29 +1537,14 @@ int Population::codonForRule(
     // Candidate from next modulo block
     // --------------------------------------------------------
 
-    int upper =
-        (
-            quotient +
-            1
-            ) *
-            ruleCount +
-        desiredRule;
+    int upper =(quotient +1) *ruleCount +desiredRule;
 
     if (upper >= 0)
     {
-        int distance =
-            abs(
-                upper -
-                oldCodon
-                );
-
-        if (
-            distance <
-            bestDistance
-            )
+        int distance =abs(upper -oldCodon);
+        if (distance <bestDistance)
         {
-            best =
-                upper;
+            best =upper;
         }
     }
 
@@ -1938,36 +1555,23 @@ int Population::codonForRule(
 // LOCAL METHOD
 // ============================================================
 
-void Population::setLocalMethod(
-    string s
-    )
+void Population::setLocalMethod(string s)
 {
-    localMethod =
-        s;
+    localMethod =s;
 }
 
 // ============================================================
 // CROSS ONE ITEM
 // ============================================================
 
-void Population::crossItem(
-    int pos
-    )
+void Population::crossItem(int pos)
 {
     vector<int> g;
+    g.resize(genome_size);
 
-    g.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    for (int i = 0;i < genome_size;i++)
     {
-        g[i] =
-            genome[pos][i];
+        g[i] =genome[pos][i];
     }
 
     printf(
@@ -1977,62 +1581,34 @@ void Population::crossItem(
 
     fflush(stdout);
 
-    for (
-        int iters = 1;
-        iters <= 100;
-        iters++
-        )
+    for (int iters = 1;iters <= 100;iters++)
     {
         int gpos;
         int cutpoint;
 
     again:
 
-        gpos =
-            rand() %
-            genome_count;
+        gpos =rand() %genome_count;
 
-        cutpoint =
-            rand() %
-            genome_size;
-
-        for (
-            int j = 0;
-            j < cutpoint;
-            j++
-            )
+        cutpoint =rand() %genome_size;
+        for (int j = 0;j < cutpoint;j++)
         {
-            g[j] =
-                genome[pos][j];
+            g[j] =genome[pos][j];
         }
 
-        for (
-            int j = cutpoint;
-            j < genome_size;
-            j++
-            )
+        for (int j = cutpoint;j < genome_size;j++)
         {
-            g[j] =
-                genome[gpos][j];
+            g[j] =genome[gpos][j];
         }
 
-        double f =
-            fitness(g);
+        double f =fitness(g);
 
-        if (
-            fabs(f) >
-            1e+10
-            )
+        if (fabs(f) >1e+10)
         {
             goto again;
         }
 
-        if (
-            fabs(f) <
-            fabs(
-                fitness_array[pos]
-                )
-            )
+        if (fabs(f) <fabs(fitness_array[pos]))
         {
             printf(
                 "%lf ",
@@ -2041,50 +1617,27 @@ void Population::crossItem(
 
             fflush(stdout);
 
-            for (
-                int j = 0;
-                j < genome_size;
-                j++
-                )
+            for (int j = 0;j < genome_size;j++)
             {
-                genome[pos][j] =
-                    g[j];
+                genome[pos][j] =g[j];
             }
 
-            fitness_array[pos] =
-                f;
+            fitness_array[pos] =f;
         }
         else
         {
-            for (
-                int j = 0;
-                j < cutpoint;
-                j++
-                )
+            for (int j = 0;j < cutpoint;j++)
             {
-                g[j] =
-                    genome[gpos][j];
+                g[j] =genome[gpos][j];
             }
 
-            for (
-                int j = cutpoint;
-                j < genome_size;
-                j++
-                )
+            for (int j = cutpoint;j < genome_size;j++)
             {
-                g[j] =
-                    genome[pos][j];
+                g[j] =genome[pos][j];
             }
 
-            double f2 =
-                fitness(g);
-
-            if (
-                fabs(f2) <
-                fabs(
-                    fitness_array[pos]
-                    )
-                )
+            double f2 =fitness(g);
+            if (fabs(f2) <fabs(fitness_array[pos]))
             {
                 printf(
                     "%lf ",
@@ -2093,18 +1646,11 @@ void Population::crossItem(
 
                 fflush(stdout);
 
-                for (
-                    int j = 0;
-                    j < genome_size;
-                    j++
-                    )
+                for (int j = 0;j < genome_size;j++)
                 {
-                    genome[pos][j] =
-                        g[j];
+                    genome[pos][j] =g[j];
                 }
-
-                fitness_array[pos] =
-                    f2;
+                fitness_array[pos] =f2;
             }
         }
     }
@@ -2114,24 +1660,13 @@ void Population::crossItem(
 // RANDOM LOCAL MUTATION
 // ============================================================
 
-void Population::mutateItem(
-    int pos
-    )
+void Population::mutateItem(int pos)
 {
     vector<int> g;
-
-    g.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    g.resize(genome_size);
+    for (int i = 0;i < genome_size;i++)
     {
-        g[i] =
-            genome[pos][i];
+        g[i] =genome[pos][i];
     }
 
     printf(
@@ -2141,61 +1676,36 @@ void Population::mutateItem(
 
     fflush(stdout);
 
-    for (
-        int j = 0;
-        j < 10;
-        j++
-        )
+    for (int j = 0;j < 10;j++)
     {
-        for (
-            int i = 0;
-            i < genome_size;
-            i++
-            )
+        for (int i = 0;i < genome_size;i++)
         {
             int ik = 0;
-
             double f = 0.0;
-
             do
             {
-                g[i] =
-                    rand() %
-                    MAX_RULE;
-
+                g[i] =rand() %MAX_RULE;
                 ik++;
-
                 if (ik == 10)
                     break;
-
-                f =
-                    fitness(g);
-
+                f =fitness(g);
             }
-            while (
-                f <=
-                fitness_array[pos]
-                );
+            while (f <=fitness_array[pos]);
 
             if (ik != 10)
             {
-                fitness_array[pos] =
-                    f;
-
+                fitness_array[pos] =f;
                 printf(
                     " %lf ",
                     f
                     );
 
                 fflush(stdout);
-
-                genome[pos][i] =
-                    g[i];
+                genome[pos][i] =g[i];
             }
             else
             {
-                g[i] =
-                    genome[pos][i];
+                g[i] =genome[pos][i];
             }
         }
     }
@@ -2207,25 +1717,14 @@ void Population::mutateItem(
 // MUTATE ITEM AT CLASS
 // ============================================================
 
-void Population::mutateItemAtClass(
-    int pos,
-    int classIndex
-    )
+void Population::mutateItemAtClass(int pos,int classIndex)
 {
     vector<int> g;
+    g.resize(genome_size);
 
-    g.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    for (int i = 0;i < genome_size;i++)
     {
-        g[i] =
-            genome[pos][i];
+        g[i] =genome[pos][i];
     }
 
     printf(
@@ -2235,47 +1734,19 @@ void Population::mutateItemAtClass(
 
     fflush(stdout);
 
-    ClassProgram *p =
-        (ClassProgram *)program;
+    ClassProgram *p =(ClassProgram *)program;
+    int partSize =genome_size /(p->getClass() -1);
+    int start =classIndex *partSize;
 
-    int partSize =
-        genome_size /
-        (
-            p->getClass() -
-            1
-            );
-
-    int start =
-        classIndex *
-        partSize;
-
-    int end =
-        (
-            classIndex +
-            1
-            ) *
-        partSize;
-
-    if (
-        end >=
-        genome_size
-        )
+    int end =(classIndex +1) *partSize;
+    if (end >=genome_size)
     {
-        end =
-            genome_size;
+        end =genome_size;
     }
 
-    for (
-        int j = 0;
-        j < 10;
-        j++
-        )
+    for (int j = 0;j < 10;j++)
     {
-        for (
-            int i = start;
-            i < end;
-            i++
-            )
+        for (int i = start;i < end;i++)
         {
             int ik = 0;
 
@@ -2283,28 +1754,20 @@ void Population::mutateItemAtClass(
 
             do
             {
-                g[i] =
-                    rand() %
-                    MAX_RULE;
+                g[i] =rand() %MAX_RULE;
 
                 ik++;
 
-                if (ik == 10)
-                    break;
+                if (ik == 10)break;
 
-                f =
-                    fitness(g);
+                f =fitness(g);
 
             }
-            while (
-                f <=
-                fitness_array[pos]
-                );
+            while (f <=fitness_array[pos]);
 
             if (ik != 10)
             {
-                fitness_array[pos] =
-                    f;
+                fitness_array[pos] =f;
 
                 printf(
                     " %lf ",
@@ -2313,13 +1776,11 @@ void Population::mutateItemAtClass(
 
                 fflush(stdout);
 
-                genome[pos][i] =
-                    g[i];
+                genome[pos][i] =g[i];
             }
             else
             {
-                g[i] =
-                    genome[pos][i];
+                g[i] =genome[pos][i];
             }
         }
     }
@@ -2375,61 +1836,41 @@ void Population::mutateItemAtClass(
 //         Search all active semantic codons.
 // ============================================================
 
-void Population::targetedWorstLocalSearch(
-    int pos,
-    int iterations
-    )
+void Population::targetedWorstLocalSearch(int pos,int iterations)
 {
     // --------------------------------------------------------
     // Basic checks
     // --------------------------------------------------------
 
-    if(
-        pos < 0 ||
-        pos >= genome_count
-        )
+    if(pos < 0 ||pos >= genome_count)
     {
         return;
     }
 
-    if(iterations <= 0)
-        return;
+    if(iterations <= 0)return;
 
-    if(genome_size <= 0)
-        return;
+    if(genome_size <= 0)return;
 
-    ClassProgram *p =
-        (ClassProgram *)program;
+    ClassProgram *p =(ClassProgram *)program;
 
-    if(p == NULL)
-        return;
+    if(p == NULL)return;
 
-    const int classCount =
-        p->getClass();
+    const int classCount =p->getClass();
 
-    if(classCount <= 1)
-        return;
+    if(classCount <= 1)return;
 
     // --------------------------------------------------------
     // Copy chromosome
     // --------------------------------------------------------
 
-    vector<int> current(
-        genome_size
-        );
+    vector<int> current(genome_size);
 
-    for(
-        int i=0;
-        i<genome_size;
-        i++
-        )
+    for(int i=0;i<genome_size;i++)
     {
-        current[i] =
-            genome[pos][i];
+        current[i] =genome[pos][i];
     }
 
-    double bestFitness =
-        fitness(current);
+    double bestFitness =fitness(current);
 
     // ========================================================
     // LOCAL SEARCH
@@ -2437,11 +1878,7 @@ void Population::targetedWorstLocalSearch(
 
     int acceptedMoves = 0;
 
-    for(
-        int iteration=0;
-        iteration<iterations;
-        iteration++
-        )
+    for(int iteration=0;iteration<iterations;iteration++)
     {
         // ====================================================
         // 1. FIND CURRENT WORST CLASS
@@ -2452,72 +1889,45 @@ void Population::targetedWorstLocalSearch(
 
         vector<double> classError;
 
-        p->getErrorPerClass(
-            current,
-            classError
-            );
+        p->getErrorPerClass(current,classError);
 
-        if(classError.empty())
-            break;
+        if(classError.empty())break;
 
         int worstClass = -1;
+        double worstError =-1.0;
 
-        double worstError =
-            -1.0;
-
-        for(
-            int c=0;
-            c<(int)classError.size();
-            c++
-            )
+        for(int c=0;c<(int)classError.size();c++)
         {
-            if(
-                classError[c] >
-                worstError
-                )
+            if(classError[c] >worstError)
             {
-                worstError =
-                    classError[c];
-
-                worstClass =
-                    c;
+                worstError =classError[c];
+                worstClass =c;
             }
         }
 
-        if(worstClass < 0)
-            break;
+        if(worstClass < 0)break;
 
         // ====================================================
         // 2. GET ACTIVE CODON TRACE
         // ====================================================
 
         vector<CodonTrace> fullTrace;
+        p->getCodonTrace(current,fullTrace);
 
-        p->getCodonTrace(
-            current,
-            fullTrace
-            );
-
-        if(fullTrace.empty())
-            break;
+        if(fullTrace.empty())break;
 
         // ====================================================
         // 3. DETERMINE WORST CLASS SEGMENT
         // ====================================================
 
-        const int explicitRules =
-            classCount - 1;
+        const int explicitRules =classCount - 1;
 
-        const int partSize =
-            genome_size /
-            explicitRules;
+        const int partSize =genome_size /explicitRules;
 
         int segmentStart = 0;
-        int segmentEnd =
-            genome_size;
+        int segmentEnd =genome_size;
 
-        bool useWholeGenome =
-            false;
+        bool useWholeGenome =false;
 
         /*
          * The last class is the default ELSE class and has
@@ -2525,36 +1935,22 @@ void Population::targetedWorstLocalSearch(
          */
 
         if(
-            worstClass >=
-            explicitRules
-            )
+            worstClass >=explicitRules)
         {
-            useWholeGenome =
-                true;
+            useWholeGenome =true;
         }
         else
         {
-            segmentStart =
-                worstClass *
-                partSize;
-
-            segmentEnd =
-                (
-                    worstClass + 1
-                    ) *
-                partSize;
+            segmentStart =worstClass *partSize;
+            segmentEnd =(worstClass + 1) *partSize;
 
             /*
              * Include any remainder in the final explicit
              * segment if necessary.
              */
-            if(
-                worstClass ==
-                explicitRules - 1
-                )
+            if(worstClass ==explicitRules - 1)
             {
-                segmentEnd =
-                    genome_size;
+                segmentEnd =genome_size;
             }
         }
 
@@ -2563,150 +1959,92 @@ void Population::targetedWorstLocalSearch(
         //    WORST CLASS
         // ====================================================
 
-        vector<CodonTrace>
-            candidates;
+        vector<CodonTrace>candidates;
 
         for(
-            const CodonTrace &item :
-            fullTrace
-            )
+            const CodonTrace &item :fullTrace)
         {
             if(
                 item.genomePos < 0 ||
-                item.genomePos >=
-                    genome_size
-                )
+                item.genomePos >=genome_size)
             {
                 continue;
             }
 
             if(useWholeGenome)
             {
-                candidates.push_back(
-                    item
-                    );
+                candidates.push_back(item);
             }
             else
             {
                 if(
-                    item.genomePos >=
-                        segmentStart &&
-                    item.genomePos <
-                        segmentEnd
-                    )
+                    item.genomePos >=segmentStart &&
+                    item.genomePos <segmentEnd)
                 {
-                    candidates.push_back(
-                        item
-                        );
+                    candidates.push_back(item);
                 }
             }
         }
 
-        if(candidates.empty())
-            continue;
+        if(candidates.empty())continue;
 
         // ====================================================
         // 5. CHOOSE ONE ACTIVE SEMANTIC CODON
         // ====================================================
 
-        const int traceIndex =
-            rand() %
-            static_cast<int>(
-                candidates.size()
-                );
+        const int traceIndex =rand() %static_cast<int>(candidates.size());
 
-        const CodonTrace item =
-            candidates[
-                traceIndex
-        ];
+        const CodonTrace item =candidates[traceIndex];
 
         if(item.ruleCount <= 1)
             continue;
 
-        if(
-            item.selectedRule < 0 ||
-            item.selectedRule >=
-                item.ruleCount
-            )
+        if(item.selectedRule < 0 ||item.selectedRule >=item.ruleCount)
         {
             continue;
         }
 
-        const int originalCodon =
-            current[
-                item.genomePos
-        ];
+        const int originalCodon =current[item.genomePos];
 
         // ====================================================
         // 6. TRY ALL SEMANTIC ALTERNATIVES
         // ====================================================
 
-        vector<int> bestCandidate =
-            current;
+        vector<int> bestCandidate =current;
 
-        double localBestFitness =
-            bestFitness;
+        double localBestFitness =bestFitness;
 
-        int bestProduction =
-            item.selectedRule;
+        int bestProduction =item.selectedRule;
 
-        for(
-            int desiredRule=0;
-            desiredRule<
-            item.ruleCount;
-            desiredRule++
-            )
+        for(int desiredRule=0;desiredRule<item.ruleCount;desiredRule++)
         {
-            if(
-                desiredRule ==
-                item.selectedRule
-                )
+            if(desiredRule ==item.selectedRule)
             {
                 continue;
             }
 
-            vector<int> trial =
-                current;
+            vector<int> trial =current;
 
             int newCodon =
-                codonForRule(
-                    originalCodon,
-                    item.ruleCount,
-                    desiredRule
-                    );
+                codonForRule(originalCodon,item.ruleCount,desiredRule);
 
-            if(
-                newCodon ==
-                originalCodon
-                )
+            if(newCodon ==originalCodon)
             {
                 continue;
             }
 
-            trial[
-                item.genomePos
-            ] =
-                newCodon;
+            trial[item.genomePos] =newCodon;
 
-            double trialFitness =
-                fitness(trial);
+            double trialFitness =fitness(trial);
 
             /*
              * Population::fitness() is maximized.
              */
-            if(
-                trialFitness >
-                localBestFitness
-                )
+            if(trialFitness >localBestFitness)
             {
-                localBestFitness =
-                    trialFitness;
-
-                bestCandidate =
-                    trial;
-
-                bestProduction =
-                    desiredRule;
+                localBestFitness =trialFitness;
+                bestCandidate =trial;
+                bestProduction =desiredRule;
             }
         }
 
@@ -2714,53 +2052,28 @@ void Population::targetedWorstLocalSearch(
         // 7. ACCEPT IMPROVEMENT
         // ====================================================
 
-        if(
-            localBestFitness >
-            bestFitness
-            )
+        if(localBestFitness >bestFitness)
         {
-            const char *typeName =
-                "UNKNOWN";
+            const char *typeName ="UNKNOWN";
 
-            if(
-                item.type ==
-                CodonType::FUNCTION
-                )
+            if(item.type ==CodonType::FUNCTION)
             {
-                typeName =
-                    "FUNCTION";
+                typeName ="FUNCTION";
             }
-            else if(
-                item.type ==
-                CodonType::
-                BINARY_OPERATOR
-                )
+            else if(item.type ==CodonType::BINARY_OPERATOR)
             {
-                typeName =
-                    "BINARY_OPERATOR";
+                typeName ="BINARY_OPERATOR";
             }
-            else if(
-                item.type ==
-                CodonType::
-                BOOLEAN_OPERATOR
-                )
+            else if(item.type ==CodonType::BOOLEAN_OPERATOR)
             {
-                typeName =
-                    "BOOLEAN_OPERATOR";
+                typeName ="BOOLEAN_OPERATOR";
             }
-            else if(
-                item.type ==
-                CodonType::VARIABLE
-                )
+            else if(item.type ==CodonType::VARIABLE)
             {
-                typeName =
-                    "VARIABLE";
+                typeName ="VARIABLE";
             }
 
-            const int newCodon =
-                bestCandidate[
-                    item.genomePos
-            ];
+            const int newCodon =bestCandidate[item.genomePos];
 
             printf(
                 "TARGETED_WORST[%d] "
@@ -2788,12 +2101,9 @@ void Population::targetedWorstLocalSearch(
 
             fflush(stdout);
 
-            current =
-                bestCandidate;
+            current =bestCandidate;
 
-            bestFitness =
-                localBestFitness;
-
+            bestFitness =localBestFitness;
             acceptedMoves++;
         }
     }
@@ -2802,18 +2112,12 @@ void Population::targetedWorstLocalSearch(
     // 8. COPY IMPROVED CHROMOSOME BACK
     // ========================================================
 
-    for(
-        int i=0;
-        i<genome_size;
-        i++
-        )
+    for(int i=0;i<genome_size;i++)
     {
-        genome[pos][i] =
-            current[i];
+        genome[pos][i] =current[i];
     }
 
-    fitness_array[pos] =
-        bestFitness;
+    fitness_array[pos] =bestFitness;
 
     printf(
         "TARGETED_WORST[%d] "
@@ -2826,57 +2130,38 @@ void Population::targetedWorstLocalSearch(
 
     fflush(stdout);
 }
-void Population::targetedLocalSearch(
-    int pos,
-    int iterations
-    )
+void Population::targetedLocalSearch(int pos,int iterations)
 {
     // --------------------------------------------------------
     // Validate arguments
     // --------------------------------------------------------
 
-    if (
-        pos < 0 ||
-        pos >= genome_count
-        )
+    if (pos < 0 ||pos >= genome_count)
     {
         return;
     }
 
-    if (iterations <= 0)
-        return;
-
-    if (genome_size <= 0)
-        return;
+    if (iterations <= 0)return;
+    if (genome_size <= 0)return;
 
     // --------------------------------------------------------
     // Targeted search currently requires ClassProgram.
     // --------------------------------------------------------
 
-    ClassProgram *p =
-        (ClassProgram *)program;
+    ClassProgram *p =(ClassProgram *)program;
 
-    if (p == NULL)
-        return;
+    if (p == NULL)return;
 
     // --------------------------------------------------------
     // Copy current genome
     // --------------------------------------------------------
 
     vector<int> current;
+    current.resize(genome_size);
 
-    current.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    for (int i = 0;i < genome_size;i++)
     {
-        current[i] =
-            genome[pos][i];
+        current[i] =genome[pos][i];
     }
 
     /*
@@ -2889,8 +2174,7 @@ void Population::targetedLocalSearch(
      * Therefore larger values are better.
      */
 
-    double bestFitness =
-        fitness(current);
+    double bestFitness =fitness(current);
 
     printf(
         "TARGETED[%d] START fitness=%20.10lf\n",
@@ -2900,18 +2184,13 @@ void Population::targetedLocalSearch(
 
     fflush(stdout);
 
-    int acceptedMoves =
-        0;
+    int acceptedMoves =0;
 
     // ========================================================
     // TARGETED ITERATIONS
     // ========================================================
 
-    for (
-        int iteration = 0;
-        iteration < iterations;
-        iteration++
-        )
+    for (int iteration = 0;iteration < iterations;iteration++)
     {
         // ----------------------------------------------------
         // Recompute mapping trace.
@@ -2922,11 +2201,7 @@ void Population::targetedLocalSearch(
         // ----------------------------------------------------
 
         vector<CodonTrace> trace;
-
-        p->getCodonTrace(
-            current,
-            trace
-            );
+        p->getCodonTrace(current,trace);
 
         if (trace.empty())
         {
@@ -2947,41 +2222,21 @@ void Population::targetedLocalSearch(
         // Randomly select one meaningful grammar decision.
         // ----------------------------------------------------
 
-        int traceIndex =
-            rand() %
-            static_cast<int>(
-                trace.size()
-                );
+        int traceIndex =rand() %static_cast<int>(trace.size());
 
-        CodonTrace item =
-            trace[
-                static_cast<size_t>(
-                    traceIndex
-                    )
-        ];
+        CodonTrace item =trace[static_cast<size_t>(traceIndex)];
 
-        if (
-            item.genomePos < 0 ||
-            item.genomePos >= genome_size
-            )
+        if (item.genomePos < 0 ||item.genomePos >= genome_size)
         {
             continue;
         }
 
-        if (
-            item.ruleCount <=
-            1
-            )
+        if (item.ruleCount <=1)
         {
             continue;
         }
 
-        if (
-            item.selectedRule <
-                0 ||
-            item.selectedRule >=
-                item.ruleCount
-            )
+        if (item.selectedRule <0 ||item.selectedRule >=item.ruleCount)
         {
             continue;
         }
@@ -2990,21 +2245,12 @@ void Population::targetedLocalSearch(
         // Best candidate for this grammar decision.
         // ----------------------------------------------------
 
-        vector<int> bestCandidate =
-            current;
+        vector<int> bestCandidate =current;
+        double localBestFitness =bestFitness;
 
-        double localBestFitness =
-            bestFitness;
-
-        int bestProduction =
-            item.selectedRule;
-
+        int bestProduction =item.selectedRule;
         int originalCodon =
-            current[
-                static_cast<size_t>(
-                    item.genomePos
-                    )
-        ];
+            current[static_cast<size_t>(item.genomePos)];
 
         // ====================================================
         // EXHAUSTIVE SEMANTIC NEIGHBORHOOD
@@ -3025,67 +2271,36 @@ void Population::targetedLocalSearch(
         // ====================================================
 
         for (
-            int desiredRule = 0;
-            desiredRule <
-            item.ruleCount;
-            desiredRule++
-            )
+            int desiredRule = 0;desiredRule <item.ruleCount;desiredRule++)
         {
-            if (
-                desiredRule ==
-                item.selectedRule
-                )
+            if (desiredRule ==item.selectedRule)
             {
                 continue;
             }
 
-            vector<int> candidate =
-                current;
+            vector<int> candidate =current;
 
             int newCodon =
-                codonForRule(
-                    originalCodon,
-                    item.ruleCount,
-                    desiredRule
-                    );
+                codonForRule(originalCodon,item.ruleCount,desiredRule);
 
-            if (
-                newCodon ==
-                originalCodon
-                )
+            if (newCodon ==originalCodon)
             {
                 continue;
             }
 
-            candidate[
-                static_cast<size_t>(
-                    item.genomePos
-                    )
-            ] =
-                newCodon;
+            candidate[static_cast<size_t>(item.genomePos)]=newCodon;
 
-            double candidateFitness =
-                fitness(
-                    candidate
-                    );
+            double candidateFitness =fitness(candidate);
 
             // ------------------------------------------------
             // Population fitness is maximized.
             // ------------------------------------------------
 
-            if (
-                candidateFitness >
-                localBestFitness
-                )
+            if (candidateFitness >localBestFitness)
             {
-                localBestFitness =
-                    candidateFitness;
-
-                bestCandidate =
-                    candidate;
-
-                bestProduction =
-                    desiredRule;
+                localBestFitness =candidateFitness;
+                bestCandidate =candidate;
+                bestProduction =desiredRule;
             }
         }
 
@@ -3093,64 +2308,33 @@ void Population::targetedLocalSearch(
         // ACCEPT BEST IMPROVING PRODUCTION
         // ====================================================
 
-        if (
-            localBestFitness >
-            bestFitness
-            )
+        if (localBestFitness >bestFitness)
         {
-            const char *typeName =
-                "UNKNOWN";
+            const char *typeName ="UNKNOWN";
 
-            if (
-                item.type ==
-                CodonType::FUNCTION
-                )
+            if (item.type ==CodonType::FUNCTION)
             {
-                typeName =
-                    "FUNCTION";
+                typeName ="FUNCTION";
             }
-            else if (
-                item.type ==
-                CodonType::
-                BINARY_OPERATOR
-                )
+            else if (item.type ==CodonType::BINARY_OPERATOR)
             {
-                typeName =
-                    "BINARY_OPERATOR";
+                typeName ="BINARY_OPERATOR";
             }
-            else if (
-                item.type ==
-                CodonType::
-                BOOLEAN_OPERATOR
-                )
+            else if (item.type ==CodonType::BOOLEAN_OPERATOR)
             {
-                typeName =
-                    "BOOLEAN_OPERATOR";
+                typeName ="BOOLEAN_OPERATOR";
             }
-            else if (
-                item.type ==
-                CodonType::VARIABLE
-                )
+            else if (item.type ==CodonType::VARIABLE)
             {
-                typeName =
-                    "VARIABLE";
+                typeName ="VARIABLE";
             }
-            else if (
-                item.type ==
-                CodonType::
-                CLASS_OUTPUT
-                )
+            else if (item.type ==CodonType::CLASS_OUTPUT)
             {
-                typeName =
-                    "CLASS_OUTPUT";
+                typeName ="CLASS_OUTPUT";
             }
 
             int newCodon =
-                bestCandidate[
-                    static_cast<size_t>(
-                        item.genomePos
-                        )
-            ];
+                bestCandidate[static_cast<size_t>(item.genomePos)];
 
             printf(
                 "TARGETED[%d] "
@@ -3174,11 +2358,8 @@ void Population::targetedLocalSearch(
 
             fflush(stdout);
 
-            current =
-                bestCandidate;
-
-            bestFitness =
-                localBestFitness;
+            current =bestCandidate;
+            bestFitness =localBestFitness;
 
             acceptedMoves++;
         }
@@ -3188,22 +2369,12 @@ void Population::targetedLocalSearch(
     // COPY IMPROVED GENOME BACK
     // ========================================================
 
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    for (int i = 0;i < genome_size;i++)
     {
-        genome[pos][i] =
-            current[
-                static_cast<size_t>(
-                    i
-                    )
-        ];
+        genome[pos][i] =current[static_cast<size_t>(i)];
     }
 
-    fitness_array[pos] =
-        bestFitness;
+    fitness_array[pos] =bestFitness;
 
     printf(
         "TARGETED[%d] END fitness=%20.10lf accepted=%d\n",
@@ -3219,34 +2390,20 @@ void Population::targetedLocalSearch(
 // LOCAL SEARCH DISPATCHER
 // ============================================================
 
-void Population::localSearch(
-    int pos
-    )
+void Population::localSearch(int pos)
 {
     vector<int> g;
-
-    g.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    g.resize(genome_size);
+    for (int i = 0;i < genome_size;i++)
     {
-        g[i] =
-            genome[pos][i];
+        g[i] =genome[pos][i];
     }
 
     // ========================================================
     // CROSSOVER LOCAL SEARCH
     // ========================================================
 
-    if (
-        localMethod ==
-        "crossover"
-        )
+    if (localMethod =="crossover")
     {
         crossItem(pos);
     }
@@ -3255,50 +2412,23 @@ void Population::localSearch(
     // MUTATE WORST CLASS
     // ========================================================
 
-    else if (
-        localMethod ==
-        "mutateWorst"
-        )
+    else if (localMethod =="mutateWorst")
     {
-        ClassProgram *p =
-            (ClassProgram *)program;
-
+        ClassProgram *p =(ClassProgram *)program;
         vector<double> val;
 
-        val.resize(
-            p->getClass()
-            );
+        val.resize(p->getClass());
+        p->getErrorPerClass(g,val);
 
-        p->getErrorPerClass(
-            g,
-            val
-            );
+        int maxIndex =0;
+        double maxValue =val[0];
 
-        int maxIndex =
-            0;
-
-        double maxValue =
-            val[0];
-
-        for (
-            int i = 0;
-            i <
-            static_cast<int>(
-                val.size()
-                );
-            i++
-            )
+        for (int i = 0;i <static_cast<int>(val.size());i++)
         {
-            if (
-                val[i] >
-                maxValue
-                )
+            if (val[i] >maxValue)
             {
-                maxIndex =
-                    i;
-
-                maxValue =
-                    val[i];
+                maxIndex =i;
+                maxValue =val[i];
             }
         }
 
@@ -3308,20 +2438,13 @@ void Population::localSearch(
             maxValue
             );
 
-        if (
-            maxIndex ==
-            p->getClass() -
-                1
-            )
+        if (maxIndex ==p->getClass() -1)
         {
             mutateItem(pos);
         }
         else
         {
-            mutateItemAtClass(
-                pos,
-                maxIndex
-                );
+            mutateItemAtClass(pos,maxIndex);
         }
     }
 
@@ -3329,10 +2452,7 @@ void Population::localSearch(
     // RANDOM LOCAL MUTATION
     // ========================================================
 
-    else if (
-        localMethod ==
-        "mutate"
-        )
+    else if (localMethod =="mutate")
     {
         mutateItem(pos);
     }
@@ -3341,30 +2461,14 @@ void Population::localSearch(
     // SIMULATED ANNEALING
     // ========================================================
 
-    else if (
-        localMethod ==
-        "siman"
-        )
+    else if (localMethod =="siman")
     {
-        double f =
-            fitness_array[pos];
-
-        g =
-            simulatedAnnealing(
-                g
-                );
-
-        fitness_array[pos] =
-            fitness(g);
-
-        for (
-            int j = 0;
-            j < genome_size;
-            j++
-            )
+        double f =fitness_array[pos];
+        g =simulatedAnnealing(g);
+        fitness_array[pos] =fitness(g);
+        for (int j = 0;j < genome_size;j++)
         {
-            genome[pos][j] =
-                g[j];
+            genome[pos][j] =g[j];
         }
 
         printf(
@@ -3379,10 +2483,7 @@ void Population::localSearch(
     // DIFFERENTIAL EVOLUTION LOCAL SEARCH
     // ========================================================
 
-    else if (
-        localMethod ==
-        "de"
-        )
+    else if (localMethod =="de")
     {
         int randomA;
         int randomB;
@@ -3390,121 +2491,48 @@ void Population::localSearch(
 
         do
         {
-            randomA =
-                rand() %
-                genome_count;
-
-            randomB =
-                rand() %
-                genome_count;
-
-            randomC =
-                rand() %
-                genome_count;
-
+            randomA =rand() %genome_count;
+            randomB =rand() %genome_count;
+            randomC =rand() %genome_count;
         }
-        while (
-            randomA ==
-                randomB ||
-            randomB ==
-                randomC ||
-            randomC ==
-                randomA
-            );
+        while (randomA ==randomB ||randomB ==randomC ||randomC ==randomA);
 
-        double CR =
-            0.9;
+        double CR =0.9;
+        double F =0.8;
 
-        double F =
-            0.8;
-
-        int randomIndex =
-            rand() %
-            genome_size;
-
-        for (
-            int i = 0;
-            i < genome_size;
-            i++
-            )
+        int randomIndex =rand() %genome_size;
+        for (int i = 0;i < genome_size;i++)
         {
-            if (
-                i ==
-                    randomIndex ||
-                rand() *
-                        1.0 /
-                        RAND_MAX <=
-                    CR
-                )
+            if (i ==randomIndex ||rand() *1.0 /RAND_MAX <=CR)
             {
-                int old_value =
-                    genome[pos][i];
+                int old_value =genome[pos][i];
 
-                F =
-                    -0.5 +
-                    2.0 *
-                        rand() *
-                        1.0 /
-                        RAND_MAX;
+                F =-0.5 +2.0 *rand() *1.0 /RAND_MAX;
 
                 genome[pos][i] =
-                    genome[
-                        randomA
-                ][i] +
-                    abs(
-                        F *
-                        (
-                            genome[
-                                randomB
-                ][i] -
-                            genome[
-                                randomC
-                ][i]
-                            )
-                        );
+                    genome[randomA][i] +
+                    abs(F *(genome[randomB][i] -genome[randomC][i]));
 
-                if (
-                    genome[pos][i] <
-                    0
-                    )
+                if (genome[pos][i] <0)
                 {
-                    genome[pos][i] =
-                        old_value;
-
+                    genome[pos][i] =old_value;
                     continue;
                 }
 
-                for (
-                    int j = 0;
-                    j < genome_size;
-                    j++
-                    )
+                for (int j = 0;j < genome_size;j++)
                 {
-                    g[j] =
-                        genome[pos][j];
+                    g[j] =genome[pos][j];
                 }
 
-                double trial_fitness =
-                    fitness(g);
+                double trial_fitness =fitness(g);
 
-                if (
-                    fabs(
-                        trial_fitness
-                        ) <
-                    fabs(
-                        fitness_array[
-                            pos
-                ]
-                        )
-                    )
+                if (fabs(trial_fitness) <fabs(fitness_array[pos]))
                 {
-                    fitness_array[pos] =
-                        trial_fitness;
+                    fitness_array[pos] =trial_fitness;
                 }
                 else
                 {
-                    genome[pos][i] =
-                        old_value;
+                    genome[pos][i] =old_value;
                 }
             }
         }
@@ -3514,26 +2542,13 @@ void Population::localSearch(
     // INTEGER GRADIENT DESCENT
     // ========================================================
 
-    else if (
-        localMethod ==
-        "gd"
-        )
+    else if (localMethod =="gd")
     {
-        integerLocalSearch(
-            g
-            );
+        integerLocalSearch(g);
 
-        double ff =
-            fitness(g);
+        double ff =fitness(g);
 
-        if (
-            fabs(ff) <
-            fabs(
-                fitness_array[
-                    pos
-        ]
-                )
-            )
+        if (fabs(ff) <fabs(fitness_array[pos]))
         {
             printf(
                 "GD. NEW VALUE[%d] = %lf=>%lf\n",
@@ -3542,20 +2557,11 @@ void Population::localSearch(
                 ff
                 );
 
-            fitness_array[pos] =
-                ff;
+            fitness_array[pos] =ff;
 
-            for (
-                int j = 0;
-                j <
-                static_cast<int>(
-                    g.size()
-                    );
-                j++
-                )
+            for (int j = 0;j <static_cast<int>(g.size());j++)
             {
-                genome[pos][j] =
-                    g[j];
+                genome[pos][j] =g[j];
             }
         }
     }
@@ -3564,27 +2570,13 @@ void Population::localSearch(
     // INTEGER ADAM
     // ========================================================
 
-    else if (
-        localMethod ==
-        "adam"
-        )
+    else if (localMethod =="adam")
     {
-        g =
-            integerAdam(
-                g
-                );
+        g =integerAdam(g);
 
-        double ff =
-            fitness(g);
+        double ff =fitness(g);
 
-        if (
-            fabs(ff) <
-            fabs(
-                fitness_array[
-                    pos
-        ]
-                )
-            )
+        if (fabs(ff) <fabs(fitness_array[pos]))
         {
             printf(
                 "ADAM. NEW VALUE[%d] = %lf=>%lf\n",
@@ -3593,20 +2585,12 @@ void Population::localSearch(
                 ff
                 );
 
-            fitness_array[pos] =
-                ff;
+            fitness_array[pos] =ff;
 
-            for (
-                int j = 0;
-                j <
-                static_cast<int>(
-                    g.size()
-                    );
-                j++
-                )
+            for (int j = 0;j <static_cast<int>(g.size());
+                j++)
             {
-                genome[pos][j] =
-                    g[j];
+                genome[pos][j] =g[j];
             }
         }
     }
@@ -3616,30 +2600,15 @@ void Population::localSearch(
     // TARGETED GENOTYPE LOCAL SEARCH
     // ========================================================
 
-    else if (
-        localMethod ==
-        "targeted"
-        )
+    else if (localMethod =="targeted")
     {
-        targetedLocalSearch(
-            pos,
-            targetedIterations
-            );
+        targetedLocalSearch(pos,targetedIterations);
     }
-    else if(
-        localMethod ==
-        "targetedWorst"
-        )
+    else if(localMethod =="targetedWorst")
     {
-        targetedWorstLocalSearch(
-            pos,
-            targetedIterations
-            );
+        targetedWorstLocalSearch(pos,targetedIterations);
     }
-    else if(
-        localMethod ==
-        "targetedBest"
-        )
+    else if(localMethod =="targetedBest")
     {
           printf("BEST!!!!!!!!\n");
         targetedBestLocalSearch(
@@ -3647,10 +2616,7 @@ void Population::localSearch(
             targetedIterations
             );
     }
-    else if(
-        localMethod ==
-        "constants"
-        )
+    else if(localMethod =="constants")
     {
         printf("CONST!!!!!!!!\n");
         constantsLocalSearch(
@@ -3667,38 +2633,24 @@ void Population::localSearch(
 double Population::evaluateBestFitness()
 {
     vector<int> g;
+    g.resize(genome_size);
 
-    g.resize(
-        genome_size
-        );
-
-    for (
-        int i = 0;
-        i < genome_size;
-        i++
-        )
+    for (int i = 0;i < genome_size;i++)
     {
-        g[i] =
-            genome[0][i];
+        g[i] =genome[0][i];
     }
 
-    return
-        fitness(g);
-}
-void Population::setTargetedStagnationLimit(
-    int n
-    )
-{
-    if(n >= 0)
-        targetedStagnationLimit = n;
+    return fitness(g);
 }
 
-void Population::setTargetedBurstIterations(
-    int n
-    )
+void Population::setTargetedStagnationLimit(int n)
 {
-    if(n > 0)
-        targetedBurstIterations = n;
+    if(n >= 0)targetedStagnationLimit = n;
+}
+
+void Population::setTargetedBurstIterations(int n)
+{
+    if(n > 0)targetedBurstIterations = n;
 }
 void Population::printTargetedStatistics() const
 {
@@ -3762,42 +2714,20 @@ void Population::printTargetedStatistics() const
 // ============================================================
 
 
-void Population::targetedBestLocalSearch(
-    int pos,
-    int iterations
-    )
+void Population::targetedBestLocalSearch(int pos,int iterations)
 {
-    if(
-        pos < 0 ||
-        pos >= genome_count
-        )
-        return;
+    if(pos < 0 ||pos >= genome_count)return;
+    if(iterations <= 0)return;
+    ClassProgram *p =(ClassProgram *)program;
 
-    if(iterations <= 0)
-        return;
-
-    ClassProgram *p =
-        (ClassProgram *)program;
-
-    if(p == NULL)
-        return;
-
-    vector<int> current(
-        genome_size
-        );
-
-    for(
-        int i=0;
-        i<genome_size;
-        i++
-        )
+    if(p == NULL)return;
+    vector<int> current(genome_size);
+    for(int i=0;i<genome_size;i++)
     {
-        current[i] =
-            genome[pos][i];
+        current[i] =genome[pos][i];
     }
 
-    double bestFitness =
-        fitness(current);
+    double bestFitness =fitness(current);
 
     printf(
         "TARGETED_BEST[%d] START fitness=%.10lf\n",
@@ -3814,20 +2744,12 @@ void Population::targetedBestLocalSearch(
     // ========================================================
 
     for(
-        int iteration=0;
-        iteration<iterations;
-        iteration++
-        )
+        int iteration=0;iteration<iterations;iteration++)
     {
         vector<CodonTrace> trace;
+        p->getCodonTrace(current,trace);
 
-        p->getCodonTrace(
-            current,
-            trace
-            );
-
-        if(trace.empty())
-            break;
+        if(trace.empty())break;
 
         // ====================================================
         // ADAPTIVE SUCCESS RATES
@@ -3835,223 +2757,130 @@ void Population::targetedBestLocalSearch(
 
         double functionRate =
             targetedSuccessRate(
-                targetedFunctionAttempts,
-                targetedFunctionAccepted
-                );
+                targetedFunctionAttempts,targetedFunctionAccepted);
 
         double binaryRate =
             targetedSuccessRate(
-                targetedBinaryAttempts,
-                targetedBinaryAccepted
-                );
+                targetedBinaryAttempts,targetedBinaryAccepted);
 
         double booleanRate =
             targetedSuccessRate(
-                targetedBooleanAttempts,
-                targetedBooleanAccepted
-                );
+                targetedBooleanAttempts,targetedBooleanAccepted);
 
         double variableRate =
-            targetedSuccessRate(
-                targetedVariableAttempts,
-                targetedVariableAccepted
-                );
+            targetedSuccessRate(targetedVariableAttempts,targetedVariableAccepted);
 
         // ====================================================
         // FIND GLOBAL BEST MOVE
         // ====================================================
 
-        vector<int> globalBestGenome =
-            current;
+        vector<int> globalBestGenome =current;
 
-        double globalBestFitness =
-            bestFitness;
+        double globalBestFitness =bestFitness;
 
-        int globalCodonPos =
-            -1;
+        int globalCodonPos =-1;
+        int globalOldRule =-1;
+        int globalNewRule =-1;
 
-        int globalOldRule =
-            -1;
-
-        int globalNewRule =
-            -1;
-
-        CodonType globalType =
-            CodonType::UNKNOWN;
+        CodonType globalType =CodonType::UNKNOWN;
 
         // ====================================================
         // TEST ALL ACTIVE SEMANTIC CODONS
         // ====================================================
 
-        for(
-            size_t t=0;
-            t<trace.size();
-            t++
-            )
+        for(size_t t=0;t<trace.size();t++)
         {
-            const CodonTrace &item =
-                trace[t];
+            const CodonTrace &item =trace[t];
 
-            if(
-                item.genomePos < 0 ||
-                item.genomePos >= genome_size
-                )
+            if(item.genomePos < 0 ||item.genomePos >= genome_size)
                 continue;
 
-            if(item.ruleCount <= 1)
-                continue;
+            if(item.ruleCount <= 1)continue;
 
             // ------------------------------------------------
             // Adaptive sampling
             // ------------------------------------------------
 
-            double probability =
-                1.0;
+            double probability =1.0;
 
-            if(
-                item.type ==
-                CodonType::FUNCTION
-                )
+            if(item.type ==CodonType::FUNCTION)
             {
-                probability =
-                    functionRate;
+                probability =functionRate;
             }
-            else if(
-                item.type ==
-                CodonType::
-                BINARY_OPERATOR
-                )
+            else if(item.type ==CodonType::BINARY_OPERATOR)
             {
-                probability =
-                    binaryRate;
+                probability =binaryRate;
             }
-            else if(
-                item.type ==
-                CodonType::
-                BOOLEAN_OPERATOR
-                )
+            else if(item.type ==CodonType::BOOLEAN_OPERATOR)
             {
-                probability =
-                    booleanRate;
+                probability =booleanRate;
             }
-            else if(
-                item.type ==
-                CodonType::VARIABLE
-                )
+            else if(item.type ==CodonType::VARIABLE)
             {
-                probability =
-                    variableRate;
+                probability =variableRate;
             }
 
             /*
              * Keep a minimum exploration probability.
              */
-            probability =
-                0.20 +
-                0.80 *
-                    probability;
+            probability =0.20 +0.80 *probability;
 
-            double r =
-                rand() *
-                1.0 /
-                RAND_MAX;
+            double r =rand() *1.0 /RAND_MAX;
 
             if(r > probability)
                 continue;
 
-            int originalCodon =
-                current[
-                    item.genomePos
-            ];
+            int originalCodon =current[item.genomePos];
 
             // =================================================
             // TRY ALL PRODUCTIONS FOR THIS CODON
             // =================================================
 
             for(
-                int desiredRule=0;
-                desiredRule<
-                item.ruleCount;
-                desiredRule++
-                )
+                int desiredRule=0;desiredRule<item.ruleCount;desiredRule++)
             {
-                if(
-                    desiredRule ==
-                    item.selectedRule
-                    )
+                if(desiredRule ==item.selectedRule)
                     continue;
 
                 // --------------------------------------------
                 // Statistics
                 // --------------------------------------------
 
-                if(
-                    item.type ==
-                    CodonType::FUNCTION
-                    )
+                if(item.type ==CodonType::FUNCTION)
                     targetedFunctionAttempts++;
 
-                else if(
-                    item.type ==
-                    CodonType::
-                    BINARY_OPERATOR
-                    )
+                else if(item.type ==CodonType::BINARY_OPERATOR)
                     targetedBinaryAttempts++;
 
-                else if(
-                    item.type ==
-                    CodonType::
-                    BOOLEAN_OPERATOR
-                    )
+                else if(item.type ==CodonType::BOOLEAN_OPERATOR)
                     targetedBooleanAttempts++;
 
-                else if(
-                    item.type ==
-                    CodonType::VARIABLE
-                    )
+                else if(item.type ==CodonType::VARIABLE)
                     targetedVariableAttempts++;
 
-                vector<int> candidate =
-                    current;
+                vector<int> candidate =current;
 
-                candidate[
-                    item.genomePos
-                ] =
+                candidate[item.genomePos] =
                     codonForRule(
                         originalCodon,
                         item.ruleCount,
                         desiredRule
                         );
 
-                double candidateFitness =
-                    fitness(candidate);
+                double candidateFitness =fitness(candidate);
 
                 // =============================================
                 // GLOBAL BEST IMPROVEMENT
                 // =============================================
 
-                if(
-                    candidateFitness >
-                    globalBestFitness
-                    )
+                if(candidateFitness >globalBestFitness)
                 {
-                    globalBestFitness =
-                        candidateFitness;
-
-                    globalBestGenome =
-                        candidate;
-
-                    globalCodonPos =
-                        item.genomePos;
-
-                    globalOldRule =
-                        item.selectedRule;
-
-                    globalNewRule =
-                        desiredRule;
-
-                    globalType =
-                        item.type;
+                    globalBestFitness =candidateFitness;
+                    globalBestGenome =candidate;
+                    globalCodonPos =item.genomePos;
+                    globalOldRule =item.selectedRule;
+                    globalNewRule =desiredRule;
+                    globalType =item.type;
                 }
             }
         }
@@ -4060,10 +2889,7 @@ void Population::targetedBestLocalSearch(
         // NO IMPROVEMENT
         // ====================================================
 
-        if(
-            globalBestFitness <=
-            bestFitness
-            )
+        if(globalBestFitness <=bestFitness)
         {
             /*
              * We reached a local optimum for the currently
@@ -4076,49 +2902,27 @@ void Population::targetedBestLocalSearch(
         // ACCEPT GLOBAL BEST MOVE
         // ====================================================
 
-        const char *typeName =
-            "UNKNOWN";
+        const char *typeName ="UNKNOWN";
 
-        if(
-            globalType ==
-            CodonType::FUNCTION
-            )
+        if(globalType ==CodonType::FUNCTION)
         {
-            typeName =
-                "FUNCTION";
-
+            typeName ="FUNCTION";
             targetedFunctionAccepted++;
         }
-        else if(
-            globalType ==
-            CodonType::
-            BINARY_OPERATOR
-            )
+        else if(globalType ==CodonType::BINARY_OPERATOR)
         {
-            typeName =
-                "BINARY_OPERATOR";
-
+            typeName ="BINARY_OPERATOR";
             targetedBinaryAccepted++;
         }
-        else if(
-            globalType ==
-            CodonType::
-            BOOLEAN_OPERATOR
-            )
+        else if(globalType ==CodonType::BOOLEAN_OPERATOR)
         {
-            typeName =
-                "BOOLEAN_OPERATOR";
+            typeName ="BOOLEAN_OPERATOR";
 
             targetedBooleanAccepted++;
         }
-        else if(
-            globalType ==
-            CodonType::VARIABLE
-            )
+        else if(globalType ==CodonType::VARIABLE)
         {
-            typeName =
-                "VARIABLE";
-
+            typeName ="VARIABLE";
             targetedVariableAccepted++;
         }
 
@@ -4141,11 +2945,9 @@ void Population::targetedBestLocalSearch(
 
         fflush(stdout);
 
-        current =
-            globalBestGenome;
+        current =globalBestGenome;
 
-        bestFitness =
-            globalBestFitness;
+        bestFitness =globalBestFitness;
 
         acceptedMoves++;
     }
@@ -4154,18 +2956,12 @@ void Population::targetedBestLocalSearch(
     // COPY BACK
     // ========================================================
 
-    for(
-        int i=0;
-        i<genome_size;
-        i++
-        )
+    for(int i=0;i<genome_size;i++)
     {
-        genome[pos][i] =
-            current[i];
+        genome[pos][i] =current[i];
     }
 
-    fitness_array[pos] =
-        bestFitness;
+    fitness_array[pos] =bestFitness;
 
     printf(
         "TARGETED_BEST[%d] END fitness=%.10lf accepted=%d\n",
@@ -4201,46 +2997,29 @@ void Population::targetedBestLocalSearch(
 // depending on the grammar productions.
 // ============================================================
 
-void Population::constantsLocalSearch(
-    int pos,
-    int iterations
-    )
+void Population::constantsLocalSearch(int pos,int iterations)
 {
     // --------------------------------------------------------
     // Checks
     // --------------------------------------------------------
 
-    if(
-        pos < 0 ||
-        pos >= genome_count
-        )
-        return;
+    if(pos < 0 ||pos >= genome_count)return;
 
-    if(iterations <= 0)
-        return;
+    if(iterations <= 0)return;
 
-    ClassProgram *p =
-        (ClassProgram *)program;
+    ClassProgram *p =(ClassProgram *)program;
 
-    if(p == NULL)
-        return;
+    if(p == NULL)return;
 
     // --------------------------------------------------------
     // Copy current chromosome
     // --------------------------------------------------------
 
-    vector<int> current(
-        genome_size
-        );
+    vector<int> current(genome_size);
 
-    for(
-        int i=0;
-        i<genome_size;
-        i++
-        )
+    for(int i=0;i<genome_size;i++)
     {
-        current[i] =
-            genome[pos][i];
+        current[i] =genome[pos][i];
     }
 
     /*
@@ -4248,8 +3027,7 @@ void Population::constantsLocalSearch(
      *
      *      -program->fitness(...)
      */
-    double bestFitness =
-        fitness(current);
+    double bestFitness =fitness(current);
 
     printf(
         "CONSTANTS[%d] START fitness=%.10lf\n",
@@ -4265,11 +3043,7 @@ void Population::constantsLocalSearch(
     // LOCAL SEARCH ITERATIONS
     // ========================================================
 
-    for(
-        int iteration=0;
-        iteration<iterations;
-        iteration++
-        )
+    for(int iteration=0;iteration<iterations;iteration++)
     {
         // ----------------------------------------------------
         // Rebuild trace because an accepted constant change
@@ -4278,31 +3052,19 @@ void Population::constantsLocalSearch(
 
         vector<CodonTrace> trace;
 
-        p->getCodonTrace(
-            current,
-            trace
-            );
+        p->getCodonTrace(current,trace);
 
         // ----------------------------------------------------
         // Keep only constant-related codons
         // ----------------------------------------------------
 
-        vector<CodonTrace>
-            constantTrace;
+        vector<CodonTrace> constantTrace;
 
-        for(
-            const CodonTrace &item :
-            trace
-            )
+        for(const CodonTrace &item :trace)
         {
-            if(
-                item.type ==
-                CodonType::CONSTANT
-                )
+            if(item.type ==CodonType::CONSTANT)
             {
-                constantTrace.push_back(
-                    item
-                    );
+                constantTrace.push_back(item);
             }
         }
 
@@ -4327,35 +3089,19 @@ void Population::constantsLocalSearch(
         // ----------------------------------------------------
 
         int selected =
-            rand() %
-            static_cast<int>(
-                constantTrace.size()
-                );
+            rand() %static_cast<int>(constantTrace.size());
 
         CodonTrace item =
-            constantTrace[
-                static_cast<size_t>(
-                    selected
-                    )
-        ];
+            constantTrace[static_cast<size_t>(selected)];
 
-        if(
-            item.genomePos < 0 ||
-            item.genomePos >=
-                genome_size
-            )
+        if(item.genomePos < 0 ||item.genomePos >=genome_size)
         {
             continue;
         }
 
-        if(item.ruleCount <= 1)
-            continue;
+        if(item.ruleCount <= 1)continue;
 
-        if(
-            item.selectedRule < 0 ||
-            item.selectedRule >=
-                item.ruleCount
-            )
+        if(item.selectedRule < 0 ||item.selectedRule >=item.ruleCount)
         {
             continue;
         }
@@ -4364,21 +3110,13 @@ void Population::constantsLocalSearch(
         // Current integer codon
         // ----------------------------------------------------
 
-        int originalCodon =
-            current[
-                static_cast<size_t>(
-                    item.genomePos
-                    )
-        ];
+        int originalCodon =current[static_cast<size_t>(item.genomePos)];
 
-        vector<int> bestCandidate =
-            current;
+        vector<int> bestCandidate =current;
 
-        double localBestFitness =
-            bestFitness;
+        double localBestFitness =bestFitness;
 
-        int bestProduction =
-            item.selectedRule;
+        int bestProduction =item.selectedRule;
 
         // ====================================================
         // TRY ALL ALTERNATIVE PRODUCTIONS
@@ -4387,61 +3125,34 @@ void Population::constantsLocalSearch(
         // non-terminal are examined.
         // ====================================================
 
-        for(
-            int desiredRule=0;
-            desiredRule<
-            item.ruleCount;
-            desiredRule++
-            )
+        for(int desiredRule=0;desiredRule<item.ruleCount;desiredRule++)
         {
-            if(
-                desiredRule ==
-                item.selectedRule
-                )
+            if(desiredRule ==item.selectedRule)
             {
                 continue;
             }
 
-            vector<int> candidate =
-                current;
+            vector<int> candidate =current;
 
             int newCodon =
-                codonForRule(
-                    originalCodon,
-                    item.ruleCount,
-                    desiredRule
-                    );
+                codonForRule(originalCodon,item.ruleCount,desiredRule);
 
             if(newCodon == originalCodon)
                 continue;
 
-            candidate[
-                static_cast<size_t>(
-                    item.genomePos
-                    )
-            ] =
-                newCodon;
+            candidate[static_cast<size_t>(item.genomePos)]=newCodon;
 
-            double candidateFitness =
-                fitness(candidate);
+            double candidateFitness =fitness(candidate);
 
             // ------------------------------------------------
             // Larger Population fitness is better.
             // ------------------------------------------------
 
-            if(
-                candidateFitness >
-                localBestFitness
-                )
+            if(candidateFitness >localBestFitness)
             {
-                localBestFitness =
-                    candidateFitness;
-
-                bestCandidate =
-                    candidate;
-
-                bestProduction =
-                    desiredRule;
+                localBestFitness =candidateFitness;
+                bestCandidate =candidate;
+                bestProduction =desiredRule;
             }
         }
 
@@ -4449,17 +3160,10 @@ void Population::constantsLocalSearch(
         // ACCEPT
         // ====================================================
 
-        if(
-            localBestFitness >
-            bestFitness
-            )
+        if(localBestFitness >bestFitness)
         {
             int newCodon =
-                bestCandidate[
-                    static_cast<size_t>(
-                        item.genomePos
-                        )
-            ];
+                bestCandidate[static_cast<size_t>(item.genomePos)];
 
             printf(
                 "CONSTANTS[%d] "
@@ -4481,12 +3185,8 @@ void Population::constantsLocalSearch(
 
             fflush(stdout);
 
-            current =
-                bestCandidate;
-
-            bestFitness =
-                localBestFitness;
-
+            current =bestCandidate;
+            bestFitness =localBestFitness;
             acceptedMoves++;
         }
     }
@@ -4495,22 +3195,11 @@ void Population::constantsLocalSearch(
     // COPY BEST CHROMOSOME BACK
     // ========================================================
 
-    for(
-        int i=0;
-        i<genome_size;
-        i++
-        )
+    for(int i=0;i<genome_size;i++)
     {
-        genome[pos][i] =
-            current[
-                static_cast<size_t>(
-                    i
-                    )
-        ];
+        genome[pos][i] =current[static_cast<size_t>(i)];
     }
-
-    fitness_array[pos] =
-        bestFitness;
+    fitness_array[pos] = bestFitness;
 
     printf(
         "CONSTANTS[%d] "
@@ -4525,25 +3214,12 @@ void Population::constantsLocalSearch(
 }
 Population::~Population()
 {
-    for (
-        int i = 0;
-        i < genome_count;
-        i++
-        )
+    for (int i = 0;i < genome_count;i++)
     {
-        delete[]
-            children[i];
-
-        delete[]
-            genome[i];
+        delete[]children[i];
+        delete[]genome[i];
     }
-
-    delete[]
-        genome;
-
-    delete[]
-        children;
-
-    delete[]
-        fitness_array;
+    delete[]genome;
+    delete[]children;
+    delete[]fitness_array;
 }
