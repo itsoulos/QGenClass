@@ -133,6 +133,9 @@
     belowskip=0.3em,
     xleftmargin=0em
 }
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \end_preamble
 \options journal,article,submit,moreauthors
 \use_default_options false
@@ -904,6 +907,13 @@ This section first provides a detailed description of the rule construction meth
 
 \begin_layout Subsection
 The rule construction method
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:The-rule-construction"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -929,7 +939,7 @@ ref{alg:genclass_bnf}
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -1219,11 +1229,13 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
 	filename mapping.png
+	lyxscale 50
 	scale 25
 
 \end_inset
@@ -1410,6 +1422,7 @@ Evaluate
 \end_inset
 
 .
+ 
 \end_layout
 
 \end_deeper
@@ -1541,17 +1554,15 @@ Mutation
 
  is generated.
  If 
-\backslash
-(r 
-\backslash
-leq p_m
-\backslash
-),
+\begin_inset Formula $r\leq p_{m}$
+\end_inset
+
+,
  where 
-\backslash
-(p_m
-\backslash
-) denotes the mutation rate,
+\begin_inset Formula $p_{m}$
+\end_inset
+
+ denotes the mutation rate,
  the corresponding gene is replaced by a randomly generated integer value within the predefined range of admissible codon values.
  Otherwise,
  the gene remains unchanged.
@@ -1606,11 +1617,13 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
 	filename onepoint.png
+	lyxscale 50
 	scale 15
 
 \end_inset
@@ -1650,6 +1663,1611 @@ name "fig:onePoint"
 The proposed crossover methods
 \end_layout
 
+\begin_layout Standard
+In the present work,
+ additional crossover techniques are introduced with the aim of improving the performance of GenClass and enhancing its ability to escape from local minima of the classification error function.
+ These crossover operations are applied at each generation of the evolutionary process to a subset of the current population.
+ More specifically,
+ a number of chromosomes are randomly selected from the population and genetic material from each selected chromosome is exchanged with that of another randomly selected chromosome.
+ In this way,
+ new combinations of genetic material are introduced into the population,
+ potentially increasing population diversity and allowing the evolutionary search to explore previously unvisited regions of the search space.
+ The number of chromosomes subjected to these additional crossover operations at each generation is denoted by
+\begin_inset Formula $\ensuremath{N_{K}}$
+\end_inset
+
+throughout the remainder of this work.
+\end_layout
+
+\begin_layout Standard
+The proposed procedure is incorporated into the evolutionary algorithm described in subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:The-rule-construction"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ and is executed at each generation after the standard genetic operators of selection,
+ crossover,
+ and mutation have been applied.
+ In this way,
+ the additional crossover mechanism operates as an enhancement of the original evolutionary process without modifying its basic structure.
+\end_layout
+
+\begin_layout Standard
+The proposed crossover techniques,
+ denoted throughout this work as Standard,
+ Targeted,
+ and TargetedWorst,
+ differ in the strategy employed to select and exchange genetic material between chromosomes.
+ A detailed description of each technique is provided in the following subsections.
+\end_layout
+
+\begin_layout Subsubsection
+The Standard crossover method 
+\end_layout
+
+\begin_layout Standard
+In the Standard crossover technique,
+ for each of the 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ selected chromosomes,
+ denoted by 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+,
+ a subset of 
+\begin_inset Formula $k$
+\end_inset
+
+ chromosomes is randomly selected from the current population,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+S=\{g_{r_{1}},g_{r_{2}},\ldots,g_{r_{k}}\}.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The chromosome 
+\begin_inset Formula $\ensuremath{g_{c}}$
+\end_inset
+
+ is then successively combined with each chromosome 
+\begin_inset Formula $\ensuremath{g_{r_{i}}},\ensuremath{i=1,\ldots,k}$
+\end_inset
+
+,
+ using one-point crossover.
+ For each pair 
+\begin_inset Formula $(g_{c},g_{r_{i}})$
+\end_inset
+
+,
+ a crossover point is randomly selected and the corresponding genetic material is exchanged to produce a candidate offspring chromosome 
+\begin_inset Formula $g_{\mathrm{new}}$
+\end_inset
+
+.
+ The fitness of 
+\begin_inset Formula $g_{\mathrm{new}}$
+\end_inset
+
+ is subsequently evaluated using its classification error on the training set.
+ If 
+\begin_inset Formula $g_{\mathrm{new}}$
+\end_inset
+
+ achieves a lower fitness value than the current 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+,
+ it replaces 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+;
+ otherwise,
+ the current chromosome remains unchanged.
+ Importantly,
+ whenever such an improvement occurs,
+ the updated chromosome becomes the new 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+ and is used in the subsequent crossover operation with 
+\begin_inset Formula $g_{r_{i+1}}$
+\end_inset
+
+.
+ Therefore,
+ the procedure performs a sequential improvement of 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+,
+ allowing beneficial genetic material obtained from successive crossover operations to be accumulated.
+ After all 
+\begin_inset Formula $k$
+\end_inset
+
+ chromosomes in 
+\begin_inset Formula $S$
+\end_inset
+
+ have been examined,
+ the final improved version of 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+ is retained in the population.
+\end_layout
+
+\begin_layout Standard
+The complete procedure of the Standard crossover technique is summarized in Algorithm 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{alg:standard_crossover}
+\end_layout
+
+\end_inset
+
+.
+ The method follows a greedy acceptance strategy,
+ since a newly generated chromosome replaces the current chromosome only when it achieves a lower classification error.
+ Furthermore,
+ each accepted chromosome is immediately used in the subsequent crossover operation,
+ allowing improvements obtained during successive crossover trials to be accumulated.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{algorithm}[H]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{Standard crossover technique}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{alg:standard_crossover}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{algorithmic}[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+Require Population $G=
+\backslash
+{g_1,g_2,
+\backslash
+ldots,g_{N_c}
+\backslash
+}$,
+\end_layout
+
+\begin_layout Plain Layout
+         number of selected chromosomes $N_K$,
+\end_layout
+
+\begin_layout Plain Layout
+         number of crossover trials $k$
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+Ensure Updated population $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State Randomly select $N_K$ chromosomes from $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+For{each selected chromosome $g_c$}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+    
+\backslash
+State Randomly select a subset
+\end_layout
+
+\begin_layout Plain Layout
+    $S=
+\backslash
+{g_{r_1},g_{r_2},
+\backslash
+ldots,g_{r_k}
+\backslash
+}$ from $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+    
+\backslash
+For{$i=1$ to $k$}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Randomly select a one-point crossover position
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Generate $g_{
+\backslash
+mathrm{new}}$ by applying one-point crossover
+\end_layout
+
+\begin_layout Plain Layout
+        between $g_c$ and $g_{r_i}$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Evaluate the fitness $f(g_{
+\backslash
+mathrm{new}})$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$f(g_{
+\backslash
+mathrm{new}}) < f(g_c)$}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State $g_c 
+\backslash
+gets g_{
+\backslash
+mathrm{new}}$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+    
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State 
+\backslash
+Return $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{algorithm}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+The Targeted crossover method 
+\end_layout
+
+\begin_layout Standard
+In the Targeted crossover technique,
+ the exchange of genetic material is guided by information collected during the genotype-to-phenotype mapping process.
+ More specifically,
+ the mapping procedure records the positions of the active codons of each chromosome together with their semantic role in the generated classification program.
+ These codons may correspond to different grammatical components,
+ such as functions,
+ binary operators,
+ Boolean operators,
+ variables,
+ and constants.
+\end_layout
+
+\begin_layout Standard
+For each selected chromosome 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+,
+ the Targeted technique performs 
+\begin_inset Formula $k$
+\end_inset
+
+ crossover trials.
+ At each trial,
+ an active codon position is randomly selected as the target of the crossover operation.
+ A donor chromosome 
+\begin_inset Formula $g_{r}$
+\end_inset
+
+ is then randomly selected from the best fraction 
+\begin_inset Formula $\rho$
+\end_inset
+
+ of the current population,
+ and the recorded mapping information is used to identify an active codon in 
+\begin_inset Formula $g_{r}$
+\end_inset
+
+ having the same semantic type as the selected codon of 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+.
+ Instead of performing an unrestricted one-point crossover,
+ the Targeted technique transfers a bounded block of genetic material between the corresponding positions.
+ The size of this block is determined from the distances to the next active codons in the two chromosomes and is additionally restricted by a predefined maximum block size 
+\begin_inset Formula $B_{\max}$
+\end_inset
+
+.
+ In this way,
+ the transferred genetic material is associated with similar grammatical components of the classification programs represented by the two chromosomes.
+\end_layout
+
+\begin_layout Standard
+The resulting chromosome 
+\begin_inset Formula $g_{\mathrm{new}}$
+\end_inset
+
+ is subsequently mapped to its corresponding classification program and its fitness is evaluated on the training set.
+ If
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(g_{\mathrm{new}}\right)<f\left(g_{c}\right),
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+the new chromosome replaces 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+;
+ otherwise,
+ the current chromosome remains unchanged.
+ As in the Standard technique,
+ an accepted improvement is immediately retained and the updated chromosome is used in subsequent crossover trials.
+ The main difference from Standard crossover is therefore that the exchange of genetic material is not determined exclusively by randomly selected crossover points.
+ Instead,
+ information obtained during the mapping process is exploited to perform crossover between semantically related regions of the participating chromosomes.
+ This targeted exchange is intended to increase the probability of producing meaningful modifications to the generated classification programs while preserving useful genetic structures already discovered during the evolutionary process.
+ The complete procedure of the Targeted crossover technique is summarized in Algorithm 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{alg:targeted_crossover}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{algorithm}[H]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{Targeted crossover technique}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{alg:targeted_crossover}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{algorithmic}[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+Require Population $G=
+\backslash
+{g_1,g_2,
+\backslash
+ldots,g_{N_c}
+\backslash
+}$,
+\end_layout
+
+\begin_layout Plain Layout
+         number of selected chromosomes $N_K$,
+\end_layout
+
+\begin_layout Plain Layout
+         number of crossover trials $k$,
+\end_layout
+
+\begin_layout Plain Layout
+         elite fraction $
+\backslash
+rho$,
+\end_layout
+
+\begin_layout Plain Layout
+         maximum block size $B_{
+\backslash
+max}$
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+Ensure Updated population $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State Randomly select $N_K$ chromosomes from $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State $N_e 
+\backslash
+gets 
+\backslash
+max(2,
+\backslash
+lfloor 
+\backslash
+rho N_c 
+\backslash
+rfloor)$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+For{each selected chromosome $g_c$}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+    
+\backslash
+For{$i=1$ to $k$}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Obtain the codon trace of the current chromosome $g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Construct the set $A_c$ of active semantic codons
+\end_layout
+
+\begin_layout Plain Layout
+        corresponding to functions,
+ binary operators,
+\end_layout
+
+\begin_layout Plain Layout
+        Boolean operators,
+ variables,
+ and constants
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$A_c$ is empty}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State 
+\backslash
+textbf{break}
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Randomly select a target codon $a_c 
+\backslash
+in A_c$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Let $t_c$ be the semantic type of $a_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Randomly select a donor chromosome $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+        from the best $N_e$ chromosomes,
+ with $g_r 
+\backslash
+neq g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Obtain the codon trace of $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Construct the set $A_r$ of active codons in $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+        having semantic type $t_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$A_r$ is empty}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State 
+\backslash
+textbf{continue}
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Randomly select a compatible donor codon $a_r 
+\backslash
+in A_r$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Determine $L_c$,
+ the distance from $a_c$
+\end_layout
+
+\begin_layout Plain Layout
+        to the next active codon in $g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Determine $L_r$,
+ the distance from $a_r$
+\end_layout
+
+\begin_layout Plain Layout
+        to the next active codon in $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State $L 
+\backslash
+gets 
+\backslash
+min(L_c,L_r,B_{
+\backslash
+max})$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Create $g_{
+\backslash
+mathrm{new}} 
+\backslash
+gets g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Copy $L$ codons from $g_r$,
+ starting at $a_r$,
+\end_layout
+
+\begin_layout Plain Layout
+        to the corresponding block of $g_{
+\backslash
+mathrm{new}}$
+\end_layout
+
+\begin_layout Plain Layout
+        starting at $a_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Evaluate the fitness $f(g_{
+\backslash
+mathrm{new}})$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$f(g_{
+\backslash
+mathrm{new}}) < f(g_c)$}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State $g_c 
+\backslash
+gets g_{
+\backslash
+mathrm{new}}$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+    
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State 
+\backslash
+Return $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{algorithm}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+The TargetedWorst crossover method
+\end_layout
+
+\begin_layout Standard
+The TargetedWorst crossover technique extends the Targeted approach by additionally exploiting information about the classification performance of the generated program.
+ While Targeted crossover may select an active semantic codon from the chromosome without considering the performance of individual classes,
+ TargetedWorst attempts to concentrate the crossover operation on the chromosome region associated with the class exhibiting the poorest classification performance.
+ The motivation behind this strategy is to modify preferentially those parts of the generated classification program that are more likely to contribute to the observed classification errors,
+ while leaving better-performing components less affected.
+\end_layout
+
+\begin_layout Standard
+For each selected chromosome 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+,
+ the corresponding classification program is evaluated and the class exhibiting the worst classification performance is identified.
+ The genotype-to-phenotype mapping information is subsequently used to determine the active codons associated with the corresponding part of the classification program.
+ An active codon is then selected from this region and its semantic type is determined.
+ As in the Targeted technique,
+ a donor chromosome 
+\begin_inset Formula $g_{r}$
+\end_inset
+
+ is selected from the elite fraction of the population,
+ and an active codon having the same semantic type is identified in the donor chromosome.
+ This establishes semantically compatible positions between the two chromosomes and allows genetic material from a high-quality solution to be transferred specifically to a poorly performing region of 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+A bounded block of genetic material is subsequently transferred from the donor chromosome to 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+.
+ As in Targeted crossover,
+ the size of the transferred block is determined using the active-codon structure of the participating chromosomes and is restricted by the predefined maximum block size 
+\begin_inset Formula $B_{\max}$
+\end_inset
+
+.
+ The resulting chromosome 
+\begin_inset Formula $g_{\mathrm{new}}$
+\end_inset
+
+ is then mapped to its corresponding classification program and evaluated on the training set.
+ If
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(g_{\mathrm{new}}\right)<f\left(g_{c}\right),
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+the candidate chromosome replaces 
+\begin_inset Formula $g_{c}$
+\end_inset
+
+;
+ otherwise,
+ the modification is discarded.
+ Accepted improvements are immediately retained and are therefore available to subsequent crossover trials.
+\end_layout
+
+\begin_layout Standard
+Consequently,
+ TargetedWorst introduces an additional level of guidance compared with Targeted crossover.
+ Targeted determines the exchanged genetic material according to semantic information obtained during genotype-to-phenotype mapping,
+ whereas TargetedWorst combines this information with class-specific classification performance in order to focus the search on chromosome regions associated with poorly performing parts of the generated classifier.
+ The complete procedure is summarized in Algorithm 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{alg:targeted_worst_crossover}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{algorithm}[H]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{TargetedWorst crossover technique}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{alg:targeted_worst_crossover}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{algorithmic}[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+Require Population $G=
+\backslash
+{g_1,g_2,
+\backslash
+ldots,g_{N_c}
+\backslash
+}$,
+\end_layout
+
+\begin_layout Plain Layout
+         number of selected chromosomes $N_K$,
+\end_layout
+
+\begin_layout Plain Layout
+         number of crossover trials $k$,
+\end_layout
+
+\begin_layout Plain Layout
+         elite fraction $
+\backslash
+rho$,
+\end_layout
+
+\begin_layout Plain Layout
+         maximum block size $B_{
+\backslash
+max}$
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+Ensure Updated population $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State Randomly select $N_K$ chromosomes from $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State $N_e 
+\backslash
+gets 
+\backslash
+max(2,
+\backslash
+lfloor 
+\backslash
+rho N_c 
+\backslash
+rfloor)$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+For{each selected chromosome $g_c$}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+    
+\backslash
+For{$i=1$ to $k$}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Evaluate the class-specific performance of $g_c$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Identify the worst-performing class $w$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Let $C$ be the number of classes
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State $N_R 
+\backslash
+gets C-1$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$w < N_R$}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State Determine the chromosome segment $R_w$
+\end_layout
+
+\begin_layout Plain Layout
+                   associated with class $w$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+Else
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State Set $R_w$ to the entire chromosome
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Obtain the codon trace of the current chromosome $g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Construct the set $A_c$ of active semantic codons
+\end_layout
+
+\begin_layout Plain Layout
+               of $g_c$ that belong to $R_w$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$A_c$ is empty}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State 
+\backslash
+textbf{continue}
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Randomly select a target codon $a_c 
+\backslash
+in A_c$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Let $t_c$ be the semantic type of $a_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Randomly select a donor chromosome $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+               from the best $N_e$ chromosomes,
+\end_layout
+
+\begin_layout Plain Layout
+               with $g_r 
+\backslash
+neq g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Obtain the codon trace of $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$w < N_R$}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State Determine the donor segment $R_w^{(r)}$
+\end_layout
+
+\begin_layout Plain Layout
+                   associated with class $w$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+Else
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State Set $R_w^{(r)}$ to the entire donor chromosome
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Construct the set $A_r$ of active codons in $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+               that belong to $R_w^{(r)}$ and have semantic type $t_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$A_r$ is empty}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State 
+\backslash
+textbf{continue}
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Randomly select a compatible donor codon $a_r 
+\backslash
+in A_r$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Determine $L_c$,
+ the distance from $a_c$
+\end_layout
+
+\begin_layout Plain Layout
+               to the next active codon in $g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Determine $L_r$,
+ the distance from $a_r$
+\end_layout
+
+\begin_layout Plain Layout
+               to the next active codon in $g_r$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State $L 
+\backslash
+gets 
+\backslash
+min(L_c,L_r,B_{
+\backslash
+max})$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Restrict $L$ to remain within the corresponding
+\end_layout
+
+\begin_layout Plain Layout
+               class segments and chromosome boundaries
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Create $g_{
+\backslash
+mathrm{new}} 
+\backslash
+gets g_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Copy $L$ codons from $g_r$,
+ starting at $a_r$,
+\end_layout
+
+\begin_layout Plain Layout
+               to $g_{
+\backslash
+mathrm{new}}$,
+ starting at $a_c$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+State Evaluate the fitness $f(g_{
+\backslash
+mathrm{new}})$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+If{$f(g_{
+\backslash
+mathrm{new}}) < f(g_c)$}
+\end_layout
+
+\begin_layout Plain Layout
+            
+\backslash
+State $g_c 
+\backslash
+gets g_{
+\backslash
+mathrm{new}}$
+\end_layout
+
+\begin_layout Plain Layout
+        
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+    
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+State 
+\backslash
+Return $G$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{algorithm}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Results
 \begin_inset CommandInset label
@@ -1666,22 +3284,8 @@ Experimental datasets
 \end_layout
 
 \begin_layout Standard
-The datasets used in the conducted experiments were downloaded from the following following online databases:
-\end_layout
-
-\begin_layout Enumerate
-The UCI website,
- 
-\begin_inset Flex URL
-status open
-
-\begin_layout Plain Layout
-https://archive.ics.uci.edu/
-\end_layout
-
-\end_inset
-
-(accessed on 24 June 2026)
+The datasets employed in the experimental evaluation were obtained from two widely used public repositories:
+ the UCI Machine Learning Repository 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "uci"
@@ -1689,22 +3293,7 @@ literal "false"
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Enumerate
-The Keel website,
- 
-\begin_inset Flex URL
-status open
-
-\begin_layout Plain Layout
-https://sci2s.ugr.es/keel/datasets.php
-\end_layout
-
-\end_inset
-
-(accessed on 24 June 2026)
+ and the KEEL Dataset Repository 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Keel"
@@ -1713,19 +3302,18 @@ literal "false"
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-The used datasets are the following:
+ Both repositories provide a broad collection of benchmark datasets commonly used for the experimental evaluation and comparison of machine learning and classification algorithms.
+ The datasets were accessed on 3 October 2026.
+ The used datasets are the following:
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Alcohol
+Alcohol.
+ 
 \series default
-.
- This dataset is related to experiments on alcohol consumption 
+This dataset contains data collected from experiments investigating patterns of alcohol consumption and is used as a classification benchmark in the present study 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "alcohol"
@@ -1755,15 +3343,34 @@ literal "false"
 \end_layout
 
 \begin_layout Enumerate
-Beed.
+The 
+\series bold
+Beed
+\series default
+ dataset.
+ The Bangalore EEG Epilepsy Dataset (BEED),
+ presented by Banu et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "beed"
+literal "false"
+
+\end_inset
+
+,
+ is an EEG dataset developed for epileptic seizure detection and classification.
+ The dataset contains 8,000 patterns,
+ each represented by 16 features.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Dermatology
+Dermatology.
+ 
 \series default
- dataset 
+The Dermatology dataset 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "dermatology"
@@ -1771,21 +3378,40 @@ literal "false"
 
 \end_inset
 
-,
- a dataset that contains measurements for dermatological deceases.
- 
-\end_layout
-
-\begin_layout Enumerate
-Gene.
+ contains clinical and histopathological measurements used for the differential diagnosis of dermatological diseases.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Hayes-roth
+Gene
 \series default
- dataset 
+.
+ The Gene dataset,
+ also known as the Splice-junction Gene Sequences dataset,
+ contains 3,175 DNA sequences represented by 120 binary features.
+ The dataset is used for the classification of splice-junction boundaries into three classes:
+ exon–intron (EI) boundaries,
+ intron–exon (IE) boundaries,
+ and sequences containing neither type of boundary 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "gene"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Hayes-Roth.
+ 
+\series default
+The Hayes-Roth dataset is an artificial classification dataset comprising three classes and was originally designed to evaluate the behavior of prototype-based classifiers.
+ The hobby attribute was generated randomly and therefore acts as a noise-inducing feature in the classification problem 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "hayes-roth"
@@ -1793,32 +3419,35 @@ literal "false"
 
 \end_inset
 
-,
- a dataset with 3 classes.
- An artificial data set created to test the behaviour of prototype-based classifiers.
- The hobby attribute was generated at random,
- thus it is employed to add noise to the data.
- 
+.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Hepatitis
-\series default
- dataset.
- This data set contains a mixture of integer and real valued attributes,
- with information about patients affected by the Hepatitis disease.
+Hepatitis.
  
+\series default
+The Hepatitis dataset contains clinical information collected from patients affected by hepatitis and includes a combination of integer- and real-valued attributes describing various patient characteristics and medical measurements 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "hepatitis"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Housevotes
+HouseVotes.
+
 \series default
-,
- that uses data from the Congressional voting in USA 
+ The House Votes dataset contains voting records of members of the U.S.
+ House of Representatives on a set of congressional issues.
+ The classification task aims to distinguish representatives according to their political party affiliation based on their recorded votes 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "housevotes"
@@ -1832,10 +3461,11 @@ literal "false"
 \begin_layout Enumerate
 
 \series bold
-Ionosphere
+Ionosphere.
+ 
 \series default
-,
- that used data from various measurements in the ionosphere 
+The Ionosphere dataset contains radar measurements collected from signals transmitted through the ionosphere.
+ The classification task aims to distinguish between radar returns that provide evidence of structure in the ionosphere and those that do not 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "ion1,ion2"
@@ -1866,9 +3496,15 @@ literal "false"
 \begin_layout Enumerate
 
 \series bold
-Nursery
+Nursery.
+ 
 \series default
- dataset 
+The Nursery dataset was derived from a hierarchical decision model originally developed to rank applications for admission to nursery schools.
+ The model was used in Ljubljana,
+ Slovenia,
+ during the 1980s,
+ when high demand for nursery schools required an objective procedure for evaluating and explaining admission decisions.
+ The corresponding classification task involves assigning nursery school applications to different priority categories based on a set of socioeconomic and family-related attributes 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "nursery"
@@ -1877,22 +3513,17 @@ literal "false"
 \end_inset
 
 .
- This database was derived from a hierarchical decision model originally developed to rank applications for nursery schools.
- It was used during several years in 1980
-\backslash
-'s when there was excessive enrollment to these schools in Ljubljana,
- Slovenia,
- and the rejected applications frequently needed an objective explanation.
- The task is to rank applications for a given nursery school.
- 
 \end_layout
 
 \begin_layout Enumerate
-The 
+
 \series bold
 Optdigits
 \series default
- dataset 
+.
+ The Optical Recognition of Handwritten Digits (Optdigits) dataset contains digitized representations of handwritten numerals obtained from optical scans.
+ The corresponding classification task aims to recognize and assign each handwritten sample to one of the ten digit classes,
+ ranging from 0 to 9 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "optdigits"
@@ -1900,17 +3531,32 @@ literal "false"
 
 \end_inset
 
-,
- used for the recognition of handwritten digits from optical scans.
+.
 \end_layout
 
 \begin_layout Enumerate
-Penbased dataset.
- A digit data base made by collecting 250 samples from 44 writers,
- using only (x,
- y) coordinate information represented as constant length feature vectors,
- which were resampled to 8 points per digit (therefore the data set contains 8 points x 2 coordinates = 16 attributes).
- The class label represents the code of the digit written.
+
+\series bold
+Penbased
+\series default
+.
+ The Pen-Based Recognition of Handwritten Digits dataset contains samples of handwritten digits collected from 44 writers.
+ Each digit is represented using its 
+\begin_inset Formula $(x,y)$
+\end_inset
+
+ coordinate information,
+ resampled to eight points and encoded as a fixed-length feature vector of 16 attributes.
+ The corresponding classification task aims to assign each sample to one of the ten digit classes,
+ ranging from 0 to 9 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "penbased"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
@@ -1918,16 +3564,27 @@ Penbased dataset.
 \series bold
 Phoneme
 \series default
-,
- where the purpose of this dataset is to distinguish between nasal and oral sounds.
+.
+ The Phoneme dataset contains acoustic measurements extracted from speech signals.
+ The corresponding classification task aims to distinguish between nasal and oral phonemes based on their acoustic characteristics 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "phoneme"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-PirVision
+PirVision.
+ 
 \series default
- dataset 
+The PirVision dataset contains sensor measurements collected for occupancy detection.
+ The corresponding classification task aims to determine occupancy status based on data acquired from passive infrared (PIR) sensing devices 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "pirvision"
@@ -1935,8 +3592,7 @@ literal "false"
 
 \end_inset
 
-,
- that contains occupancy detection data.
+.
 \end_layout
 
 \begin_layout Enumerate
@@ -1944,16 +3600,27 @@ literal "false"
 \series bold
 Satimage
 \series default
- dataset,
- related to satellite images.
+.
+ The Satimage dataset contains multispectral satellite image data representing different types of terrain.
+ The corresponding classification task aims to assign image regions to different land-cover classes based on their spectral characteristics 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "satimage"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Segment
+Segment.
+ 
 \series default
- dataset 
+The Segment dataset contains image regions characterized by a set of numerical features extracted from outdoor images.
+ The corresponding classification task aims to assign each region to one of several image categories based on its visual characteristics 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "segment"
@@ -1961,18 +3628,17 @@ literal "false"
 
 \end_inset
 
-,
- which is used for image processing .
+.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Shuttle
-\series default
- dataset.
- This data set was generated originally to extract comprehensible rules for determining the conditions under which an autolanding would be preferable to manual control of a spacecraft.
+Shuttle.
  
+\series default
+The Shuttle dataset was originally developed to derive comprehensible classification rules for determining the conditions under which automatic landing control of a spacecraft would be preferable to manual control.
+ The corresponding classification task involves distinguishing among different operational conditions based on a set of numerical measurements.
 \end_layout
 
 \begin_layout Enumerate
@@ -1980,9 +3646,18 @@ Shuttle
 \series bold
 Spambase
 \series default
-,
- a dataset used for the detection of spam emails.
- 
+.
+ The Spambase dataset contains features extracted from email messages,
+ including word and character frequencies as well as information related to sequences of capital letters.
+ The corresponding binary classification task aims to distinguish spam from non-spam emails 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "spambase"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
@@ -1997,10 +3672,15 @@ Spiral
 \begin_layout Enumerate
 
 \series bold
-Student
+Student.
+ 
 \series default
-,
- a dataset related to some experiments in schools 
+The Student dataset contains educational data collected from 587 students over two consecutive academic years in ten non-university educational centers.
+ The attributes describe factors such as academic performance,
+ student abilities,
+ motivation,
+ and methodological and assessment preferences.
+ The corresponding classification task aims to categorize students according to their educational characteristics and performance 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "student"
@@ -2023,73 +3703,119 @@ Splice
 \begin_layout Enumerate
 
 \series bold
-Texture
+Texture.
+
 \series default
- dataset.
- The aim in this data set is to distinguish between 11 different textures (Grass lawn,
- Pressed calf leather,
- Handmade paper,
- Raffia looped to a high pile,
- Cotton canvas,
- ...),
- each pattern (pixel) being characterised by 40 attributes built by the estimation of fourth order modified moments in four orientations:
- 0,
- 45,
- 90 and 135 degrees.
+ The Texture dataset is designed for the classification of different visual textures and comprises 11 texture classes,
+ including grass lawn,
+ pressed calf leather,
+ handmade paper,
+ raffia,
+ and cotton canvas.
+ Each pattern corresponds to a pixel represented by 40 numerical features obtained from the estimation of fourth-order modified moments computed at four different orientations
+\begin_inset Formula $:\ensuremath{0^{\circ}},\ensuremath{45^{\circ}},\ensuremath{90^{\circ}},$
+\end_inset
+
+ and 
+\begin_inset Formula $135^{\circ}$
+\end_inset
+
+.
+ The corresponding classification task aims to assign each pattern to one of the 11 texture categories 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "texture"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Thyroid.
  
+\series default
+The Thyroid dataset contains clinical measurements related to thyroid gland function.
+ The corresponding classification task aims to determine whether a patient exhibits normal thyroid function or suffers from hyperthyroidism or hypothyroidism,
+ resulting in a three-class classification problem 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "thyroid"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+The 
+\series bold
+TwoNorm
+\series default
+ dataset is a synthetic 20-dimensional binary classification problem originally introduced by Breiman.
+ The patterns of each class are generated from multivariate normal distributions with unit covariance matrices and symmetric mean vectors.
+ Specifically,
+ the two class means are 
+\begin_inset Formula $(a,a,\ldots,a)$
+\end_inset
+
+ and 
+\begin_inset Formula $(-a,-a,\ldots,-a)$
+\end_inset
+
+,
+ where 
+\begin_inset Formula $a=2/\sqrt{20}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Thyroid
-\series default
- dataset.
- This data set is one of the several databases about Thyroid avalaible at the UCI repository.
- The task is to detect is a given patient is normal (1) or suffers from hyperthyroidism (2) or hypothyroidism (3).
-\end_layout
-
-\begin_layout Enumerate
-
-\series bold
-Twonorm
-\series default
- dataset.
- This is a 20 dimensional,
- 2 class classification problem.
- Each class is drawn from a multivariate normal distribution.
-\end_layout
-
-\begin_layout Enumerate
-
-\series bold
-Vehicle
-\series default
- dataset.
- The purpose is to classify a given silhouette as one of four types of vehicle,
- using a set of features extracted from the silhouette.
- The vehicle may be viewed from one of many different angles.
+Vehicle.
  
+\series default
+The Vehicle dataset is designed to classify vehicle silhouettes into four different categories using a set of numerical features extracted from their shapes.
+ The silhouettes were obtained from vehicles viewed from different angles,
+ making the classification task dependent on distinguishing characteristic geometric properties despite variations in viewing orientation 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "vehicle"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-Yeast
-\series default
- dataset.
- This database contains information about a set of Yeast cells.
- The task is to determine the localization site of each cell among 10 possible alternatives.
+Yeast.
  
+\series default
+The Yeast dataset contains information describing proteins from Saccharomyces cerevisiae.
+ Each protein is represented by eight numerical features derived from sequence-based measurements.
+ The corresponding classification task aims to predict the cellular localization site of each protein among ten possible classes 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "yeast"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
-
-\series bold
-EEG
-\series default
- dataset,
- which is a medical dataset related to EEG measurements
+EEG.
+ The EEG dataset is a medical dataset containing electroencephalographic recordings obtained from healthy subjects and patients with epilepsy under different physiological and pathological conditions 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "eeg1,eeg2"
@@ -2098,10 +3824,19 @@ literal "false"
 \end_inset
 
 .
- From the original dataset the following cases were obtained:
+ The original dataset consists of five subsets,
+ denoted by Z,
+ O,
+ N,
+ F,
+ and S,
+ corresponding to different recording conditions and brain states.
+ From these subsets,
+ four classification problems were constructed for the experimental evaluation:
  Z_F_S,
  ZO_NF_S,
- Z_O_N_F_S and ZONF_S.
+ Z_O_N_F_S,
+ and ZONF_S.
 \end_layout
 
 \begin_layout Standard
@@ -3084,6 +4819,28 @@ Experimental results
 \end_layout
 
 \begin_layout Standard
+The proposed method was implemented in C++.
+ To ensure the reliability of the experimental evaluation,
+ each experiment was independently repeated 30 times,
+ using a different random seed in each run.
+ Furthermore,
+ 10-fold cross-validation was employed to assess the generalization performance of the method and provide a robust evaluation of the experimental results.
+ The values used for the experimental parameters are listed in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Values-for-the"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 placement H
 alignment document
@@ -3113,7 +4870,7 @@ name "tab:Values-for-the"
 \begin_layout Plain Layout
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="7" columns="3">
+<lyxtabular version="3" rows="9" columns="3">
 <features borderColor="default" oddRowsColor="default" evenRowsColor="default" tabularvalignment="middle">
 <column alignment="center" valignment="top" color="default">
 <column alignment="center" valignment="top" color="default">
@@ -3308,11 +5065,75 @@ Crossover items
 </cell>
 </row>
 <row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $k$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of crossover trials
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+20
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\rho$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Elite fraction for donor selection
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.20
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $H$
+\begin_inset Formula $B_{\mbox{max}}$
 \end_inset
 
 
@@ -3324,7 +5145,7 @@ Crossover items
 \begin_inset Text
 
 \begin_layout Plain Layout
-Number of weights for neural networks
+Maximum crossover block size
 \end_layout
 
 \end_inset
@@ -3333,7 +5154,7 @@ Number of weights for neural networks
 \begin_inset Text
 
 \begin_layout Plain Layout
-10
+16
 \end_layout
 
 \end_inset
@@ -3352,7 +5173,151 @@ Number of weights for neural networks
 
 \end_inset
 
+ The notation used in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:methods_comparison"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
 
+\end_inset
+
+ is described below:
+\end_layout
+
+\begin_layout Enumerate
+DATASET denotes the dataset used in the corresponding experiment.
+\end_layout
+
+\begin_layout Enumerate
+RBF denotes a Radial Basis Function (RBF) neural network 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "rbf1,rbf2"
+literal "false"
+
+\end_inset
+
+ with
+\begin_inset Formula $H=10$
+\end_inset
+
+ hidden nodes.
+\end_layout
+
+\begin_layout Enumerate
+NEAT denotes the NeuroEvolution of Augmenting Topologies (NEAT) method 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "neat"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+DNN denotes a deep neural network implemented using the Tiny-DNN library,
+ publicly available at the project's GitHub repository (accessed on 3 October 2026).
+ The network was trained using the AdaGrad optimization algorithm 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "adagrad"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+ADAM denotes a neural network with 
+\begin_inset Formula $H=10$
+\end_inset
+
+ hidden nodes trained using the Adam optimization algorithm 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "nn_adam"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+BFGS denotes a neural network with 
+\begin_inset Formula $H=10$
+\end_inset
+
+ hidden nodes trained using Powell's variant of the BFGS optimization method 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "powell"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+GEN denotes a neural network with 
+\begin_inset Formula $H=10$
+\end_inset
+
+ hidden nodes whose weights were optimized using a Genetic Algorithm.
+ The Genetic Algorithm employed the same parameter settings reported in Table~
+\backslash
+ref{tab:Values-for-the}.
+\end_layout
+
+\begin_layout Enumerate
+CLASS denotes the original GenClass rule construction method without the additional crossover mechanism proposed in this work.
+\end_layout
+
+\begin_layout Enumerate
+STANDARD denotes GenClass enhanced with the proposed Standard crossover method.
+\end_layout
+
+\begin_layout Enumerate
+The row AVERAGE reports the mean classification error across all datasets for the corresponding method.
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:methods_comparison"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ compares the proposed method (STANDARD) with the original GenClass method (CLASS) and with the other classifiers over the 31 datasets.
+ All values are classification errors,
+ so lower values indicate better performance.
+ STANDARD attained the lowest average error,
+ 13.42%,
+ followed by CLASS with 16.13%,
+ while the average errors of the remaining methods ranged from 33.25% (GEN) to 44.04% (NEAT).
+ STANDARD achieved the lowest error in 23 of the 31 datasets,
+ CLASS in 3,
+ and each of the other methods in at most 2.
+ Compared with CLASS,
+ the average error decreases by 2.71 percentage points,
+ a relative reduction of 16.8%.
+ Therefore,
+ the new crossover procedure improves the original method on average,
+ while the improvement over the other methods is considerably larger.
 \end_layout
 
 \begin_layout Standard
@@ -3361,13 +5326,24 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Comparison with other methods.
+Classification error (%) of the proposed method (STANDARD) and of the other classifiers on the 31 datasets.
+ STANDARD is the GenClass method with the proposed additional crossover procedure,
+ while CLASS is the original GenClass method without it.
+ The last row (AVERAGE) reports the mean error over all datasets,
+ and lower values indicate better performance.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:methods_comparison"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3376,6 +5352,7 @@ Comparison with other methods.
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 
 \size footnotesize
 \begin_inset Tabular
@@ -6749,12 +8726,96 @@ AVERAGE
 \end_layout
 
 \begin_layout Standard
+The statistical analysis of Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:methods_comparison"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ is summarized in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:standart_vs_others"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
+ The Friedman test rejects the hypothesis that all eight methods perform equally (
+\begin_inset Formula $\chi^{2}(7)=121.47$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=3.8\times10^{-23}$
+\end_inset
+
+),
+ a result confirmed by the Iman-Davenport correction (
+\begin_inset Formula $F(7,210)=38.15$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=3.3\times10^{-34}$
+\end_inset
+
+),
+ with a substantial effect size (Kendall's 
+\begin_inset Formula $W=0.56$
+\end_inset
+
+).
+ STANDARD obtains the best mean rank (1.42),
+ followed by CLASS (2.29),
+ while all the other methods have mean ranks above 4.
+ In the paired comparisons,
+ STANDARD has lower error than every other method,
+ with Holm-adjusted Wilcoxon signed-rank p-values between 
+\begin_inset Formula $8.6\times10^{-6}$
+\end_inset
+
+ and 
+\begin_inset Formula $1.7\times10^{-5}$
+\end_inset
+
+ and wins in 28 to 31 of the 31 datasets.
+ The Hodges-Lehmann estimates of the median paired difference range from approximately 2.4 percentage points (CLASS) to 30.4 percentage points (NEAT),
+ none of the 95% confidence intervals includes zero,
+ and the effect sizes are large (
+\begin_inset Formula $r\geq0.77$
+\end_inset
+
+,
+ where values around 0.5 or above are conventionally considered large).
+ The comparison with CLASS requires a careful reading.
+ The bars of the two methods overlap in the mean-rank panel,
+ which means that the conservative Nemenyi test does not separate them,
+ since the difference in mean rank (0.87) is smaller than the critical difference (1.89).
+ The paired Wilcoxon test,
+ which also takes into account the magnitude of the differences,
+ detects nevertheless a consistent improvement (28 wins and 3 losses).
+ STANDARD is worse than CLASS only in three datasets (IONOSPHERE,
+ NURSERY and SHUTTLE).
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \align center
@@ -6799,7 +8860,11 @@ Note:
 Box plots:
  box = interquartile range,
  thick line = median,
- whiskers = 1.5 × IQR,
+ whiskers = 
+\begin_inset Formula $1.5×IQR$
+\end_inset
+
+,
  diamond = mean,
  dots = datasets,
  grey lines join the same dataset.
@@ -6811,7 +8876,11 @@ Box plots:
  A has lower error;
  labels give the Holm-adjusted Wilcoxon p-value and the wins/ties/losses of A.
  Rank panels:
- mean Friedman rank (1 = best) ± CD/2 (Nemenyi);
+ mean Friedman rank (1 = best) 
+\begin_inset Formula $±$
+\end_inset
+
+ CD/2 (Nemenyi);
  non-overlapping bars differ at 
 \begin_inset Formula $α$
 \end_inset
@@ -6836,6 +8905,36 @@ Crossover methods
 \end_layout
 
 \begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:crossover_strategies"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ isolates the effect of the crossover strategy.
+ STANDARD,
+ in which the exchanged chromosome regions are selected purely stochastically,
+ achieves the lowest average error (13.42%),
+ whereas the two strategies that exploit information collected during the evolutionary process are less effective,
+ with 15.08% for TARGETED and 15.42% for TARGETEDWORST.
+ STANDARD obtained the lowest error in 24 of the 31 datasets,
+ compared with 5 for TARGETED and 3 for TARGETEDWORST (a tie between the two targeted strategies in IONOSPHERE is counted for both).
+ The average gain of STANDARD is 1.66 percentage points over TARGETED and 2.0 percentage points over TARGETEDWORST,
+ which correspond to relative reductions of 11.0% and 13.0%,
+ respectively.
+ The two targeted strategies differ little from each other.
+ Hence,
+ in these experiments,
+ guiding the exchange of genetic material with information from the evolutionary process did not improve upon the purely random exchange.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 placement H
 alignment document
@@ -6847,7 +8946,14 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Crossover methods.
+Classification error (%) of the three crossover strategies.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:crossover_strategies"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -6856,6 +8962,7 @@ Crossover methods.
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="33" columns="4">
 <features borderColor="default" oddRowsColor="default" evenRowsColor="default" tabularvalignment="middle">
@@ -8138,6 +10245,117 @@ AVERAGE
 \end_layout
 
 \begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:crossover_strategies"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ presents the statistical analysis of Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:crossover_strategies"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
+ The Friedman test indicates significant differences among the three strategies (
+\begin_inset Formula $\chi^{2}(2)=22.13$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=1.6\times10^{-5}$
+\end_inset
+
+,
+ Iman-Davenport 
+\begin_inset Formula $F(2,60)=16.65$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=1.8\times10^{-6}$
+\end_inset
+
+),
+ with a moderate effect size (
+\begin_inset Formula $W=0.36$
+\end_inset
+
+).
+ STANDARD has the best mean rank (1.32),
+ against 2.27 for TARGETED and 2.40 for TARGETEDWORST.
+ Since the critical difference is 0.60,
+ the bar of STANDARD does not overlap with those of the other two strategies,
+ while the bars of TARGETED and TARGETEDWORST overlap.
+ The paired tests agree with this picture.
+ STANDARD is significantly better than TARGETED (25 wins and 6 losses,
+ median difference 1.62 percentage points,
+ 95% CI 
+\begin_inset Formula $[0.58,2.55]$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=0.0018$
+\end_inset
+
+,
+ 
+\begin_inset Formula $r=0.60$
+\end_inset
+
+) and than TARGETEDWORST (27 wins and 4 losses,
+ median difference 1.93 percentage points,
+ 95% CI 
+\begin_inset Formula $[1.08,2.80]$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=1.6\times10^{-4}$
+\end_inset
+
+,
+ 
+\begin_inset Formula $r=0.73$
+\end_inset
+
+).
+ On the contrary,
+ TARGETED and TARGETEDWORST cannot be distinguished (15 wins,
+ 3 ties and 13 losses,
+ median difference approximately 0.1 percentage points,
+ 95% CI 
+\begin_inset Formula $[-0.48,0.95]$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=0.64$
+\end_inset
+
+,
+ 
+\begin_inset Formula $r=0.09$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement H
 alignment document
@@ -8188,18 +10406,128 @@ Number of crossing items
 \end_layout
 
 \begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:diff_NK"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ reports the results of the proposed method when 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=2,
+ 5,
+ 10 and 15 chromosomes participate in the crossover.
+ The column 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=10 corresponds to the default value of Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Values-for-the"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ and coincides with the STANDARD column of Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:crossover_strategies"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
+ The average error decreases monotonically as 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ increases,
+ from 14.58% for 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=2 to 13.66% for 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=5,
+ 13.42% for 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=10 and 13.19% for 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=15.
+ The setting 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=15 gave the lowest error in 17 of the 31 datasets,
+ 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=5 and 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=10 in 7 datasets each,
+ and 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=2 in none.
+ Increasing 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ from 2 to 15 reduces the average error by 1.39 percentage points,
+ whereas each of the two further increases beyond 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=5 changes it by less than 0.3 percentage points.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Experiments with the number that participate in the crossover procedure.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:diff_NK"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -8208,6 +10536,7 @@ Experiments with the number that participate in the crossover procedure.
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="33" columns="5">
 <features borderColor="default" oddRowsColor="default" evenRowsColor="default" tabularvalignment="middle">
@@ -9802,6 +12131,156 @@ AVERAGE
 \end_layout
 
 \begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:effect_of_NK"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ presents the corresponding statistical analysis.
+ The Friedman test detects significant differences among the four settings (
+\begin_inset Formula $\chi^{2}(3)=21.97$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=6.6\times10^{-5}$
+\end_inset
+
+,
+ Iman-Davenport 
+\begin_inset Formula $F(3,90)=9.28$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=2.1\times10^{-5}$
+\end_inset
+
+),
+ although with a smaller effect size than in the previous comparisons (
+\begin_inset Formula $W=0.24$
+\end_inset
+
+).
+ The mean rank is the worst for 
+\begin_inset Formula $N_{K}=2$
+\end_inset
+
+ (3.35) and the best for 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+ (1.87),
+ with 
+\begin_inset Formula $N_{K}=5$
+\end_inset
+
+ (2.27) and 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ (2.50) in between.
+ The one-sided Page trend test,
+ which examines whether the error decreases as 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ increases,
+ confirms a significant trend (
+\begin_inset Formula $z=4.08$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=2.3\times10^{-5}$
+\end_inset
+
+).
+ In agreement,
+ the Spearman correlation between 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ and the error is negative in 23 of the 29 datasets where it is non-zero (median correlation 
+\begin_inset Formula $-0.6$
+\end_inset
+
+,
+ sign test 
+\begin_inset Formula $p=0.0023$
+\end_inset
+
+).
+ The pairwise comparisons show,
+ however,
+ that this trend is mainly due to the weakness of the smallest setting.
+ The value 
+\begin_inset Formula $N_{K}=2$
+\end_inset
+
+ has significantly higher error than 
+\begin_inset Formula $N_{K}=5$
+\end_inset
+
+ (
+\begin_inset Formula $p=3.8\times10^{-4}$
+\end_inset
+
+),
+ 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ (
+\begin_inset Formula $p=0.0047$
+\end_inset
+
+) and 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+ (
+\begin_inset Formula $p=0.0039$
+\end_inset
+
+),
+ with median differences of approximately 0.8,
+ 1.0 and 1.3 percentage points,
+ respectively.
+ None of the differences among 
+\begin_inset Formula $N_{K}=5$
+\end_inset
+
+,
+ 10 and 15 is statistically significant (adjusted
+\begin_inset Formula $p=0.61$
+\end_inset
+
+ for 5 versus 10,
+ 0.20 for 5 versus 15 and 0.61 for 10 versus 15),
+ and their confidence intervals include zero.
+ Therefore,
+ a very small number of chromosomes in the crossover is detrimental,
+ whereas beyond 
+\begin_inset Formula $N_{K}=5$
+\end_inset
+
+ any further benefit is small and is not statistically established in these experiments,
+ although 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+ has the best mean rank.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement H
 alignment document
@@ -9825,7 +12304,11 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Effect of the number of chromosomes (NK) participating in the crossover on the proposed method.
+Effect of the number of chromosomes (
+\begin_inset Formula $N_{K}$
+\end_inset
+
+) participating in the crossover on the proposed method.
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:effect_of_NK"
@@ -9854,6 +12337,81 @@ name "sec:Conclusions"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+This work introduced an additional crossover procedure into the GenClass method,
+ which is applied at every generation to a small number of randomly selected chromosomes,
+ in order to alleviate the loss of diversity and the entrapment in local minima of the classification error function.
+ The procedure was examined in three variants (STANDARD,
+ TARGETED and TARGETEDWORST) on 31 classification datasets.
+ The STANDARD variant reduced the average classification error of the original method from 16.13% to 13.42%,
+ a relative reduction of 16.8%,
+ it obtained the lowest error in 23 of the 31 datasets,
+ and the improvement was statistically significant,
+ with a considerably larger margin over all the other classifiers of the comparison.
+\end_layout
+
+\begin_layout Standard
+The experiments also gave a result that differs from what the design of the targeted variants might suggest.
+ Using information from the evolutionary process to guide the exchange of genetic material did not improve on the purely random exchange.
+ STANDARD was significantly better than both TARGETED and TARGETEDWORST,
+ while the two targeted variants could not be distinguished from each other.
+ All three variants obtained a lower average error than the original method (13.42%,
+ 15.08% and 15.42%,
+ against 16.13%),
+ but statistical significance was examined only for STANDARD.
+ A possible explanation is that random exchange preserves more diversity,
+ which is the main weakness of the original method,
+ but this hypothesis was not tested directly in the present work.
+\end_layout
+
+\begin_layout Standard
+Finally,
+ the number of chromosomes participating in the crossover affects the performance,
+ mainly at its lowest values.
+ A very small number (
+\begin_inset Formula $N_{K}=2$
+\end_inset
+
+) was significantly worse than the other settings,
+ whereas the differences among 
+\begin_inset Formula $N_{K}=5$
+\end_inset
+
+,
+ 10 and 15 were small and not statistically significant.
+ A moderate value of 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ therefore seems sufficient.
+ The conclusions are limited to the datasets,
+ the parameter values and the classification task used in the experiments.
+\end_layout
+
+\begin_layout Standard
+Several directions for future work arise from the present study.
+ First,
+ the reasons why the targeted variants did not outperform the random one should be investigated,
+ for example by measuring the diversity of the population during the evolution,
+ and by designing targeted operators that preserve diversity or combine random and guided exchanges.
+ Second,
+ the number of chromosomes participating in the crossover could be adapted automatically during the evolution instead of being fixed,
+ and values larger than 15 could be examined,
+ since 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+ had the best mean rank without a statistically established advantage.
+ Third,
+ the computational cost of the procedure,
+ which was not measured here,
+ should be analyzed together with possible parallel implementations.
+ Finally,
+ the procedure could be evaluated on larger datasets,
+ on other learning tasks such as regression,
+ and in other methods based on Grammatical Evolution.
 \end_layout
 
 \begin_layout Standard
@@ -11077,6 +13635,24 @@ Weiss,
 \begin_layout Bibliography
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
+label "(2024)"
+key "beed"
+literal "false"
+
+\end_inset
+
+Banu PK,
+ N.
+ (2024).
+ Feature Engineering for Epileptic Seizure Classification Using SeqBoostNet.
+ International Journal of Computing and Digital Systems,
+ 16(1),
+ 1-14.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
 key "dermatology"
 literal "false"
 
@@ -11103,6 +13679,24 @@ G.
 \begin_layout Bibliography
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
+key "gene"
+literal "false"
+
+\end_inset
+
+L.
+ Prechelt,
+ “PROBEN1—
+A Set of Neural Network Benchmark Problems and Benchmarking Rules,” Technical Report 21/94,
+ Fakultät für Informatik,
+ Universität Karlsruhe,
+ Germany,
+ 1994.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
 label "(1977)"
 key "hayes-roth"
 literal "false"
@@ -11123,6 +13717,31 @@ B.
  pp.
  321-338,
  1977.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "hepatitis"
+literal "false"
+
+\end_inset
+
+G.
+ Cestnik,
+ I.
+ Kononenko,
+ and I.
+ Bratko,
+ “Assistant-86:
+ A Knowledge-Elicitation Tool for Sophisticated Users,” in Progress in Machine Learning,
+ I.
+ Bratko and N.
+ Lavrač (Eds.),
+ Sigma Press,
+ 1987,
+ pp.
+ 31–45.
 \end_layout
 
 \begin_layout Bibliography
@@ -11269,6 +13888,41 @@ Kaynak,
 \begin_layout Bibliography
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
+key "penbased"
+literal "false"
+
+\end_inset
+
+E.
+ Alpaydin and F.
+ Alimoglu,
+ “Pen-Based Recognition of Handwritten Digits,” UCI Machine Learning Repository,
+ 1998,
+ doi:
+ 10.24432/C5MG6K.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "phoneme"
+literal "false"
+
+\end_inset
+
+A.
+ Guerin-Dugué et al.,
+ “Deliverable R3-B4-P —
+ Task B4:
+ Benchmarks,” Technical Report,
+ ELENA-NERVES II,
+ ESPRIT Basic Research Project 6891,
+ 1995.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
 label "(2023)"
 key "pirvision"
 literal "false"
@@ -11284,6 +13938,22 @@ Emad-Ud-Din,
  IEEE Sensors Journal,
  23(9),
  9595-9606.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "satimage"
+literal "false"
+
+\end_inset
+
+A.
+ Srinivasan,
+ “Statlog (Landsat Satellite),” UCI Machine Learning Repository,
+ 1993,
+ doi:
+ 10.24432/C55887.
 \end_layout
 
 \begin_layout Bibliography
@@ -11316,6 +13986,28 @@ M.
 \begin_layout Bibliography
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
+key "spambase"
+literal "false"
+
+\end_inset
+
+M.
+ Hopkins,
+ E.
+ Reeber,
+ G.
+ Forman,
+ and J.
+ Suermondt,
+ “Spambase,” UCI Machine Learning Repository,
+ 1999,
+ doi:
+ 10.24432/C53G6X.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
 label "(2007)"
 key "student"
 literal "false"
@@ -11332,6 +14024,94 @@ P.
  5–12).
  EUROSIS-ETI,
  2008.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "texture"
+literal "false"
+
+\end_inset
+
+A.
+ Guerin-Dugué et al.,
+ “Deliverable R3-B4-P —
+ Task B4:
+ Benchmarks,” Technical Report,
+ ELENA-NERVES II,
+ ESPRIT Basic Research Project 6891,
+ 1995.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "thyroid"
+literal "false"
+
+\end_inset
+
+R.
+ Quinlan,
+ “Thyroid Disease,” UCI Machine Learning Repository,
+ 1986,
+ doi:
+ 10.24432/C5D010.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "twonorm"
+literal "false"
+
+\end_inset
+
+L.
+ Breiman,
+ “Bias,
+ Variance,
+ and Arcing Classifiers,” Technical Report 460,
+ Statistics Department,
+ University of California,
+ Berkeley,
+ 1996.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "vehicle"
+literal "false"
+
+\end_inset
+
+J.
+ P.
+ Siebert,
+ “Vehicle Recognition Using Rule Based Methods,” Turing Institute Research Memorandum TIRM-87-018,
+ Turing Institute,
+ Glasgow,
+ UK,
+ March 1987.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "yeast"
+literal "false"
+
+\end_inset
+
+P.
+ Horton and K.
+ Nakai,
+ “A Probabilistic Classification System for Predicting the Cellular Localization Sites of Proteins,” Proceedings of the Fourth International Conference on Intelligent Systems for Molecular Biology (ISMB),
+ pp.
+ 109–115,
+ 1996.
 \end_layout
 
 \begin_layout Bibliography
@@ -11392,6 +14172,152 @@ A.
  13 pages,
  2007.
  doi:10.1155/2007/80510
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "(1991)"
+key "rbf1"
+literal "false"
+
+\end_inset
+
+J.
+ Park and I.
+ W.
+ Sandberg,
+ Universal Approximation Using Radial-Basis-Function Networks,
+ Neural Computation 
+\series bold
+3
+\series default
+,
+ pp.
+ 246-257,
+ 1991.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "rbf2"
+literal "false"
+
+\end_inset
+
+G.A.
+ Montazer,
+ D.
+ Giveki,
+ M.
+ Karami,
+ H.
+ Rastegar,
+ Radial basis function neural networks:
+ A review.
+ Comput.
+ Rev.
+ J 
+\series bold
+1
+\series default
+,
+ pp.
+ 52-74,
+ 2018.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "(2002)"
+key "neat"
+literal "false"
+
+\end_inset
+
+K.
+ O.
+ Stanley,
+ R.
+ Miikkulainen,
+ Evolving Neural Networks through Augmenting Topologies,
+ Evolutionary Computation 
+\series bold
+10
+\series default
+,
+ pp.
+ 99-127,
+ 2002.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "(2020)"
+key "adagrad"
+literal "false"
+
+\end_inset
+
+Ward,
+ R.,
+ Wu,
+ X.,
+ & Bottou,
+ L.
+ (2020).
+ Adagrad stepsizes:
+ Sharp convergence over nonconvex landscapes.
+ Journal of Machine Learning Research,
+ 21(219),
+ 1-30.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "nn_adam"
+literal "false"
+
+\end_inset
+
+D.
+ P.
+ Kingma,
+ J.
+ L.
+ Ba,
+ ADAM:
+ a method for stochastic optimization,
+ in:
+ Proceedings of the 3rd International Conference on Learning Representations (ICLR 2015),
+ pp.
+ 1–15,
+ 2015.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "powell"
+literal "true"
+
+\end_inset
+
+M.J.D Powell,
+ A Tolerant Algorithm for Linearly Constrained Optimization Calculations,
+ Mathematical Programming 
+\series bold
+45
+\series default
+,
+ pp.
+ 547-566,
+ 1989.
+ 
 \end_layout
 
 \begin_layout End Whole Page
