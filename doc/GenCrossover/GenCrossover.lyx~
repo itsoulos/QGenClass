@@ -1594,7 +1594,7 @@ Termination check step
 Set
 \series default
  
-\begin_inset Formula $k=k+1$
+\begin_inset Formula $t=t+1$
 \end_inset
 
 
@@ -1606,7 +1606,7 @@ Set
 If
 \series default
  
-\begin_inset Formula $k\le N_{g}$
+\begin_inset Formula $t\le N_{g}$
 \end_inset
 
  
@@ -5314,7 +5314,11 @@ The row AVERAGE reports the mean classification error across all datasets for th
 \end_layout
 
 \begin_layout Standard
+
+\series bold
 Statistical analysis.
+
+\series default
  The comparison of the methods was based on the average classification error of each method on each dataset,
  so that every dataset provides one observation and 
 \begin_inset Formula $N=31$
@@ -12525,7 +12529,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -12565,6 +12569,123 @@ name "fig:effect_of_NK"
 \end_inset
 
 
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename time.png
+	lyxscale 40
+	scale 43
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Execution time of the Standard technique for different values of 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ (Dermatology dataset).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:time_dermatology"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The figure shows the average execution time of the Standard technique on the Dermatology dataset for 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+=2,
+ 5,
+ 10 and 15.
+ The time increases with
+\begin_inset Formula $N_{K}$
+\end_inset
+
+,
+ from 104.4 s for 
+\begin_inset Formula $N_{K}=2$
+\end_inset
+
+ to 302.6 s for 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+,
+ which is about 2.9 times higher.
+ The increase is approximately linear up to 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+,
+ at about 19 s per additional chromosome,
+ and becomes slower from 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ to 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+,
+ at about 9 s per additional chromosome.
+ The time does not grow in proportion to 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+,
+ because the rest of the algorithm has a cost that does not depend on 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+.
+ The default value 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ requires 255.6 s,
+ whereas 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+ needs 47 s more (18%) and,
+ in this dataset,
+ does not give a lower error (Table 
+\begin_inset Formula $\ref{tab:diff_NK}$
+\end_inset
+
+,
+ 4.00% against 2.80% for 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Section
@@ -12677,7 +12798,6 @@ tuple "list"
 \end_inset
 
  offspring per generation.
- The running time was not measured in the present work.
  Moreover,
  the parameters 
 \begin_inset Formula $k$
