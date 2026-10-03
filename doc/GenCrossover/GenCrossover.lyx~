@@ -1184,9 +1184,19 @@ where
 
 \begin_layout Standard
 As an illustrative example,
- Fig.~
+ Figure 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
 \backslash
-ref{fig:genclass_mapping} demonstrates the successive mapping of an integer chromosome to the production rules of Algorithm 
+ref{fig:genclass_mapping}
+\end_layout
+
+\end_inset
+
+ demonstrates the successive mapping of an integer chromosome to the production rules of Algorithm 
 \begin_inset ERT
 status open
 
@@ -1341,7 +1351,7 @@ the initial population of
 Set
 \series default
  
-\begin_inset Formula $k=0$
+\begin_inset Formula $t=0$
 \end_inset
 
 ,
@@ -1672,11 +1682,11 @@ In the present work,
  In this way,
  new combinations of genetic material are introduced into the population,
  potentially increasing population diversity and allowing the evolutionary search to explore previously unvisited regions of the search space.
- The number of chromosomes subjected to these additional crossover operations at each generation is denoted by
+ The number of chromosomes subjected to these additional crossover operations at each generation is denoted by 
 \begin_inset Formula $\ensuremath{N_{K}}$
 \end_inset
 
-throughout the remainder of this work.
+ throughout the remainder of this work.
 \end_layout
 
 \begin_layout Standard
@@ -1840,6 +1850,7 @@ ref{alg:standard_crossover}
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset ERT
 status collapsed
 
@@ -2175,6 +2186,7 @@ ref{alg:targeted_crossover}
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset ERT
 status collapsed
 
@@ -2712,6 +2724,7 @@ ref{alg:targeted_worst_crossover}
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset ERT
 status collapsed
 
@@ -3328,9 +3341,10 @@ literal "false"
 \begin_layout Enumerate
 
 \series bold
-Appendictis
+Appendicitis.
+
 \series default
- a dataset originated in 
+ A dataset originated in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "appendicitis"
@@ -5201,7 +5215,7 @@ literal "false"
 
 \end_inset
 
- with
+ with 
 \begin_inset Formula $H=10$
 \end_inset
 
@@ -5272,9 +5286,19 @@ GEN denotes a neural network with
 \end_inset
 
  hidden nodes whose weights were optimized using a Genetic Algorithm.
- The Genetic Algorithm employed the same parameter settings reported in Table~
-\backslash
-ref{tab:Values-for-the}.
+ The Genetic Algorithm employed the same parameter settings reported in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Values-for-the"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
@@ -5287,6 +5311,89 @@ STANDARD denotes GenClass enhanced with the proposed Standard crossover method.
 
 \begin_layout Enumerate
 The row AVERAGE reports the mean classification error across all datasets for the corresponding method.
+\end_layout
+
+\begin_layout Standard
+Statistical analysis.
+ The comparison of the methods was based on the average classification error of each method on each dataset,
+ so that every dataset provides one observation and 
+\begin_inset Formula $N=31$
+\end_inset
+
+ observations are available for each method.
+ All tests were performed at the significance level 
+\begin_inset Formula $\alpha=0.05$
+\end_inset
+
+.
+ For every table,
+ the Friedman test was first applied in order to examine the hypothesis that all the methods of the table perform equally.
+ For each dataset the methods are ranked from the lowest to the highest error,
+ with ties receiving the average rank,
+ and the test compares the mean ranks of the methods.
+ The result is also reported with the Iman-Davenport correction,
+ which is less conservative,
+ and the strength of the differences is expressed by Kendall's coefficient of concordance 
+\begin_inset Formula $W=\chi^{2}/(N(k-1))$
+\end_inset
+
+,
+ where 
+\begin_inset Formula $k$
+\end_inset
+
+ is the number of methods.
+ The Nemenyi test was then used to compare all the methods through their mean ranks,
+ and two methods are considered different when their mean ranks differ by more than the critical difference 
+\begin_inset Formula $CD$
+\end_inset
+
+.
+ In addition,
+ specific pairs of methods were compared with the two-sided Wilcoxon signed-rank test for paired samples,
+ applied to the differences of the errors on the individual datasets,
+ where zero differences are discarded and tied absolute differences receive average ranks.
+ The p-values of the Wilcoxon tests were adjusted with the Holm method separately for each table,
+ over the family of comparisons of that table.
+ These are the seven comparisons of STANDARD with each of the other methods in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:methods_comparison"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+,
+ and all the pairs of methods in Table 
+\begin_inset Formula $\ref{tab:crossover_strategies}$
+\end_inset
+
+ (three comparisons) and in Table 
+\begin_inset Formula $\ref{tab:diff_NK}$
+\end_inset
+
+ (six comparisons).
+ Finally,
+ for Table 
+\begin_inset Formula $\ref{tab:diff_NK}$
+\end_inset
+
+,
+ the one-sided Page trend test was used to examine whether the error decreases as 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ increases,
+ together with the Spearman correlation between 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ and the error in each dataset,
+ whose sign was summarized with a sign test.
 \end_layout
 
 \begin_layout Standard
@@ -5318,6 +5425,184 @@ tuple "list"
  Therefore,
  the new crossover procedure improves the original method on average,
  while the improvement over the other methods is considerably larger.
+\end_layout
+
+\begin_layout Standard
+The critical difference of the Nemenyi test is 
+\begin_inset Formula $CD=\frac{q_{\alpha}}{\sqrt{2}}\sqrt{\frac{k(k+1)}{6N}}$
+\end_inset
+
+,
+ where 
+\begin_inset Formula $q_{\alpha}$
+\end_inset
+
+ is the critical value of the studentized range distribution for 
+\begin_inset Formula $k$
+\end_inset
+
+ methods,
+ and it therefore depends on the number of methods compared.
+ For each pair of methods,
+ the size of the difference was estimated with the Hodges-Lehmann estimator,
+ which is the median of the pairwise averages of the paired differences of the errors,
+ and its 95% confidence interval was derived from the Wilcoxon signed-rank test using the normal approximation.
+ The effect size of each Wilcoxon test was expressed as 
+\begin_inset Formula $r=Z/\sqrt{n}$
+\end_inset
+
+,
+ where 
+\begin_inset Formula $Z$
+\end_inset
+
+ is the standardized statistic of the test and 
+\begin_inset Formula $n$
+\end_inset
+
+ is the number of datasets with non-zero difference.
+ The confidence intervals of the mean rank and of the mean change in error in Figure 
+\begin_inset Formula $\ref{fig:effect_of_NK}$
+\end_inset
+
+ were computed with the percentile bootstrap,
+ using 10,000 resamples of the datasets with replacement.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\shape italic
+\size small
+Notation for Figures 
+\begin_inset Formula $\ref{fig:standart_vs_others}$
+\end_inset
+
+,
+ 
+\begin_inset Formula $\ref{fig:crossover_strategies}$
+\end_inset
+
+ and 
+\begin_inset Formula $\ref{fig:effect_of_NK}$
+\end_inset
+
+.
+ Each figure has four panels and a header with the Friedman test,
+ the Iman-Davenport correction and Kendall's 
+\begin_inset Formula $W$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+\size small
+Box plots (top left):
+ The box is the interquartile range (
+\begin_inset Formula $IQR$
+\end_inset
+
+),
+ the thick line is the median,
+ the whiskers extend up to 
+\begin_inset Formula $1.5\times IQR$
+\end_inset
+
+,
+ the diamond is the mean,
+ the dots are the datasets and the grey lines join the same dataset.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+\size small
+Pairs "A vs B" (top right):
+ A is the first method named and B the second.
+ The dot is the Hodges-Lehmann median paired difference,
+ error(B) − error(A),
+ with its 95% confidence interval.
+ Right of the dashed line,
+ A has lower error.
+ The label gives the Holm-adjusted Wilcoxon p-value and the wins/ties/losses of A.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+\size small
+Mean ranks (bottom left):
+ Mean Friedman rank (1 = best) 
+\begin_inset Formula $\pm CD/2$
+\end_inset
+
+,
+ where 
+\begin_inset Formula $CD$
+\end_inset
+
+ is the Nemenyi critical difference.
+ Non-overlapping bars differ at 
+\begin_inset Formula $\alpha=0.05$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+\size small
+Bottom right:
+ In Figures 
+\begin_inset Formula $\ref{fig:standart_vs_others}$
+\end_inset
+
+ and 
+\begin_inset Formula $\ref{fig:crossover_strategies}$
+\end_inset
+
+,
+ the per-dataset differences error(B) − error(A) (blue:
+ A better,
+ red:
+ B better).
+ In Figure 
+\begin_inset Formula $\ref{fig:effect_of_NK}$
+\end_inset
+
+,
+ the mean change in error relative to 
+\begin_inset Formula $N_{K}=2$
+\end_inset
+
+ and the mean rank as a function of 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+,
+ with bootstrap 95% confidence intervals.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+\size small
+Stars:
+ *** $p<0.001$,
+ ** $p<0.01$,
+ * $p<0.05$,
+ ns = not significant (Holm-adjusted).
 \end_layout
 
 \begin_layout Standard
@@ -8853,53 +9138,6 @@ name "fig:standart_vs_others"
 
 \end_layout
 
-\begin_layout Standard
-Note:
- 
-\shape italic
-Box plots:
- box = interquartile range,
- thick line = median,
- whiskers = 
-\begin_inset Formula $1.5×IQR$
-\end_inset
-
-,
- diamond = mean,
- dots = datasets,
- grey lines join the same dataset.
- Forest plots:
- Hodges-Lehmann median paired difference in error,
- error(B) − error(A),
- with 95% CI;
- right of the dashed line,
- A has lower error;
- labels give the Holm-adjusted Wilcoxon p-value and the wins/ties/losses of A.
- Rank panels:
- mean Friedman rank (1 = best) 
-\begin_inset Formula $±$
-\end_inset
-
- CD/2 (Nemenyi);
- non-overlapping bars differ at 
-\begin_inset Formula $α$
-\end_inset
-
- = 0.05.
- Bottom right:
- per-dataset paired differences (blue:
- A better,
- red:
- B better) or,
- for $N_K$,
- the trend with bootstrap 95% CI.
- Stars:
- *** p < 0.001,
- ** p < 0.01,
- * p < 0.05,
- ns = not significant.
-\end_layout
-
 \begin_layout Subsection
 Crossover methods 
 \end_layout
@@ -10379,16 +10617,17 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Statistical comparison of the three 
+Statistical comparison of the three three crossover strategies.
+ (STANDARD,
+ TARGETED,
+ TARGETEDWORST).
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:crossover_strategies"
 
 \end_inset
 
- (STANDARD,
- TARGETED,
- TARGETEDWORST).
+
 \end_layout
 
 \end_inset
@@ -10571,7 +10810,7 @@ DATASET
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $N_{k}=5$
+\begin_inset Formula $N_{K}=5$
 \end_inset
 
 
@@ -12259,7 +12498,7 @@ tuple "list"
 \end_inset
 
 ,
- 10 and 15 is statistically significant (adjusted
+ 10 and 15 is statistically significant (adjusted 
 \begin_inset Formula $p=0.61$
 \end_inset
 
@@ -12340,35 +12579,55 @@ name "sec:Conclusions"
 \end_layout
 
 \begin_layout Standard
-This work introduced an additional crossover procedure into the GenClass method,
- which is applied at every generation to a small number of randomly selected chromosomes,
- in order to alleviate the loss of diversity and the entrapment in local minima of the classification error function.
- The procedure was examined in three variants (STANDARD,
- TARGETED and TARGETEDWORST) on 31 classification datasets.
- The STANDARD variant reduced the average classification error of the original method from 16.13% to 13.42%,
+This work introduced an additional crossover procedure into the GenClass method.
+ At every generation,
+ after the standard genetic operators,
+ 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ randomly selected chromosomes undergo 
+\begin_inset Formula $k$
+\end_inset
+
+ crossover trials,
+ and a candidate chromosome replaces the current one only if it achieves a lower classification error on the training set.
+ The procedure was examined in three variants (Standard,
+ Targeted and TargetedWorst) on 31 classification datasets.
+ The Standard variant combines each selected chromosome with randomly chosen chromosomes of the population using one-point crossover.
+ It reduced the average classification error of the original method from 16.13% to 13.42%,
  a relative reduction of 16.8%,
- it obtained the lowest error in 23 of the 31 datasets,
- and the improvement was statistically significant,
- with a considerably larger margin over all the other classifiers of the comparison.
+ and obtained the lowest error in 23 of the 31 datasets.
+ According to the paired Wilcoxon test with Holm correction,
+ the improvement was statistically significant,
+ and the margin over all the other classifiers of the comparison was considerably larger.
 \end_layout
 
 \begin_layout Standard
-The experiments also gave a result that differs from what the design of the targeted variants might suggest.
- Using information from the evolutionary process to guide the exchange of genetic material did not improve on the purely random exchange.
- STANDARD was significantly better than both TARGETED and TARGETEDWORST,
- while the two targeted variants could not be distinguished from each other.
+The comparison of the three variants gave a result that differs from what their design might suggest.
+ The Targeted and TargetedWorst variants take donor chromosomes only from the best fraction of the population and transfer a bounded block of codons between semantically compatible positions,
+ yet they did not improve on the random exchange of Standard.
+ Standard was significantly better than both,
+ while the two targeted variants could not be distinguished from each other,
+ so the additional focus of TargetedWorst on the worst-performing class brought no measurable benefit over Targeted.
  All three variants obtained a lower average error than the original method (13.42%,
  15.08% and 15.42%,
  against 16.13%),
- but statistical significance was examined only for STANDARD.
- A possible explanation is that random exchange preserves more diversity,
- which is the main weakness of the original method,
- but this hypothesis was not tested directly in the present work.
+ but statistical significance against the original method was examined only for Standard.
+ A possible explanation is related to the difference in the exchanged material.
+ In Standard the donors come from the whole population and the genetic material after a random crossover point is exchanged,
+ whereas in the targeted variants the donors come from the best 20% of the population and the exchanged block is limited to at most 
+\begin_inset Formula $B_{\max}$
+\end_inset
+
+ codons.
+ The unrestricted exchange may therefore introduce more diverse genetic material,
+ which relates to the loss of diversity identified as a limitation of the original method.
+ This hypothesis was not tested directly in the present work.
 \end_layout
 
 \begin_layout Standard
-Finally,
- the number of chromosomes participating in the crossover affects the performance,
+The number of chromosomes participating in the crossover affects the performance,
  mainly at its lowest values.
  A very small number (
 \begin_inset Formula $N_{K}=2$
@@ -12380,12 +12639,60 @@ Finally,
 \end_inset
 
 ,
- 10 and 15 were small and not statistically significant.
+ 10 and 15 were small and not statistically significant,
+ although 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+ obtained the lowest average error and the best mean rank.
  A moderate value of 
 \begin_inset Formula $N_{K}$
 \end_inset
 
  therefore seems sufficient.
+\end_layout
+
+\begin_layout Standard
+Some limitations should be noted.
+ The additional procedure requires up to 
+\begin_inset Formula $N_{K}k$
+\end_inset
+
+ extra fitness evaluations per generation,
+ that is 200 with the parameter values of Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Values-for-the"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+,
+ while the standard genetic operators generate 
+\begin_inset Formula $p_{s}N_{c}=450$
+\end_inset
+
+ offspring per generation.
+ The running time was not measured in the present work.
+ Moreover,
+ the parameters 
+\begin_inset Formula $k$
+\end_inset
+
+,
+ 
+\begin_inset Formula $\rho$
+\end_inset
+
+ and 
+\begin_inset Formula $B_{\max}$
+\end_inset
+
+ were kept fixed and their influence was not examined.
  The conclusions are limited to the datasets,
  the parameter values and the classification task used in the experiments.
 \end_layout
@@ -12395,19 +12702,38 @@ Several directions for future work arise from the present study.
  First,
  the reasons why the targeted variants did not outperform the random one should be investigated,
  for example by measuring the diversity of the population during the evolution,
- and by designing targeted operators that preserve diversity or combine random and guided exchanges.
+ by examining the influence of the elite fraction 
+\begin_inset Formula $\rho$
+\end_inset
+
+ and of the maximum block size 
+\begin_inset Formula $B_{\max}$
+\end_inset
+
+,
+ and by designing guided operators that preserve diversity or combine random and guided exchanges.
  Second,
- the number of chromosomes participating in the crossover could be adapted automatically during the evolution instead of being fixed,
- and values larger than 15 could be examined,
+ the number of chromosomes 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ and the number of trials 
+\begin_inset Formula $k$
+\end_inset
+
+ could be adapted automatically during the evolution instead of being fixed,
+ and values of 
+\begin_inset Formula $N_{K}$
+\end_inset
+
+ larger than 15 could be examined,
  since 
 \begin_inset Formula $N_{K}=15$
 \end_inset
 
  had the best mean rank without a statistically established advantage.
  Third,
- the computational cost of the procedure,
- which was not measured here,
- should be analyzed together with possible parallel implementations.
+ the computational cost of the procedure should be measured and analyzed together with possible parallel implementations.
  Finally,
  the procedure could be evaluated on larger datasets,
  on other learning tasks such as regression,
