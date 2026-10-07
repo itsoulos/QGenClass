@@ -278,7 +278,7 @@ Ioannis G.
 \end_inset
 
 ,
- Georgios Georgoulas
+ George Georgoulas
 \begin_inset Formula $^{2}$
 \end_inset
 
@@ -3917,7 +3917,11 @@ literal "false"
 \end_layout
 
 \begin_layout Enumerate
-EEG.
+
+\series bold
+EEG
+\series default
+.
  The EEG dataset is a medical dataset containing electroencephalographic recordings obtained from healthy subjects and patients with epilepsy under different physiological and pathological conditions 
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -3948,7 +3952,7 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -4629,7 +4633,7 @@ STUDENT
 \begin_inset Text
 
 \begin_layout Plain Layout
-403
+587
 \end_layout
 
 \end_inset

@@ -278,7 +278,7 @@ Ioannis G.
 \end_inset
 
 ,
- Georgios Georgoulas
+ George Georgoulas
 \begin_inset Formula $^{2}$
 \end_inset
 
@@ -3282,7 +3282,19 @@ end{algorithm}
 \end_layout
 
 \begin_layout Standard
-Figure [flowchart.png] presents the general flowchart of the proposed method.
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Flowchart-of-the"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ presents the general flowchart of the proposed method.
  The process starts with the generation of the initial population of integer-valued chromosomes.
  Each chromosome is mapped to a classification program through the BNF grammar,
  and the program is evaluated on the training set,
@@ -3905,7 +3917,11 @@ literal "false"
 \end_layout
 
 \begin_layout Enumerate
-EEG.
+
+\series bold
+EEG
+\series default
+.
  The EEG dataset is a medical dataset containing electroencephalographic recordings obtained from healthy subjects and patients with epilepsy under different physiological and pathological conditions 
 \begin_inset CommandInset citation
 LatexCommand citep
