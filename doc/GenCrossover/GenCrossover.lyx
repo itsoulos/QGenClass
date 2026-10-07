@@ -3281,6 +3281,95 @@ end{algorithm}
 
 \end_layout
 
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Flowchart-of-the"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ presents the general flowchart of the proposed method.
+ The process starts with the generation of the initial population of integer-valued chromosomes.
+ Each chromosome is mapped to a classification program through the BNF grammar,
+ and the program is evaluated on the training set,
+ which gives the fitness of the chromosome.
+ The standard genetic operators of selection,
+ one-point crossover and mutation are then applied to the population.
+ After them,
+ the additional crossover procedure is executed.
+ A small number of chromosomes is randomly selected and,
+ for each of them,
+ a number of crossover trials is performed.
+ In every trial,
+ the technique in use,
+ Standard,
+ Targeted or TargetedWorst,
+ produces a new candidate chromosome,
+ which is mapped to a classification program through the grammar and evaluated.
+ If the candidate achieves a lower error than the current chromosome,
+ it replaces it,
+ otherwise the current chromosome is kept.
+ The process continues with the next trial until all the trials of all the selected chromosomes are completed.
+ Finally,
+ the termination criterion is checked.
+ If it is not satisfied,
+ the algorithm returns to the mapping and evaluation of the new population,
+ otherwise it terminates and returns the best classification program.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename flowchart.png
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Flowchart of the proposed GenClass method with the additional crossover techniques.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Flowchart-of-the"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Results
 \begin_inset CommandInset label
