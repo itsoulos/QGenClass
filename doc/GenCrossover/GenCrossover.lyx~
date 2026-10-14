@@ -432,7 +432,7 @@ literal "false"
  medical applications 
 \begin_inset CommandInset citation
 LatexCommand citep
-key "Doewes,Choudhury"
+key "Choudhury"
 literal "false"
 
 \end_inset
@@ -3952,7 +3952,7 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -4633,7 +4633,7 @@ STUDENT
 \begin_inset Text
 
 \begin_layout Plain Layout
-403
+587
 \end_layout
 
 \end_inset

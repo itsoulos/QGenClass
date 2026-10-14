@@ -432,7 +432,7 @@ literal "false"
  medical applications 
 \begin_inset CommandInset citation
 LatexCommand citep
-key "Doewes,Choudhury"
+key "Choudhury"
 literal "false"
 
 \end_inset
@@ -13266,29 +13266,6 @@ G.
 ,
  123437,
  2022.
-\end_layout
-
-\begin_layout Bibliography
-\labelwidthstring 999
-\begin_inset CommandInset bibitem
-LatexCommand bibitem
-key "Doewes"
-literal "false"
-
-\end_inset
-
-Doewes,
- R.I.;
- Nair,
- R.;
- Sharma,
- T.
- Diagnosis of COVID-19 through blood sample using ensemble genetic algorithms and machine learning classifier.
- World J.
- Eng.
- 2022,
- 19,
- 175–182.
 \end_layout
 
 \begin_layout Bibliography

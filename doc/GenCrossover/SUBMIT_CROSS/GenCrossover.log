@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.9.28)  7 OCT 2026 16:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.9.28)  13 OCT 2026 12:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1623,7 +1623,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.18796pt}.
 
 [4]
-<mapping.png, id=194, 1541.76pt x 1027.84pt>
+<mapping.png, id=192, 1541.76pt x 1027.84pt>
 File: mapping.png Graphic file (type png)
 <use mapping.png>
 Package pdftex.def Info: mapping.png  used on input line 468.
@@ -1645,7 +1645,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.18796pt}.
 
 [6 <./mapping.png (PNG copy)>]
-<onepoint.png, id=255, 1990.43625pt x 795.97375pt>
+<onepoint.png, id=253, 1990.43625pt x 795.97375pt>
 File: onepoint.png Graphic file (type png)
 <use onepoint.png>
 Package pdftex.def Info: onepoint.png  used on input line 538.
@@ -1957,7 +1957,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.18796pt}.
 
 [12]
-<flowchart.png, id=350, 882.4167pt x 1454.0724pt>
+<flowchart.png, id=348, 882.4167pt x 1454.0724pt>
 File: flowchart.png Graphic file (type png)
 <use flowchart.png>
 Package pdftex.def Info: flowchart.png  used on input line 944.
@@ -2120,7 +2120,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.18796pt}.
 
 [18]
-<tbl3_summary.png, id=517, 939.51pt x 686.565pt>
+<tbl3_summary.png, id=515, 939.51pt x 686.565pt>
 File: tbl3_summary.png Graphic file (type png)
 <use tbl3_summary.png>
 Package pdftex.def Info: tbl3_summary.png  used on input line 1430.
@@ -2146,7 +2146,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.18796pt}.
 
 [20 <./tbl3_summary.png (PNG copy)>]
-<tbl4_summary.png, id=532, 939.51pt x 686.565pt>
+<tbl4_summary.png, id=530, 939.51pt x 686.565pt>
 File: tbl4_summary.png Graphic file (type png)
 <use tbl4_summary.png>
 Package pdftex.def Info: tbl4_summary.png  used on input line 1551.
@@ -2172,7 +2172,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.18796pt}.
 
 [22 <./tbl4_summary.png (PNG copy)>]
-<tbl5_summary.png, id=547, 939.51pt x 686.565pt>
+<tbl5_summary.png, id=545, 939.51pt x 686.565pt>
 File: tbl5_summary.png Graphic file (type png)
 <use tbl5_summary.png>
 Package pdftex.def Info: tbl5_summary.png  used on input line 1676.
@@ -2182,7 +2182,7 @@ Overfull \hbox (9.6262pt too wide) in paragraph at lines 1676--1677
  [][] 
  []
 
-<time.png, id=548, 362.007pt x 217.467pt>
+<time.png, id=546, 362.007pt x 217.467pt>
 File: time.png Graphic file (type png)
 <use time.png>
 Package pdftex.def Info: time.png  used on input line 1683.
@@ -2227,7 +2227,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.18796pt}.
 
 [27]
-Underfull \hbox (badness 1158) in paragraph at lines 2070--2072
+Underfull \hbox (badness 1158) in paragraph at lines 2066--2068
 []\T1/ppl/m/n/9 (+20) M. Hop-kins, E. Reeber, G. For-man, and J. Suer-mondt, ^^
 PSpam-base,^^Q UCI Ma-chine Learn-ing Repos-i-tory, 1999, doi:
  []
@@ -2263,10 +2263,10 @@ Package rerunfilecheck Info: File `GenCrossover.out' has not changed.
 (rerunfilecheck)             Checksum: AF8A188E502CAAB3D054C46FFA9C30C1;2323.
  ) 
 Here is how much of TeX's memory you used:
- 38689 strings out of 469013
- 701739 string characters out of 5457712
+ 38685 strings out of 469013
+ 701686 string characters out of 5457712
  1681839 words of memory out of 5000000
- 66187 multiletter control sequences out of 15000+600000
+ 66184 multiletter control sequences out of 15000+600000
  732347 words of font info for 607 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  123i,14n,121p,5694b,1512s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -2282,10 +2282,10 @@ ss0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt0900.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/share/texlive/t
 exmf-dist/fonts/type1/urw/palatino/uplr8a.pfb></usr/share/texlive/texmf-dist/fo
 nts/type1/urw/palatino/uplri8a.pfb>
-Output written on GenCrossover.pdf (29 pages, 4088399 bytes).
+Output written on GenCrossover.pdf (29 pages, 4088172 bytes).
 PDF statistics:
- 711 PDF objects out of 1000 (max. 8388607)
- 635 compressed objects within 7 object streams
- 271 named destinations out of 1000 (max. 500000)
+ 708 PDF objects out of 1000 (max. 8388607)
+ 632 compressed objects within 7 object streams
+ 270 named destinations out of 1000 (max. 500000)
  135333 words of extra memory for PDF output out of 154059 (max. 10000000)
 
