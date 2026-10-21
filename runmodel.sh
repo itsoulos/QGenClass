@@ -15,6 +15,7 @@ General:
   --runs N                    Number of runs (default 1)
   --seed N                    First random seed (default 1)
   --results-dir DIR           Logs directory (default results)
+  --summary-file FILE         Per-run metrics TSV (default results/summary_*.tsv)
   --help                      Show this help
 
 QGenClass parameters:
@@ -56,7 +57,7 @@ HELP
 
 exe=./QGenClass
 data_dir="$HOME/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding"
-dataset=; train=; test=; runs=1; seed=1; results_dir=results
+dataset=; train=; test=; runs=1; seed=1; results_dir=results; summary_file=
 declare -A config=()
 config[mode]='standard'
 config[features]='5'
@@ -135,11 +136,12 @@ while (($#)); do
         value=$2; shift 2
       fi
       case "$key" in
-        exe|data-dir|dataset|train|test|runs|seed|results-dir)
+        exe|data-dir|dataset|train|test|runs|seed|results-dir|summary-file)
           case "$key" in
             exe) exe=$value ;; data-dir) data_dir=$value ;; dataset) dataset=$value ;;
             train) train=$value ;; test) test=$value ;; runs) runs=$value ;;
             seed) seed=$value ;; results-dir) results_dir=$value ;;
+            summary-file) summary_file=$value ;;
           esac ;;
         *) if [[ -v options[$key] ]]; then config[${options[$key]}]=$value
            else echo "Unknown option: --$key" >&2; usage >&2; exit 2; fi ;;
@@ -174,18 +176,76 @@ for v in train test; do
 done
 [[ -x $exe ]] || { echo "Missing executable: $exe" >&2; exit 2; }
 mkdir -p -- "$results_dir" || exit 2
+dataset_tag=${dataset:-$(basename "$train")}
+dataset_tag=${dataset_tag//[^a-zA-Z0-9_.-]/_}
+if [[ -z $summary_file ]]; then
+  summary_file="$results_dir/${dataset_tag}_${config[mode]}_${config[pop_fitnessmethod]}_summary_$(date +%Y%m%d_%H%M%S).tsv"
+fi
+mkdir -p -- "$(dirname "$summary_file")"
+printf 'run\\tseed\\tclass_error_percent\\taccuracy_percent\\tprecision\\trecall\\tf1score\\tlogfile\\n' > "$summary_file"
 # Sort keys to ensure reproducible argument order.
 mapfile -t keys < <(printf '%s\n' "${!config[@]}" | LC_ALL=C sort)
 for ((run=0;run<runs;run++)); do
   current_seed=$((seed+run))
   cmd=("$exe" "--train_file=$train" "--test_file=$test" "--random_seed=$current_seed")
   for key in "${keys[@]}"; do cmd+=("--$key=${config[$key]}"); done
-  dataset_tag=${dataset:-$(basename "$train")}
-  dataset_tag=${dataset_tag//[^a-zA-Z0-9_.-]/_}
   logfile="$results_dir/${dataset_tag}_${config[mode]}_${config[pop_fitnessmethod]}_seed${current_seed}_$(date +%Y%m%d_%H%M%S).log"
   printf 'Running (%d/%d): ' "$((run+1))" "$runs"; printf '%q ' "${cmd[@]}"; echo
   "${cmd[@]}" 2>&1 | tee "$logfile"
   status=${PIPESTATUS[0]}
   if ((status != 0)); then echo "QGenClass failed (exit $status); log: $logfile" >&2; exit "$status"; fi
+  metrics=$(LC_ALL=C awk '
+    /CLASS_ERROR:/ {
+      ce=pr=re=f1=""
+      for(i=1;i<=NF;i++) {
+        if($i=="CLASS_ERROR:") ce=$(i+1)
+        else if($i=="PRECISION:") pr=$(i+1)
+        else if($i=="RECALL:") re=$(i+1)
+        else if($i=="F1SCORE:") f1=$(i+1)
+      }
+      if(ce!="" && pr!="" && re!="" && f1!="")
+        result=ce " " pr " " re " " f1
+    }
+    END {print result}
+  ' "$logfile")
+  if [[ -z $metrics ]]; then
+    echo "Missing CLASS_ERROR/PRECISION/RECALL/F1SCORE in $logfile" >&2
+    exit 1
+  fi
+  read -r class_error precision recall f1score <<< "$metrics"
+  accuracy=$(awk -v e="$class_error" 'BEGIN {printf "%.10f",100-e}')
+  printf '%d\\t%d\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n' \\
+    "$((run+1))" "$current_seed" "$class_error" "$accuracy" \\
+    "$precision" "$recall" "$f1score" "$logfile" >> "$summary_file"
   echo "Log: $logfile"
 done
+
+echo
+echo "Summary for $runs runs:"
+LC_ALL=C awk -F '\\t' '
+NR==1 {next}
+{
+  n++
+  for(i=3;i<=7;i++) {
+    x=$i+0
+    sum[i]+=x
+    sq[i]+=x*x
+  }
+}
+END {
+  if(n==0) exit 1
+  name[3]="Class error (%)"
+  name[4]="Accuracy (%)"
+  name[5]="Precision"
+  name[6]="Recall"
+  name[7]="F1 score"
+  printf "%-19s %14s %14s\\n","Metric","Mean","Std.Dev."
+  for(i=3;i<=7;i++) {
+    avg=sum[i]/n
+    variance=n>1?(sq[i]-sum[i]*sum[i]/n)/(n-1):0
+    if(variance<0) variance=0
+    printf "%-19s %14.8f %14.8f\\n",name[i],avg,sqrt(variance)
+  }
+}' "$summary_file"
+echo "Per-run results: $summary_file"
+
