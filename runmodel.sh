@@ -1,53 +1,191 @@
-## SCRIPT TO EXECUTE THE  GENCLASS
+#!/usr/bin/env bash
+set -uo pipefail
 
-## DATAPATH: the location of datasets
-DATAPATH=~/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding/
+usage() {
+  cat <<'HELP'
+Usage: ./runmodel.sh --dataset NAME [options]
+       ./runmodel.sh --train FILE --test FILE [options]
 
-## PROGRAM: The name of the executable
-PROGRAM=./QGenClass
+General:
+  --exe PATH                  Executable (default ./QGenClass)
+  --data-dir DIR              Directory containing NAME.train / NAME.test
+  --dataset NAME              Dataset name
+  --train FILE                Training file
+  --test FILE                 Test file
+  --runs N                    Number of runs (default 1)
+  --seed N                    First random seed (default 1)
+  --results-dir DIR           Logs directory (default results)
+  --help                      Show this help
 
-## DATAFILE: the name of the used dataset
-DATAFILE=$1
+QGenClass parameters:
+  --mode                       default standard  (QGenClass: --mode)
+  --features                   default 5  (QGenClass: --features)
+  --train-format               default data  (QGenClass: --train_format)
+  --test-format                default data  (QGenClass: --test_format)
+  --chromosomes                default 500  (QGenClass: --pop_count)
+  --length                     default 200  (QGenClass: --pop_size)
+  --generations                default 2000  (QGenClass: --pop_gens)
+  --selection-rate             default 0.1  (QGenClass: --pop_srate)
+  --mutation-rate              default 0.05  (QGenClass: --pop_mrate)
+  --local                      default targeted  (QGenClass: --pop_lmethod)
+  --fitness                    default class  (QGenClass: --pop_fitnessmethod)
+  --termination                default maxiters  (QGenClass: --pop_termination)
+  --crossitems                 default 10  (QGenClass: --pop_crossitems)
+  --localitems                 default 20  (QGenClass: --pop_localitems)
+  --localgens                  default 50  (QGenClass: --pop_localgens)
+  --class-percent              default 0.5  (QGenClass: --pop_classpercent)
+  --average-percent            default 0.5  (QGenClass: --pop_averagepercent)
+  --squared-percent            default 0.0  (QGenClass: --pop_squaredpercent)
+  --targeted-iterations        default 50  (QGenClass: --targeted_iterations)
+  --targeted-stagnation-limit  default 20  (QGenClass: --targeted_stagnationlimit)
+  --targeted-burst-iterations  default 200  (QGenClass: --targeted_burstiterations)
+  --crossover                  default targeted  (QGenClass: --cross_method)
+  --targeted-cross-iterations  default 20  (QGenClass: --targeted_crossiterations)
+  --targeted-cross-elite-fraction default 0.2  (QGenClass: --targeted_crosselitefraction)
+  --targeted-cross-max-block   default 16  (QGenClass: --targeted_crossmaxblock)
+  --smote                      default no  (QGenClass: --enable_smote)
+  --smote-k                    default 5  (QGenClass: --smote_k)
+  --c-output                   default classifier.c  (QGenClass: --coutput_file)
+  --python-output              default classifier.py  (QGenClass: --pythonoutput_file)
 
-SEED=1
-if [ -z $2 ] 
-then
-	SEED="1"
-else
-	SEED=$2
+Aliases: --population for --chromosomes; --local-method for --local
+         --fitness-method for --fitness; --cross-method for --crossover
+         --feature-construction is shorthand for --mode feature_construction
+HELP
+}
+
+exe=./QGenClass
+data_dir="$HOME/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding"
+dataset=; train=; test=; runs=1; seed=1; results_dir=results
+declare -A config=()
+config[mode]='standard'
+config[features]='5'
+config[train_format]='data'
+config[test_format]='data'
+config[pop_count]='500'
+config[pop_size]='200'
+config[pop_gens]='2000'
+config[pop_srate]='0.1'
+config[pop_mrate]='0.05'
+config[pop_lmethod]='targeted'
+config[pop_fitnessmethod]='class'
+config[pop_termination]='maxiters'
+config[pop_crossitems]='10'
+config[pop_localitems]='20'
+config[pop_localgens]='50'
+config[pop_classpercent]='0.5'
+config[pop_averagepercent]='0.5'
+config[pop_squaredpercent]='0.0'
+config[targeted_iterations]='50'
+config[targeted_stagnationlimit]='20'
+config[targeted_burstiterations]='200'
+config[cross_method]='targeted'
+config[targeted_crossiterations]='20'
+config[targeted_crosselitefraction]='0.2'
+config[targeted_crossmaxblock]='16'
+config[enable_smote]='no'
+config[smote_k]='5'
+config[coutput_file]='classifier.c'
+config[pythonoutput_file]='classifier.py'
+
+declare -A options=()
+options[mode]=mode
+options[features]=features
+options[train-format]=train_format
+options[test-format]=test_format
+options[chromosomes]=pop_count
+options[length]=pop_size
+options[generations]=pop_gens
+options[selection-rate]=pop_srate
+options[mutation-rate]=pop_mrate
+options[local]=pop_lmethod
+options[fitness]=pop_fitnessmethod
+options[termination]=pop_termination
+options[crossitems]=pop_crossitems
+options[localitems]=pop_localitems
+options[localgens]=pop_localgens
+options[class-percent]=pop_classpercent
+options[average-percent]=pop_averagepercent
+options[squared-percent]=pop_squaredpercent
+options[targeted-iterations]=targeted_iterations
+options[targeted-stagnation-limit]=targeted_stagnationlimit
+options[targeted-burst-iterations]=targeted_burstiterations
+options[crossover]=cross_method
+options[targeted-cross-iterations]=targeted_crossiterations
+options[targeted-cross-elite-fraction]=targeted_crosselitefraction
+options[targeted-cross-max-block]=targeted_crossmaxblock
+options[smote]=enable_smote
+options[smote-k]=smote_k
+options[c-output]=coutput_file
+options[python-output]=pythonoutput_file
+options[population]=pop_count
+options[local-method]=pop_lmethod
+options[fitness-method]=pop_fitnessmethod
+options[cross-method]=cross_method
+
+while (($#)); do
+  case "$1" in
+    --help|-h) usage; exit 0 ;;
+    --feature-construction) config[mode]=feature_construction; shift ;;
+    --*)
+      key=${1#--}
+      if [[ "$key" == *=* ]]; then value=${key#*=}; key=${key%%=*}; shift
+      else
+        if (($# < 2)); then echo "Missing value for --$key" >&2; exit 2; fi
+        value=$2; shift 2
+      fi
+      case "$key" in
+        exe|data-dir|dataset|train|test|runs|seed|results-dir)
+          case "$key" in
+            exe) exe=$value ;; data-dir) data_dir=$value ;; dataset) dataset=$value ;;
+            train) train=$value ;; test) test=$value ;; runs) runs=$value ;;
+            seed) seed=$value ;; results-dir) results_dir=$value ;;
+          esac ;;
+        *) if [[ -v options[$key] ]]; then config[${options[$key]}]=$value
+           else echo "Unknown option: --$key" >&2; usage >&2; exit 2; fi ;;
+      esac ;;
+    *) echo "Unexpected argument: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+for v in runs seed; do
+  if [[ ! ${!v} =~ ^[0-9]+$ ]]; then echo "Invalid $v: ${!v}" >&2; exit 2; fi
+done
+(( runs > 0 )) || { echo 'runs must be positive' >&2; exit 2; }
+(( seed + runs - 1 <= 1000 )) || { echo 'QGenClass random_seed range is 0..1000' >&2; exit 2; }
+case ${config[mode]} in standard|feature_construction) ;; *) echo 'Invalid mode' >&2; exit 2;; esac
+case ${config[pop_lmethod]} in none|crossover|mutate|mutateWorst|siman|hill|de|gd|adam|targeted|targetedWorst|targetedBest|constants) ;; *) echo 'Invalid local search' >&2; exit 2;; esac
+case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
+case ${config[cross_method]} in standard|targeted|targetedWorst) ;; *) echo 'Invalid crossover' >&2; exit 2;; esac
+case ${config[pop_termination]} in maxiters|doublebox|similarity) ;; *) echo 'Invalid termination' >&2; exit 2;; esac
+case ${config[enable_smote]} in yes|no) ;; *) echo 'Invalid smote value' >&2; exit 2;; esac
+for fmt in train_format test_format; do case ${config[$fmt]} in data|csv|arff) ;; *) echo "Invalid $fmt" >&2; exit 2;; esac; done
+if [[ ! ${config[features]} =~ ^[0-9]+$ ]] || ((config[features] < 1 || config[features] > 100)); then
+  echo 'features must be between 1 and 100' >&2; exit 2
 fi
-
-### GENPRAMS: The params of genetic algorithm
-## pop_count: Chromosome count.
-## pop_size:  Size of each chromosome.
-## pop_gens:  Maximum number of generations.
-## pop_srate: Selection rate.
-## pop_mrate: Mutation rate.
-## pop_lrate: Local search rate.
-## pop_lmethod: Local search method. Available methods: none, crossover, mutate, siman, hill,de,gd,adam,mutateWorst,targeted, targetedWorst, constants
-## pop_fitnessmethod: Fitness calculation method. Available methods: class, average, squared, mixed, mean, macroF1, weightedF1
-## pop_classpercent:   The percentage of class mode in mixed mode fitness.
-## pop_averagepercent: The percentage of average mode in mixed mode fitness.
-## pop_squaredpercent: The percentage of squared mode in mixed mode fitness.
-## pop_mutationiters:  The number of iters in mutation local search.
-## pop_mutationrange:  The magnitude of changes in mutation local search.
-## pop_lsearchiters:   The number of generations before the application of the local search procedure.
-## pop_crossitems:     The number of chromosomes that participate in local crossover.
-## pop_localitems:     The number of items that participate in local search.
-## pop_localgens:      The number of generations passed before the application of local search.
-## cross_method:       The local crossover method. Values: standard, targeted, targetedWorst
-## targeted_crossiterations: The local crossover targeted iterations. 
-GENPARAMS="--pop_count=500 --pop_size=200 --pop_gens=2000 --pop_srate=0.1 --pop_mrate=0.05  --pop_lmethod=targeted --targeted_iterations=50 --targeted_stagnationlimit=20 --targeted_burstiterations=200  --pop_fitnessmethod=class --cross_method=targeted --targeted_crossiterations=20 --targeted_crosselitefraction=0.2 --targeted_crossmaxblock=16  --pop_crossitems=10 --pop_localitems=20 --pop_localgens=50 --pop_classpercent=0.5 --pop_averagepercent=0.5 --pop_squaredpercent=0.00 --random_seed=$SEED"
-# TERMINATION: The termination method used. Available values: maxiters, doublebox, similarity
-TERMINATION=maxiters
-
-### DATAPARAMS: The parameters used for datasets handling.
-## train_file:   The path to the train file
-## train_format: The used format for the train file. Available values: data, csv, arff.
-## test_file:    The path to the test file.
-## test_format:  The used format for the test file. Available values: data, csv, arff.
-## enable_smote: This is a flag that enables or disables the Smote method in the train set. Values: yes/no
-## smote_k     : An integer value used in the k-nn procedure of the smote method.
-DATAPARAMS="--train_file=$DATAPATH/$DATAFILE.train --train_format=data --test_file=$DATAPATH/$DATAFILE.test --test_format=data --enable_smote=no --smote_k=5"
-## Execute the program
-$PROGRAM $GENPARAMS $DATAPARAMS
+if [[ -n $dataset ]]; then
+  [[ -n $train ]] || train="$data_dir/$dataset.train"
+  [[ -n $test ]] || test="$data_dir/$dataset.test"
+fi
+[[ -n $train && -n $test ]] || { echo 'Specify --dataset or --train and --test' >&2; exit 2; }
+for v in train test; do
+  if [[ ! -f ${!v} && -f $data_dir/${!v} ]]; then printf -v "$v" '%s' "$data_dir/${!v}"; fi
+  [[ -f ${!v} ]] || { echo "Missing $v file: ${!v}" >&2; exit 2; }
+done
+[[ -x $exe ]] || { echo "Missing executable: $exe" >&2; exit 2; }
+mkdir -p -- "$results_dir" || exit 2
+# Sort keys to ensure reproducible argument order.
+mapfile -t keys < <(printf '%s\n' "${!config[@]}" | LC_ALL=C sort)
+for ((run=0;run<runs;run++)); do
+  current_seed=$((seed+run))
+  cmd=("$exe" "--train_file=$train" "--test_file=$test" "--random_seed=$current_seed")
+  for key in "${keys[@]}"; do cmd+=("--$key=${config[$key]}"); done
+  dataset_tag=${dataset:-$(basename "$train")}
+  dataset_tag=${dataset_tag//[^a-zA-Z0-9_.-]/_}
+  logfile="$results_dir/${dataset_tag}_${config[mode]}_${config[pop_fitnessmethod]}_seed${current_seed}_$(date +%Y%m%d_%H%M%S).log"
+  printf 'Running (%d/%d): ' "$((run+1))" "$runs"; printf '%q ' "${cmd[@]}"; echo
+  "${cmd[@]}" 2>&1 | tee "$logfile"
+  status=${PIPESTATUS[0]}
+  if ((status != 0)); then echo "QGenClass failed (exit $status); log: $logfile" >&2; exit "$status"; fi
+  echo "Log: $logfile"
+done

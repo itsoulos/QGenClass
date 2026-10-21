@@ -16,6 +16,7 @@ QMAKE_LFLAGS += -O3
 SOURCES += \
         CORE/arffdata.cpp \
         CORE/dataset.cpp \
+        CORE/featureconstruction.cpp \
         CORE/parameter.cpp \
         CORE/parameterlist.cpp \
         CORE/problem.cpp \
@@ -40,6 +41,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     CORE/arffdata.h \
     CORE/dataset.h \
+    CORE/featureconstruction.h \
     CORE/parameter.h \
     CORE/parameterlist.h \
     CORE/problem.h \

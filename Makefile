@@ -54,6 +54,7 @@ OBJECTS_DIR   = ./
 
 SOURCES       = CORE/arffdata.cpp \
 		CORE/dataset.cpp \
+		CORE/featureconstruction.cpp \
 		CORE/parameter.cpp \
 		CORE/parameterlist.cpp \
 		CORE/problem.cpp \
@@ -71,6 +72,7 @@ SOURCES       = CORE/arffdata.cpp \
 		main.cpp 
 OBJECTS       = arffdata.o \
 		dataset.o \
+		featureconstruction.o \
 		parameter.o \
 		parameterlist.o \
 		problem.o \
@@ -150,7 +152,6 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
-		.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -170,6 +171,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		QGenClass.pro CORE/arffdata.h \
 		CORE/dataset.h \
+		CORE/featureconstruction.h \
 		CORE/parameter.h \
 		CORE/parameterlist.h \
 		CORE/problem.h \
@@ -186,6 +188,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		GE/rule.h \
 		GE/symbol.h CORE/arffdata.cpp \
 		CORE/dataset.cpp \
+		CORE/featureconstruction.cpp \
 		CORE/parameter.cpp \
 		CORE/parameterlist.cpp \
 		CORE/problem.cpp \
@@ -276,7 +279,6 @@ Makefile: QGenClass.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.co
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
-		.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -360,7 +362,6 @@ Makefile: QGenClass.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.co
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf:
-.qmake.stash:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf:
@@ -394,8 +395,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents CORE/arffdata.h CORE/dataset.h CORE/parameter.h CORE/parameterlist.h CORE/problem.h GE/classprogram.h GE/cprogram.h GE/doublestack.h GE/fparser.hh GE/fpconfig.hh GE/fptypes.hh GE/integeranneal.h GE/integerhill.h GE/population.h GE/program.h GE/rule.h GE/symbol.h $(DISTDIR)/
-	$(COPY_FILE) --parents CORE/arffdata.cpp CORE/dataset.cpp CORE/parameter.cpp CORE/parameterlist.cpp CORE/problem.cpp GE/classprogram.cc GE/cprogram.cc GE/doublestack.cc GE/fparser.cc GE/fpoptimizer.cc GE/integeranneal.cpp GE/integerhill.cpp GE/population.cc GE/program.cc GE/rule.cc GE/symbol.cc main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents CORE/arffdata.h CORE/dataset.h CORE/featureconstruction.h CORE/parameter.h CORE/parameterlist.h CORE/problem.h GE/classprogram.h GE/cprogram.h GE/doublestack.h GE/fparser.hh GE/fpconfig.hh GE/fptypes.hh GE/integeranneal.h GE/integerhill.h GE/population.h GE/program.h GE/rule.h GE/symbol.h $(DISTDIR)/
+	$(COPY_FILE) --parents CORE/arffdata.cpp CORE/dataset.cpp CORE/featureconstruction.cpp CORE/parameter.cpp CORE/parameterlist.cpp CORE/problem.cpp GE/classprogram.cc GE/cprogram.cc GE/doublestack.cc GE/fparser.cc GE/fpoptimizer.cc GE/integeranneal.cpp GE/integerhill.cpp GE/population.cc GE/program.cc GE/rule.cc GE/symbol.cc main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -449,6 +450,10 @@ arffdata.o: CORE/arffdata.cpp CORE/arffdata.h
 dataset.o: CORE/dataset.cpp CORE/dataset.h \
 		CORE/arffdata.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dataset.o CORE/dataset.cpp
+
+featureconstruction.o: CORE/featureconstruction.cpp CORE/featureconstruction.h \
+		CORE/dataset.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o featureconstruction.o CORE/featureconstruction.cpp
 
 parameter.o: CORE/parameter.cpp CORE/parameter.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parameter.o CORE/parameter.cpp
@@ -541,7 +546,8 @@ main.o: main.cpp CORE/parameterlist.h \
 		GE/classprogram.h \
 		GE/cprogram.h \
 		GE/fparser.hh \
-		CORE/dataset.h
+		CORE/dataset.h \
+		CORE/featureconstruction.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 ####### Install

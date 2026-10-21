@@ -2,6 +2,8 @@
 # include <CORE/parameterlist.h>
 # include <GE/population.h>
 # include <GE/classprogram.h>
+#include <CORE/featureconstruction.h>
+#include <exception>
 # include <QDebug>
 char    grammar_file[1024];
 int     wrapping=2;
@@ -62,6 +64,9 @@ void 	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
 
 void setParams()
 {
+    QStringList fcModes; fcModes << "standard" << "feature_construction";
+    mainParams.addParam(Parameter("mode",fcModes[0],fcModes,"Classifier mode"));
+    mainParams.addParam(Parameter("features",5,1,100,"Number of constructed features"));
     mainParams.addParam(Parameter("train_file","","The trainfile used here"));
     mainParams.addParam(Parameter("test_file","","The test file used"));
     QStringList format;
@@ -226,6 +231,19 @@ void run()
                     mainParams.getParam("test_file").getValue(),
                     mainParams.getParam("test_format").getValue()
                     );
+    }
+    if(mainParams.getParam("mode").getValue()=="feature_construction") {
+        FeatureConstruction fc;
+        try {
+            fc.fit(*trainSet,
+                   mainParams.getParam("features").getValue().toInt(),
+                   mainParams.getParam("random_seed").getValue().toInt());
+            fc.print();
+            fc.transform(*trainSet);
+            if(testSet) fc.transform(*testSet);
+        } catch(const std::exception &e) {
+            error(QString("Feature construction failed: %1").arg(e.what()));
+        }
     }
     program = new ClassProgram(trainSet,testSet);
     pop=new Population(
