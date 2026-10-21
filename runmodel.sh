@@ -182,7 +182,7 @@ if [[ -z $summary_file ]]; then
   summary_file="$results_dir/${dataset_tag}_${config[mode]}_${config[pop_fitnessmethod]}_summary_$(date +%Y%m%d_%H%M%S).tsv"
 fi
 mkdir -p -- "$(dirname "$summary_file")"
-printf 'run\\tseed\\tclass_error_percent\\taccuracy_percent\\tprecision\\trecall\\tf1score\\tlogfile\\n' > "$summary_file"
+printf 'run\tseed\tclass_error_percent\taccuracy_percent\tprecision\trecall\tf1score\tlogfile\n' > "$summary_file"
 # Sort keys to ensure reproducible argument order.
 mapfile -t keys < <(printf '%s\n' "${!config[@]}" | LC_ALL=C sort)
 for ((run=0;run<runs;run++)); do
@@ -214,15 +214,15 @@ for ((run=0;run<runs;run++)); do
   fi
   read -r class_error precision recall f1score <<< "$metrics"
   accuracy=$(awk -v e="$class_error" 'BEGIN {printf "%.10f",100-e}')
-  printf '%d\\t%d\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n' \\
-    "$((run+1))" "$current_seed" "$class_error" "$accuracy" \\
+  printf '%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$((run+1))" "$current_seed" "$class_error" "$accuracy" \
     "$precision" "$recall" "$f1score" "$logfile" >> "$summary_file"
   echo "Log: $logfile"
 done
 
 echo
 echo "Summary for $runs runs:"
-LC_ALL=C awk -F '\\t' '
+LC_ALL=C awk -F '\t' '
 NR==1 {next}
 {
   n++
@@ -239,12 +239,12 @@ END {
   name[5]="Precision"
   name[6]="Recall"
   name[7]="F1 score"
-  printf "%-19s %14s %14s\\n","Metric","Mean","Std.Dev."
+  printf "%-19s %14s %14s\n","Metric","Mean","Std.Dev."
   for(i=3;i<=7;i++) {
     avg=sum[i]/n
     variance=n>1?(sq[i]-sum[i]*sum[i]/n)/(n-1):0
     if(variance<0) variance=0
-    printf "%-19s %14.8f %14.8f\\n",name[i],avg,sqrt(variance)
+    printf "%-19s %14.8f %14.8f\n",name[i],avg,sqrt(variance)
   }
 }' "$summary_file"
 echo "Per-run results: $summary_file"
