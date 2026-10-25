@@ -3433,7 +3433,8 @@ literal "false"
 Appendicitis.
 
 \series default
- A dataset originated in 
+ The Appendicitis dataset is a binary classification dataset containing 106 instances and 7 numerical features,
+ used to predict the presence or absence of acute appendicitis based on clinical measurements 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "appendicitis"
@@ -3582,7 +3583,7 @@ literal "false"
 \begin_layout Enumerate
 
 \series bold
-Lymography
+Lymphography
 \series default
  
 \begin_inset CommandInset citation
@@ -3741,7 +3742,15 @@ Shuttle.
  
 \series default
 The Shuttle dataset was originally developed to derive comprehensible classification rules for determining the conditions under which automatic landing control of a spacecraft would be preferable to manual control.
- The corresponding classification task involves distinguishing among different operational conditions based on a set of numerical measurements.
+ The corresponding classification task involves distinguishing among different operational conditions based on a set of numerical measurements 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "shuttle"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Enumerate
@@ -3769,7 +3778,18 @@ literal "false"
 Spiral
 \series default
 ,
- which is an artificial dataset.
+ The Spiral dataset is a synthetic binary classification problem consisting of 1,000 two-dimensional instances equally distributed between two classes.
+ The instances are generated using parametric equations that form two intertwined spiral patterns,
+ resulting in a highly nonlinear classification problem 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "spiral"
+literal "false"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Enumerate
@@ -3800,7 +3820,20 @@ literal "false"
 Splice
 \series default
  dataset,
- which is inspired by biology.
+ which is a biological classification benchmark consisting of 3,190 DNA sequences,
+ each represented by 60 categorical features.
+ The task is to classify sequences into three categories:
+ exon-intron boundaries (EI),
+ intron-exon boundaries (IE),
+ and non-splice junctions (N) 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "splice"
+literal "false"
+
+\end_inset
+
+ .
 \end_layout
 
 \begin_layout Enumerate
@@ -3873,6 +3906,14 @@ TwoNorm
 ,
  where 
 \begin_inset Formula $a=2/\sqrt{20}$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "twonorm"
+literal "false"
+
 \end_inset
 
 .
@@ -4276,7 +4317,7 @@ IONOSPHERE
 \begin_inset Text
 
 \begin_layout Plain Layout
-LYMOGRAPHY
+LYMPHOGRAPHY
 \end_layout
 
 \end_inset
@@ -4314,7 +4355,7 @@ NURSERY
 \begin_inset Text
 
 \begin_layout Plain Layout
-12690
+12960
 \end_layout
 
 \end_inset
@@ -4930,8 +4971,20 @@ The proposed method was implemented in C++.
  To ensure the reliability of the experimental evaluation,
  each experiment was independently repeated 30 times,
  using a different random seed in each run.
+ The code used in the experiments with GenClass is a modifed version of the original algorithm located in the repository 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://github.com/itsoulos/QGenClass/
+\end_layout
+
+\end_inset
+
+(accessed on 24 October 2026).
  Furthermore,
  10-fold cross-validation was employed to assess the generalization performance of the method and provide a robust evaluation of the experimental results.
+ Values in tables represent average test error as measured on the corresponding test set.
  The values used for the experimental parameters are listed in Table 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -4945,6 +4998,7 @@ tuple "list"
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
@@ -6766,7 +6820,7 @@ IONOSPHERE
 \begin_layout Plain Layout
 
 \size footnotesize
-LYMOGRAPHY
+LYMPHOGRAPHY
 \end_layout
 
 \end_inset
@@ -9690,7 +9744,7 @@ IONOSPHERE
 \begin_inset Text
 
 \begin_layout Plain Layout
-LYMOGRAPHY
+LYMPHOGRAPHY
 \end_layout
 
 \end_inset
@@ -10714,7 +10768,7 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Statistical comparison of the three three crossover strategies.
+Statistical comparison of the three crossover strategies.
  (STANDARD,
  TARGETED,
  TARGETEDWORST).
@@ -11368,7 +11422,7 @@ IONOSPHERE
 \begin_inset Text
 
 \begin_layout Plain Layout
-LYMOGRAPHY
+LYMPHOGRAPHY
 \end_layout
 
 \end_inset
@@ -12667,7 +12721,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -12965,7 +13019,7 @@ G.G.
  conducted the experiments,
  employing several datasets and provided the comparative experiments.
  V.C.
- a performed the statistical analysis and prepared the manuscript.
+ performed the statistical analysis and prepared the manuscript.
  All authors have read and agreed to the published version of the manuscript.
 \end_layout
 
@@ -14242,21 +14296,20 @@ literal "false"
 
 \end_inset
 
-G.
- Cestnik,
- I.
- Kononenko,
- and I.
- Bratko,
- “Assistant-86:
- A Knowledge-Elicitation Tool for Sophisticated Users,” in Progress in Machine Learning,
- I.
- Bratko and N.
- Lavrač (Eds.),
- Sigma Press,
- 1987,
- pp.
- 31–45.
+Hepatitis [Data set].
+ (1983).
+ UCI Machine Learning Repository.
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://doi.org/10.24432/C5Q59J
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Bibliography
@@ -14268,21 +14321,20 @@ literal "false"
 
 \end_inset
 
-R.M.
- French,
- N.
- Chater,
- Using noise to compute error surfaces in connectionist networks:
- a novel means of reducing catastrophic forgetting,
- Neural Comput.
+Congressional Voting Records [Data set].
+ (1987).
+ UCI Machine Learning Repository.
  
-\series bold
-14
-\series default
-,
- pp.
- 1755-1769,
- 2002.
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://doi.org/10.24432/C5C01P
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Bibliography
@@ -14501,6 +14553,20 @@ M.
 \begin_layout Bibliography
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
+key "shuttle"
+literal "false"
+
+\end_inset
+
+Statlog (Shuttle) [Data set].
+ (n.d.).
+ UCI Machine Learning Repository.
+ https://doi.org/10.24432/C5WS31
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
 key "spambase"
 literal "false"
 
@@ -14518,6 +14584,39 @@ M.
  1999,
  doi:
  10.24432/C53G6X.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "spiral"
+literal "false"
+
+\end_inset
+
+Gavrilis,
+ D.,
+ Tsoulos,
+ I.
+ G.,
+ & Dermatas,
+ E.
+ (2008).
+ Selecting and constructing features using grammatical evolution.
+ Pattern Recognition Letters,
+ 29(9),
+ 1358–1365.
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://doi.org/10.1016/j.patrec.2008.02.007
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Bibliography
@@ -14544,19 +14643,50 @@ P.
 \begin_layout Bibliography
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
+key "splice"
+literal "false"
+
+\end_inset
+
+Molecular Biology (Splice-junction Gene Sequences) [Data set].
+ (1991).
+ UCI Machine Learning Repository.
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://doi.org/10.24432/C5M888
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
 key "texture"
 literal "false"
 
 \end_inset
 
-A.
- Guerin-Dugué et al.,
- “Deliverable R3-B4-P —
- Task B4:
- Benchmarks,” Technical Report,
- ELENA-NERVES II,
- ESPRIT Basic Research Project 6891,
- 1995.
+KEEL Project.
+ (n.d.).
+ Texture [Data set].
+ University of Granada.
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+https://sci2s.ugr.es/keel/dataset.php?cod=72
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Bibliography
