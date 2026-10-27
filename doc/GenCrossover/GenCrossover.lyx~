@@ -4973,7 +4973,7 @@ The proposed method was implemented in C++.
  using a different random seed in each run.
  The code used in the experiments with GenClass is a modifed version of the original algorithm located in the repository 
 \begin_inset Flex URL
-status open
+status collapsed
 
 \begin_layout Plain Layout
 https://github.com/itsoulos/QGenClass/
@@ -4981,7 +4981,8 @@ https://github.com/itsoulos/QGenClass/
 
 \end_inset
 
-(accessed on 24 October 2026)./ Furthermore,
+(accessed on 24 October 2026).
+ Furthermore,
  10-fold cross-validation was employed to assess the generalization performance of the method and provide a robust evaluation of the experimental results.
  Values in tables represent average test error as measured on the corresponding test set.
  The values used for the experimental parameters are listed in Table 
@@ -5006,7 +5007,7 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -5462,6 +5463,556 @@ The row AVERAGE reports the mean classification error across all datasets for th
 \begin_layout Standard
 
 \series bold
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:majority"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ compares the average classification errors of the evaluated methods with the majority-class baseline.
+ The STANDARD method achieves the lowest average classification error (13.42%),
+ followed by TARGETED (15.08%),
+ TARGETEDWORST (15.42%),
+ and the original CLASS method (16.13%).
+ In contrast,
+ the majority-class baseline yields an average error of 56.23%.
+ Although some competing classifiers perform worse than the majority-class baseline on individual datasets,
+ the four GenClass variants consistently achieve lower classification errors across all 31 datasets.
+
+\series default
+ 
+\begin_inset Float figure
+placement H
+alignment document
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align left
+\begin_inset Graphics
+	filename majority_comparison.png
+	scale 65
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Average classification error (%) of the evaluated classification methods across 31 benchmark datasets.
+ The reported values represent the unweighted mean of the dataset-level classification errors.
+ Lower values indicate better classification performance.
+ The majority-class classifier is included as a simple reference baseline.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:majority"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To assess the influence of the additional computational effort introduced by the crossover mechanism,
+ we performed a supplementary comparison between STANDARD and the original CLASS method under equal fitness evaluation budgets.
+ For each corresponding experimental run,
+ the total number of fitness evaluations performed by STANDARD was recorded and subsequently used as the maximum evaluation budget for CLASS.
+\end_layout
+
+\begin_layout Standard
+The results are presented in Table
+\series bold
+ 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{tab:equal_budget}
+\end_layout
+
+\end_inset
+
+.
+ STANDARD achieved an average classification error of 13.71%,
+ compared with 14.21% for CLASS.
+ Although STANDARD retained a small numerical advantage,
+ the difference was not statistically significant according to the Wilcoxon signed-rank test (
+\begin_inset Formula $p\approx0.608$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+These findings suggest that the additional computational effort associated with the crossover mechanism may contribute to the improvements observed in the original generation-based comparison.
+ Nevertheless,
+ the proposed method maintains a slightly lower average classification error when both approaches are evaluated under equal fitness evaluation budgets.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{table}[htbp]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{Classification error (
+\backslash
+%) of STANDARD and CLASS
+\end_layout
+
+\begin_layout Plain Layout
+under equal fitness evaluation budgets.}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{tab:equal_budget}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+small
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{tabular}{|l|r|r|}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+Dataset & STANDARD & CLASS-EQUAL 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+Alcohol      & 
+\backslash
+textbf{10.43} & 12.13 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Appendicitis & 15.00 & 
+\backslash
+textbf{14.00} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Beed         & 
+\backslash
+textbf{25.68} & 27.78 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Dermatology  & 6.00 & 
+\backslash
+textbf{5.14} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Gene         & 7.35 & 
+\backslash
+textbf{6.85} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Hayes-Roth   & 27.69 & 
+\backslash
+textbf{22.31} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Hepatitis    & 
+\backslash
+textbf{13.75} & 17.50 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Housevotes   & 
+\backslash
+textbf{3.48} & 3.89 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Ionosphere   & 10.00 & 
+\backslash
+textbf{7.43} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Lymography   & 24.29 & 
+\backslash
+textbf{22.86} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Nursery      & 19.10 & 
+\backslash
+textbf{18.41} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Optdigits    & 
+\backslash
+textbf{13.29} & 16.94 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Penbased     & 
+\backslash
+textbf{14.52} & 21.68 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Phoneme      & 
+\backslash
+textbf{16.73} & 17.54 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Pir          & 1.40 & 
+\backslash
+textbf{1.19} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Satimage     & 15.26 & 
+\backslash
+textbf{15.23} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Segment      & 
+\backslash
+textbf{9.05} & 10.35 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Shuttle      & 1.05 & 
+\backslash
+textbf{0.20} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Spambase     & 
+\backslash
+textbf{6.93} & 7.76 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Spiral       & 
+\backslash
+textbf{28.90} & 34.20 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Splice       & 7.21 & 
+\backslash
+textbf{6.90} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Student      & 7.45 & 
+\backslash
+textbf{5.73} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Texture      & 
+\backslash
+textbf{8.36} & 12.91 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Thyroid      & 
+\backslash
+textbf{0.64} & 0.96 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Twonorm      & 5.57 & 
+\backslash
+textbf{2.82} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Vehicle      & 
+\backslash
+textbf{35.83} & 36.07 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Wine         & 8.82 & 8.82 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Yeast        & 46.83 & 
+\backslash
+textbf{45.15} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Z
+\backslash
+_F
+\backslash
+_S       & 
+\backslash
+textbf{6.33} & 6.67 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Z
+\backslash
+_O
+\backslash
+_N
+\backslash
+_F
+\backslash
+_S & 
+\backslash
+textbf{25.40} & 28.80 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+ZONF
+\backslash
+_S      & 2.80 & 
+\backslash
+textbf{2.20} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+textbf{Mean} & 
+\backslash
+textbf{13.71} & 14.21 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{table}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
 Statistical analysis.
 
 \series default
@@ -5761,7 +6312,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -9250,7 +9801,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -9328,7 +9879,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -10749,7 +11300,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center

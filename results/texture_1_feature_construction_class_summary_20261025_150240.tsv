@@ -1,0 +1,2 @@
+run	seed	class_error_percent	accuracy_percent	precision	recall	f1score	logfile
+1	1	19.4545454545	80.5454545455	0.8457113519	0.8363141097	0.8409864802	results/texture_1_feature_construction_class_seed1_20261025_150240.log
