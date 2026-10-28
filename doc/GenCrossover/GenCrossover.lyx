@@ -351,8 +351,11 @@ Many real-world problems can be formulated as classification tasks in machine le
  the latter operators attempt to guide the evolutionary search toward more promising regions of the search space while preserving useful information discovered during previous generations.
  The proposed techniques were evaluated on a diverse collection of real-world classification datasets,
  including several problems characterized by a large number of patterns and/or a large number of classes.
- The experimental results demonstrate that the proposed crossover strategies can substantially improve the performance of the original method,
- leading to a noticeable reduction in classification error across a wide range of classification problems.
+ The experimental results demonstrate that the Standard crossover strategy provides the most consistent improvement over the original GenClass method,
+ reducing the average classification error from 16.13% to 13.42% across 31 classification datasets.
+ This improvement remains statistically significant after excluding four related EEG-derived datasets and applying a correction for multiple comparisons.
+ The Targeted and TargetedWorst strategies also reduce the average classification error,
+ although their statistical evidence is less robust.
 \end_layout
 
 \begin_layout Keywords
@@ -5342,9 +5345,15 @@ Experimental results
 
 \begin_layout Standard
 The proposed method was implemented in C++.
- To ensure the reliability of the experimental evaluation,
- each experiment was independently repeated 30 times,
- using a different random seed in each run.
+ For each dataset,
+ a 10-fold cross-validation procedure was employed using predefined training and test partitions.
+ Each experiment was repeated 30 times independently for every fold,
+ resulting in a total of 300 runs per dataset and method.
+ In each run,
+ the classification model was constructed and optimized exclusively using the training partition,
+ while its classification error was evaluated on the corresponding held-out test partition.
+ The final classification error reported in the experimental tables was calculated as the arithmetic mean of the 300 test classification errors.
+ The test partitions were not used during the evolutionary optimization process.
  The code used in the experiments with GenClass is a modifed version of the original algorithm located in the repository 
 \begin_inset Flex URL
 status collapsed
@@ -5356,9 +5365,6 @@ https://github.com/itsoulos/QGenClass/
 \end_inset
 
 (accessed on 24 October 2026).
- Furthermore,
- 10-fold cross-validation was employed to assess the generalization performance of the method and provide a robust evaluation of the experimental results.
- Values in tables represent average test error as measured on the corresponding test set.
  The values used for the experimental parameters are listed in Table 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -5381,7 +5387,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -6036,7 +6042,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -11496,6 +11502,30 @@ name "fig:standart_vs_others"
 
 \end_layout
 
+\begin_layout Standard
+To examine the potential influence of dependent benchmark datasets,
+ an additional statistical analysis was conducted by excluding the four EEG-derived datasets,
+ which originate from the same underlying recordings.
+ The Wilcoxon signed-rank test was applied to the remaining 27 datasets.
+ The STANDARD method retained a statistically significant advantage over CLASS 
+\begin_inset Formula $\left(p=0.54\times10^{-6}\right)$
+\end_inset
+
+.
+ In contrast,
+ the differences between TARGETED and CLASS (
+\begin_inset Formula $p=0.11105$
+\end_inset
+
+) and between TARGETEDWORST and CLASS (
+\begin_inset Formula $p=0.04215$
+\end_inset
+
+) were not statistically significant after applying the Holm correction for multiple comparisons.
+ These findings indicate that the superiority of the STANDARD method remains robust to the exclusion of the related EEG datasets,
+ whereas the evidence supporting the other two crossover strategies is less conclusive.
+\end_layout
+
 \begin_layout Subsection
 Crossover methods 
 \end_layout
@@ -12998,8 +13028,51 @@ name "fig:crossover_strategies"
 
 \end_layout
 
+\begin_layout Standard
+To further assess the effectiveness of the three crossover strategies,
+ we performed pairwise comparisons against the original CLASS method using two-sided Wilcoxon signed-rank tests.
+ For the complete set of 31 datasets,
+ the p-values were 
+\begin_inset Formula $1.381\times10^{-6}$
+\end_inset
+
+ for STANDARD,
+ 0.022385 for TARGETED,
+ and 0.030285 for TARGETEDWORST.
+ Since four EEG-derived datasets originate from the same underlying recordings,
+ we additionally repeated the analysis after excluding these related problems.
+ For the remaining 27 datasets,
+ the corresponding p-values were 
+\begin_inset Formula $9.537\times10^{-6}$
+\end_inset
+
+,
+ 0.106917,
+ and 0.040013,
+ respectively.
+ After applying the Holm correction for the three comparisons,
+ only STANDARD retained statistical significance at the 0.05 level in the analysis excluding the EEG-derived datasets.
+ These findings indicate that STANDARD provides the most robust improvement over the original CLASS method,
+ whereas the evidence supporting the two targeted strategies is less conclusive.
+\end_layout
+
 \begin_layout Subsection
 Number of crossing items
+\end_layout
+
+\begin_layout Standard
+The value 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ was used as the default configuration in the main experiments without performing a dataset-specific parameter optimization procedure.
+ The experiments presented in this subsection constitute a sensitivity analysis intended to investigate the influence of the number of chromosomes participating in the crossover operation.
+ Although 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+ achieved the lowest average classification error,
+ the default configuration was retained for the main comparisons rather than selecting the best-performing value separately for each dataset.
 \end_layout
 
 \begin_layout Standard
@@ -13111,7 +13184,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -15084,10 +15157,13 @@ The comparison of the three variants gave a result that differs from what their 
  Standard was significantly better than both,
  while the two targeted variants could not be distinguished from each other,
  so the additional focus of TargetedWorst on the worst-performing class brought no measurable benefit over Targeted.
- All three variants obtained a lower average error than the original method (13.42%,
- 15.08% and 15.42%,
- against 16.13%),
- but statistical significance against the original method was examined only for Standard.
+ All three variants obtained a lower average classification error than the original method (13.42%,
+ 15.08%,
+ and 15.42%,
+ compared with 16.13%).
+ Additional pairwise statistical comparisons against CLASS showed that STANDARD provided the most robust improvement,
+ retaining statistical significance after excluding the four related EEG-derived datasets and applying the Holm correction.
+ The improvements obtained by TARGETED and TARGETEDWORST were less conclusive under this more conservative analysis.
  A possible explanation is related to the difference in the exchanged material.
  In Standard the donors come from the whole population and the genetic material after a random crossover point is exchanged,
  whereas in the targeted variants the donors come from the best 20% of the population and the exchanged block is limited to at most 
@@ -15168,6 +15244,22 @@ tuple "list"
  were kept fixed and their influence was not examined.
  The conclusions are limited to the datasets,
  the parameter values and the classification task used in the experiments.
+\end_layout
+
+\begin_layout Standard
+Additional limitations concern the statistical evaluation and generalization of the proposed approach.
+ Four EEG-derived benchmark problems originate from the same underlying recordings and therefore do not constitute fully independent observations.
+ Although a sensitivity analysis excluding these datasets was performed,
+ the remaining benchmark problems should not necessarily be regarded as a random sample of all possible classification tasks.
+ Furthermore,
+ the individual results of the 30 independent runs per fold were not retained,
+ preventing the estimation of run-to-run standard deviations and within-dataset statistical tests.
+ Consequently,
+ small differences in average classification error should be interpreted cautiously.
+ Finally,
+ the greedy acceptance mechanism is based on training classification error and may increase the risk of overfitting,
+ particularly on small datasets such as Hepatitis and Appendicitis.
+ Future work should investigate these effects through repeated experiments with retained run-level results and additional validation procedures.
 \end_layout
 
 \begin_layout Standard
