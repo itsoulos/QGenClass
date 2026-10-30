@@ -11079,6 +11079,184 @@ end{table}
 \end_layout
 
 \begin_layout Standard
+To further examine whether the observed improvements can be attributed to the proposed crossover mechanism rather than to the increased computational budget,
+ an additional experiment was conducted using a restart-based baseline.
+ In this experiment,
+ the original CLASS method was executed twice independently with different random seeds,
+ without the additional crossover mechanism.
+ The total fitness evaluation budget was divided between the two executions,
+ and the best solution was selected according to its training fitness.
+ Consequently,
+ the restart-based baseline was allocated the same total number of fitness evaluations as STANDARD.
+\end_layout
+
+\begin_layout Standard
+The results of the equal-budget comparison are summarized in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:evalBudgets"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
+ As shown in the table,
+ STANDARD achieved the lowest average classification error (14.15%),
+ followed by the equal-budget CLASS method (14.53%) and the restart-based baseline (14.97%).
+ The restart-based approach outperformed STANDARD on 10 datasets,
+ whereas STANDARD achieved lower classification errors on 18 datasets.
+ The two methods produced identical results on one dataset.
+ A paired Wilcoxon signed-rank test yielded p-values of 0.1271 and 0.4118 for the comparisons of the restart-based approach against STANDARD and equal-budget CLASS,
+ respectively.
+ Neither comparison revealed a statistically significant difference at the 0.05 significance level.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement H
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features borderColor="default" oddRowsColor="default" evenRowsColor="default" tabularvalignment="middle">
+<column alignment="center" valignment="top" color="default">
+<column alignment="center" valignment="top" color="default">
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Method
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average classification error (%)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+STANDARD-EQUAL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14.15%
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CLASS-EQUAL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14.53%
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row color="default">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CLASS-RESTART
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" color="default" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14.97%
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Comparison of the average classification errors obtained by STANDARD,
+ CLASS,
+ and the restart-based CLASS baseline under equal total fitness evaluation budgets.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:evalBudgets"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These results indicate that distributing the available computational budget across independent restarts did not improve the overall average classification performance.
+ Although STANDARD achieved the lowest average classification error,
+ the differences were not statistically significant.
+ Therefore,
+ the results should be interpreted as additional evidence from a computational-budget-controlled comparison rather than as conclusive proof of the superiority of the proposed crossover mechanism.
+\end_layout
+
+\begin_layout Standard
 
 \series bold
 Statistical analysis.
