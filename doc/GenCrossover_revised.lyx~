@@ -870,7 +870,11 @@ Another important limitation is the tendency of the evolutionary search to becom
 In the present work,
  advanced crossover techniques are introduced in order to alleviate the aforementioned limitations and improve the search capabilities of the original method.
  These techniques are applied at each generation to a relatively small number of chromosomes selected randomly from the genetic population.
- Restricting their application to a subset of the population allows the proposed operators to enhance the exploration of the search space without substantially increasing the computational cost of the evolutionary process or excessively disrupting the population structure.
+ Restricting their application to a subset of the population allows the proposed operators to enhance the exploration of the search space while limiting their application to a selected number of chromosomes.
+ However,
+ the additional crossover operations introduce computational overhead,
+ which depends on the selected operator and the dataset,
+ as demonstrated in the experimental analysis.
 \end_layout
 
 \begin_layout Standard
@@ -11407,11 +11411,15 @@ An additional statistical comparison was performed between STANDARD and MUTATION
 \end_layout
 
 \begin_layout Standard
-These results indicate that distributing the available computational budget across independent restarts did not improve the overall average classification performance.
- Although STANDARD achieved the lowest average classification error,
- the differences were not statistically significant.
- Therefore,
- the results should be interpreted as additional evidence from a computational-budget-controlled comparison rather than as conclusive proof of the superiority of the proposed crossover mechanism.
+The results of the computational-budget-controlled experiments indicate that STANDARD achieved the lowest average classification error among the four examined methods.
+ However,
+ the differences between STANDARD and the restart-based baseline,
+ as well as between STANDARD and MUTATION-LS,
+ were not statistically significant.
+ These findings suggest that the proposed crossover mechanism may offer a modest practical advantage under equal computational budgets,
+ but they do not establish its statistical superiority over alternative strategies that allocate the same number of fitness evaluations.
+ Consequently,
+ the improvements observed in the main experimental evaluation should be interpreted in conjunction with these additional controlled comparisons.
 \end_layout
 
 \begin_layout Standard
@@ -15349,7 +15357,7 @@ placement H
 alignment document
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \align center
@@ -15366,11 +15374,23 @@ status collapsed
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Execution time of the Standard technique for different values of 
-\begin_inset Formula $N_{K}$
+Execution time of the STANDARD crossover technique on the Dermatology dataset for different values of 
+\begin_inset Formula $(N_{K})$
 \end_inset
 
- (Dermatology dataset).
+.
+ The baseline configuration 
+\begin_inset Formula $((N_{K}=0))$
+\end_inset
+
+ required 81.80 seconds,
+ while execution time increased to 302.60 seconds for 
+\begin_inset Formula $(N_{K}=15)$
+\end_inset
+
+.
+ The baseline value represents a single execution,
+ whereas the remaining values correspond to the previously reported average execution times.
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:time_dermatology"
@@ -15429,16 +15449,23 @@ The figure shows the average execution time of the Standard technique on the Der
 
 ,
  at about 9 s per additional chromosome.
- The time does not grow in proportion to 
-\begin_inset Formula $N_{K}$
-\end_inset
-
-,
- because the rest of the algorithm has a cost that does not depend on 
+ The observed execution-time increase is not uniform across the examined values of 
 \begin_inset Formula $N_{K}$
 \end_inset
 
 .
+ Although the increase becomes smaller between 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{K}=15$
+\end_inset
+
+,
+ the available measurements do not establish the underlying cause of this behavior.
+ Consequently,
+ no specific explanation for the change in the slope of the execution-time curve can be confirmed from these results alone.
  The default value 
 \begin_inset Formula $N_{K}=10$
 \end_inset
@@ -15460,6 +15487,289 @@ The figure shows the average execution time of the Standard technique on the Der
 \end_inset
 
 ).
+\end_layout
+
+\begin_layout Subsection
+
+\series bold
+Computational Cost Analysis
+\end_layout
+
+\begin_layout Standard
+To provide a more comprehensive assessment of the computational cost of the proposed crossover operators,
+ additional experiments were conducted on three relatively large datasets:
+ Nursery,
+ Pirvision,
+ and Shuttle.
+ Both wall-clock execution time and the total number of fitness evaluations were measured for the original CLASS configuration and the STANDARD,
+ TARGETED,
+ and TARGETEDWORST crossover variants.
+ All configurations were evaluated using identical experimental settings and the same random seed,
+ with 
+\begin_inset Formula $N_{K}=0$
+\end_inset
+
+ for CLASS and 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ for the crossover variants.
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{tab:computational_cost}
+\end_layout
+
+\end_inset
+
+ reports the measured execution times and total fitness evaluation counts.
+ The results reveal substantial differences in computational cost among the examined approaches.
+ STANDARD consistently exhibits the highest overhead,
+ requiring approximately 3.49--3.93 times the execution time of CLASS.
+ In contrast,
+ TARGETED introduces a more moderate overhead,
+ with execution-time ratios ranging from 1.40 to 1.67.
+ TARGETEDWORST exhibits dataset-dependent behavior,
+ with execution-time ratios ranging from 0.64 to 1.85.
+\end_layout
+
+\begin_layout Standard
+The number of fitness evaluations generally follows a similar pattern,
+ although execution time is not strictly proportional to the evaluation count.
+ This suggests that factors beyond the number of evaluations may also influence total execution time.
+ In particular,
+ STANDARD introduces a substantial increase in both execution time and fitness evaluations.
+\end_layout
+
+\begin_layout Standard
+An additional baseline measurement was performed on the Dermatology dataset with 
+\begin_inset Formula $N_{K}=0$
+\end_inset
+
+.
+ The recorded execution time was 81.80 seconds,
+ with 2,041,800 fitness evaluations.
+ The previously reported time of 255.60 seconds at 
+\begin_inset Formula $N_{K}=10$
+\end_inset
+
+ is approximately 3.12 times this baseline;
+ this comparison is valid only if both measurements were obtained under equivalent experimental conditions.
+\end_layout
+
+\begin_layout Standard
+These findings demonstrate that the computational overhead of the proposed crossover strategies depends on the operator and dataset and can be substantial,
+ particularly for STANDARD.
+ The additional crossover operations therefore represent a trade-off between classification performance and computational cost rather than a computationally negligible modification.
+ Because these measurements correspond to a single execution per configuration,
+ they are intended to characterize computational overhead rather than establish statistically significant timing differences.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% Computational cost comparison (single run per configuration).
+\end_layout
+
+\begin_layout Plain Layout
+% Requires 
+\backslash
+usepackage{booktabs} in the preamble.
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{table}[H]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{Wall-clock execution time and total fitness evaluations for CLASS and the three crossover variants on Nursery,
+ Pirvision,
+ and Shuttle.
+ The baseline uses $N_K=0$,
+ while the crossover variants use $N_K=10$.
+ Results correspond to one run per configuration.}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{tab:computational_cost}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{tabular}{llrr}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+toprule
+\end_layout
+
+\begin_layout Plain Layout
+Dataset & Method & Time (s) & Fitness evaluations 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+midrule
+\end_layout
+
+\begin_layout Plain Layout
+Nursery & CLASS & 1230.76 & 1595309 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+        & STANDARD & 4293.11 & 5564200 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+        & TARGETED & 1755.92 & 2038902 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+        & TARGETEDWORST & 2275.75 & 2079594 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+midrule
+\end_layout
+
+\begin_layout Plain Layout
+Pirvision & CLASS & 1984.78 & 2072441 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+          & STANDARD & 7805.84 & 6776246 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+          & TARGETED & 2771.94 & 2676918 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+          & TARGETEDWORST & 1267.48 & 2160418 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+midrule
+\end_layout
+
+\begin_layout Plain Layout
+Shuttle & CLASS & 4750.54 & 1783945 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+        & STANDARD & 18632.64 & 6335527 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+        & TARGETED & 7912.64 & 2481313 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+        & TARGETEDWORST & 7386.76 & 2364263 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+bottomrule
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{table}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
