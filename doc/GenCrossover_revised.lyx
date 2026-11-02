@@ -15773,6 +15773,723 @@ end{table}
 
 \end_layout
 
+\begin_layout Subsection
+Crossover Ablation Study
+\end_layout
+
+\begin_layout Standard
+To examine whether the observed behavior of targeted crossover is attributable to donor selection,
+ exchange geometry,
+ or local grammar-based matching,
+ we conducted a controlled ablation study.
+ Six crossover configurations were considered:
+ 
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+emph{Standard}
+\end_layout
+
+\end_inset
+
+,
+ the original standard crossover using donors sampled from the population and tail exchange;
+ 
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+emph{Standard+Elite}
+\end_layout
+
+\end_inset
+
+,
+ which retains the standard exchange but restricts donor selection to the top 20% of the population;
+ 
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+emph{Standard+Block}
+\end_layout
+
+\end_inset
+
+,
+ which retains population-wide donor selection but limits the exchanged segment to at most 16 codons;
+ 
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+emph{Targeted}
+\end_layout
+
+\end_inset
+
+,
+ which combines elite donor selection,
+ a maximum exchanged block length of 16 codons,
+ and local grammar-based matching;
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+emph{Targeted+Full}
+\end_layout
+
+\end_inset
+
+,
+ which replaces elite donor selection in Targeted with population-wide sampling;
+ and 
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+emph{TargetedWorst}
+\end_layout
+
+\end_inset
+
+,
+ the corresponding targeted variant using its alternative recipient-selection strategy.
+ These controls examine individual design choices but do not constitute a complete factorial isolation of all possible interactions.
+\end_layout
+
+\begin_layout Standard
+Experiments used ten classification datasets (Dermatology,
+ Hepatitis,
+ Housevotes,
+ Ionosphere,
+ Optdigits,
+ Segment,
+ Spambase,
+ Thyroid,
+ Vehicle,
+ and Yeast).
+ For each dataset and configuration,
+ 30 runs were performed using the same set of random seed values,
+ giving 1,800 runs in total.
+ All runs were constrained to exactly 100,000 fitness evaluations,
+ with a maximum of 1,000 generations.
+ The number of crossover items was 10;
+ the targeted variants used 20 crossover iterations and a maximum block length of 16 codons.
+ The results refer to one predefined training/test split per dataset,
+ rather than a complete ten-fold cross-validation.
+ Consequently,
+ the conclusions are conditional on the selected splits.
+ The recorded test classification errors are reported as mean 
+\begin_inset Formula $\pm$
+\end_inset
+
+ sample standard deviation across the 30 runs.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{table*}[t]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{Classification error (
+\backslash
+%,
+ mean $
+\backslash
+pm$ standard deviation over 30 runs) under an equal budget of 100,000 fitness evaluations per run.
+ Lower values are better.}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{tab:crossover_ablation_error}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+scriptsize
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+setlength{
+\backslash
+tabcolsep}{3pt}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{tabular}{lrrrrrr}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+Dataset & Standard & Std.+Elite & Std.+Block & Targeted & Targeted+Full & TargetedWorst 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+Dermatology & $6.48
+\backslash
+pm5.19$ & $10.67
+\backslash
+pm6.75$ & $9.05
+\backslash
+pm5.26$ & $6.86
+\backslash
+pm5.49$ & $8.19
+\backslash
+pm5.45$ & $7.24
+\backslash
+pm5.02$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Hepatitis & $21.25
+\backslash
+pm16.46$ & $25.42
+\backslash
+pm16.89$ & $16.25
+\backslash
+pm13.19$ & $24.58
+\backslash
+pm14.86$ & $22.50
+\backslash
+pm15.19$ & $24.58
+\backslash
+pm14.86$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Housevotes & $4.06
+\backslash
+pm1.10$ & $4.35
+\backslash
+pm0.00$ & $4.20
+\backslash
+pm0.79$ & $4.06
+\backslash
+pm1.10$ & $3.48
+\backslash
+pm1.77$ & $4.06
+\backslash
+pm1.10$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Ionosphere & $13.14
+\backslash
+pm3.80$ & $13.71
+\backslash
+pm4.34$ & $12.67
+\backslash
+pm4.09$ & $11.52
+\backslash
+pm3.71$ & $11.62
+\backslash
+pm3.26$ & $11.52
+\backslash
+pm3.71$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Optdigits & $43.62
+\backslash
+pm5.69$ & $44.86
+\backslash
+pm5.00$ & $43.74
+\backslash
+pm5.97$ & $43.14
+\backslash
+pm5.01$ & $42.98
+\backslash
+pm3.72$ & $46.36
+\backslash
+pm4.69$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Segment & $27.56
+\backslash
+pm6.46$ & $29.60
+\backslash
+pm6.06$ & $26.93
+\backslash
+pm6.40$ & $25.57
+\backslash
+pm4.85$ & $25.02
+\backslash
+pm5.46$ & $25.32
+\backslash
+pm7.19$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Spambase & $10.09
+\backslash
+pm2.12$ & $10.61
+\backslash
+pm2.10$ & $9.51
+\backslash
+pm2.25$ & $9.69
+\backslash
+pm1.95$ & $8.69
+\backslash
+pm1.84$ & $9.69
+\backslash
+pm1.95$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Thyroid & $4.79
+\backslash
+pm1.61$ & $4.25
+\backslash
+pm2.04$ & $5.00
+\backslash
+pm1.64$ & $4.48
+\backslash
+pm1.78$ & $3.51
+\backslash
+pm1.78$ & $4.20
+\backslash
+pm1.78$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Vehicle & $39.29
+\backslash
+pm5.99$ & $42.54
+\backslash
+pm8.11$ & $42.78
+\backslash
+pm7.84$ & $40.71
+\backslash
+pm8.08$ & $39.64
+\backslash
+pm6.12$ & $39.33
+\backslash
+pm6.63$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Yeast & $55.59
+\backslash
+pm4.50$ & $57.18
+\backslash
+pm4.03$ & $54.48
+\backslash
+pm3.55$ & $54.84
+\backslash
+pm3.70$ & $55.09
+\backslash
+pm8.14$ & $53.81
+\backslash
+pm4.33$ 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{table*}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{tab:crossover_ablation_error}
+\end_layout
+
+\end_inset
+
+ shows that no single operator is best on every dataset.
+ Targeted+Full achieves the lowest mean classification error on five datasets,
+ while Standard performs best on Dermatology and Standard+Block on Hepatitis.
+ The relatively small differences between several configurations should not be interpreted as evidence of universal superiority.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{table}[t]
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{Crossover statistics aggregated over all ten datasets and 30 runs per dataset.
+ Accepted improvements and skipped trials are mean counts per run;
+ the last column is the ratio of total accepted improvements to total crossover fitness evaluations,
+ multiplied by 1,000.}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{tab:crossover_ablation_efficiency}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+scriptsize
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{tabular}{lrrr}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+Operator & Accepted/run & Skipped/run & Accepted/1,000 evals 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+Standard & 965.5 & 0.0 & 12.18 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Standard+Elite & 810.0 & 0.0 & 10.22 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Standard+Block & 904.0 & 0.0 & 11.40 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Targeted & 629.8 & 489.2 & 29.33 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+Targeted+Full & 636.1 & 560.7 & 29.67 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+TargetedWorst & 479.8 & 1355.1 & 23.06 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{table}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As shown in Table 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+ref{tab:crossover_ablation_efficiency}
+\end_layout
+
+\end_inset
+
+,
+ the targeted configurations produce more accepted improvements per crossover fitness evaluation than the standard configurations.
+ In particular,
+ Targeted yields approximately 2.41 times the normalized acceptance count of Standard.
+ However,
+ these are not equal numbers of crossover evaluations:
+ the fixed total evaluation budget also covers other algorithmic operations,
+ and the crossover implementations use different numbers of trials and evaluations.
+ The normalized ratio is therefore an operational efficiency measure,
+ not direct proof that grammar-based matching alone causes the difference.
+ TargetedWorst also records substantially more skipped trials,
+ indicating that some attempted operations terminate without a crossover fitness evaluation.
+\end_layout
+
+\begin_layout Standard
+For a dataset-level statistical comparison,
+ the six operators were ranked according to their mean classification error on each of the ten datasets.
+ A Friedman test identified an overall difference (
+\begin_inset Formula $\chi^{2}(5)=18.878$
+\end_inset
+
+,
+ 
+\begin_inset Formula $p=0.00203$
+\end_inset
+
+).
+ The mean ranks (smaller is better) were 2.20 for Targeted+Full,
+ 2.85 for TargetedWorst,
+ 3.05 for Targeted,
+ 3.50 for Standard,
+ 3.90 for Standard+Block,
+ and 5.50 for Standard+Elite.
+ Five pre-specified pairwise comparisons were subsequently performed using two-sided Wilcoxon signed-rank tests on the ten paired dataset means,
+ with Holm correction:
+ Standard versus Targeted (
+\begin_inset Formula $p_{\mathrm{adj}}=1.0000$
+\end_inset
+
+),
+ Standard versus Standard+Elite (
+\begin_inset Formula $p_{\mathrm{adj}}=0.0488$
+\end_inset
+
+),
+ Standard versus Standard+Block (
+\begin_inset Formula $p_{\mathrm{adj}}=1.0000$
+\end_inset
+
+),
+ Targeted versus Targeted+Full (
+\begin_inset Formula $p_{\mathrm{adj}}=0.6406$
+\end_inset
+
+),
+ and Targeted versus TargetedWorst (
+\begin_inset Formula $p_{\mathrm{adj}}=1.0000$
+\end_inset
+
+).
+ Only the Standard versus Standard+Elite comparison met the 0.05 threshold after correction,
+ with Standard achieving the lower classification error on average.
+ These tests use datasets as the paired analysis units,
+ rather than treating all 300 runs per operator as independent datasets.
+\end_layout
+
+\begin_layout Standard
+The ablations suggest that restricting donors to the elite subset is not beneficial by itself and that limiting exchange length does not guarantee improved generalization.
+ Local grammar-based matching may increase the frequency of accepted local modifications,
+ but the present controls cannot establish an isolated causal effect of semantic matching.
+ Importantly,
+ matching grammar-derived types at the exchange site is a local constraint:
+ changing the derivation can alter how subsequent codons are consumed and interpreted,
+ so global semantic equivalence or validity of the entire downstream derivation is not guaranteed solely by the local match.
+ These limitations motivate interpreting the crossover mechanisms as interacting design choices rather than as independently validated sources of performance improvement.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Mechanistic interpretation of local semantic compatibility.
+\end_layout
+
+\begin_layout Standard
+An important limitation of grammar-guided crossover arises from the sequential nature of genotype-to-phenotype mapping in Grammatical Evolution.
+ Although the Targeted operator attempts to identify compatible crossover positions based on grammar-derived semantic information,
+ such compatibility is inherently local and does not guarantee preservation of the overall derivation structure.
+\end_layout
+
+\begin_layout Standard
+For example,
+ consider a grammar containing the productions <expr> ::= <expr> <op> <expr> | <var> | <func>(<expr>).
+ Replacing a codon that selects <var> with one selecting <expr> <op> <expr> introduces additional non-terminal symbols into the derivation.
+ As a result,
+ subsequent codons may be consumed in different grammatical contexts,
+ potentially selecting different production rules and producing substantially different phenotypes.
+\end_layout
+
+\begin_layout Standard
+This phenomenon implies that exchanging locally compatible codon blocks does not necessarily preserve the semantic relationships of the complete generated expression.
+ The resulting disruption may offset the expected benefits of semantic guidance and provides a plausible explanation for the absence of consistent improvements in classification performance.
+ Importantly,
+ this interpretation is a mechanistic hypothesis supported by the properties of GE mapping rather than a directly measured causal effect in the present experiments.
+\end_layout
+
+\begin_layout Subsection
+Convergence and Population Diversity Analysis
+\end_layout
+
 \begin_layout Section
 Conclusions
 \begin_inset CommandInset label
