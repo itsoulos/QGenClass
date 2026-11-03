@@ -16486,6 +16486,110 @@ This phenomenon implies that exchanging locally compatible codon blocks does not
  this interpretation is a mechanistic hypothesis supported by the properties of GE mapping rather than a directly measured causal effect in the present experiments.
 \end_layout
 
+\begin_layout Subsection
+Convergence and Population Diversity Analysis
+\end_layout
+
+\begin_layout Standard
+To further investigate the evolutionary behavior of the proposed crossover operators,
+ a convergence and population diversity analysis was conducted on four representative classification datasets:
+ Dermatology,
+ Ionosphere,
+ Spambase,
+ and Vehicle.
+ These datasets include binary and multiclass classification problems,
+ allowing the crossover strategies to be examined under different chromosome structures.
+ Each configuration was evaluated over 30 independent runs using a fixed budget of 100,000 fitness evaluations.
+\end_layout
+
+\begin_layout Standard
+Population diversity was quantified using the normalized average pairwise Hamming distance between chromosomes.
+ This measure expresses the proportion of differing codon positions across pairs of individuals in the population.
+ Higher values indicate greater genotypic diversity,
+ whereas lower values indicate increasing population homogeneity.
+ The convergence curves show the mean best-so-far fitness,
+ and the diversity curves show the mean population diversity.
+ Shaded regions indicate one standard deviation around the mean.
+\end_layout
+
+\begin_layout Standard
+Figure~
+\backslash
+ref{fig:convergence_diversity} presents the convergence and diversity trajectories for all four datasets.
+ The left column shows best-so-far fitness against the number of fitness evaluations;
+ the right column shows normalized population diversity.
+ Since the fixed evaluation budget may interrupt the final generation,
+ the diversity curves are restricted to evaluation ranges with observations from all 30 runs for each operator,
+ avoiding comparisons based on unequal sample counts.
+\end_layout
+
+\begin_layout Standard
+On Dermatology,
+ TargetedWorst exhibits relatively rapid initial fitness improvements.
+ Both targeted variants maintain greater population diversity than Standard over substantial portions of the search.
+ At 60,000 fitness evaluations,
+ the diversity differences between Standard and Targeted and between Standard and TargetedWorst are statistically significant (Holm-adjusted Wilcoxon 
+\begin_inset Formula $p=3.18\times10^{-5}$
+\end_inset
+
+ and 
+\begin_inset Formula $p=9.94\times10^{-5}$
+\end_inset
+
+,
+ respectively).
+ No statistically significant diversity difference was observed between the two targeted variants.
+ Although TargetedWorst obtained the best mean final fitness in this experiment,
+ pairwise tests did not identify statistically significant differences in final fitness.
+\end_layout
+
+\begin_layout Standard
+On Ionosphere,
+ Targeted achieves significantly better final fitness than Standard.
+ The recorded convergence and diversity trajectories of Targeted and TargetedWorst coincide.
+ On Spambase,
+ the targeted variants maintain greater population diversity than Standard over substantial portions of the search,
+ but the final-fitness difference between Standard and Targeted is not statistically significant.
+ The two targeted variants again exhibit identical recorded trajectories.
+\end_layout
+
+\begin_layout Standard
+Vehicle provides a multiclass case in which the targeted variants generally maintain greater genotypic diversity than Standard,
+ while the observed final-fitness difference between Standard and Targeted is not statistically significant.
+ Thus,
+ increased diversity does not necessarily translate into better final optimization performance under the available evaluation budget.
+\end_layout
+
+\begin_layout Standard
+An implementation-specific characteristic explains the identical behavior of Targeted and TargetedWorst observed on the binary datasets.
+ For a problem with 
+\begin_inset Formula $C$
+\end_inset
+
+ classes,
+ the chromosome contains 
+\begin_inset Formula $C-1$
+\end_inset
+
+ explicit classification rules,
+ with the remaining class represented by the default branch.
+ TargetedWorst restricts crossover positions to the segment corresponding to the worst-performing class,
+ except when that class is the default class,
+ in which case the entire chromosome is considered.
+ When 
+\begin_inset Formula $C=2$
+\end_inset
+
+,
+ the single explicit-rule segment already spans the entire chromosome.
+ Therefore,
+ the class-specific restriction is ineffective for either possible worst-performing class,
+ and TargetedWorst can select the same candidate crossover positions as Targeted.
+ With otherwise equivalent selection and exchange operations and the same random seed,
+ the operators can follow identical evolutionary trajectories,
+ as observed on Ionosphere and Spambase.
+\end_layout
+
 \begin_layout Section
 Conclusions
 \begin_inset CommandInset label

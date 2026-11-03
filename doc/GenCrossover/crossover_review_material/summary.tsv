@@ -1,0 +1,7 @@
+method	runs	mean_accepted	sd_accepted	mean_accepted_per_generation	sd_accepted_per_generation	mean_accepted_per_1000_crossover_evals	sd_accepted_per_1000_crossover_evals	mean_full_generations	mean_crossover_evals
+standard	30	968.4000	192.9312	24.4618	4.7566	12.2636	2.4120	39.5667	78945.9667
+standardElite	30	817.5667	196.4558	20.6176	4.7844	10.3403	2.4302	39.5667	78958.3333
+standardBlock	30	887.2667	144.4903	22.4686	3.5463	11.2381	1.7978	39.4667	78926.6000
+targeted	30	555.9000	85.4813	5.6152	0.8634	27.1910	4.3017	99.0000	20462.8000
+targetedFull	30	558.3667	75.8162	5.6336	0.7718	27.2333	3.8961	99.1333	20527.8333
+targetedWorst	30	294.4000	84.4020	2.9722	0.8538	15.1857	4.2317	99.0667	19342.0000
