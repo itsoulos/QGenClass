@@ -342,7 +342,7 @@ Many real-world problems can be formulated as classification tasks in machine le
  its evolutionary search process may suffer from limitations such as entrapment in local minima of the error function and premature convergence,
  which can prevent the method from discovering high-quality classification rules.
  The present work proposes an enhanced version of GenClass through the introduction of advanced crossover techniques operating on the integer-valued chromosomes employed by the method,
- with the aim of achieving a significant reduction in classification error.
+ with the aim of improving the evolutionary search process and reducing classification error.
  The proposed crossover operators follow two different strategies.
  Some of them are purely stochastic,
  introducing greater diversity into the evolutionary search,
@@ -673,60 +673,27 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-GE has been successfully applied to a wide range of real-world problems across diverse scientific and engineering domains including among other things the important field of classification.
- Because GE represents candidate solutions through a genotype-to-phenotype mapping rather than directly,
- the design of crossover operators and their interaction with this mapping constitutes an important research direction that does not arise in conventional GA.
-\end_layout
-
-\begin_layout Standard
-O'Neill et al.
- 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "ge_crossover"
-literal "false"
-
-\end_inset
-
- investigated conventional and homologous crossover in GE and analysed the disruption introduced by recombination during mapping,
- reporting that the homologous operator did not outperform the simpler one-point operator.
- Harper and Blair 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "ge_harper"
-literal "false"
+Despite the extensive application of Grammatical Evolution across different domains,
+ the design of effective crossover operators remains an important research challenge.
+ In particular,
+ the indirect genotype-to-phenotype mapping employed by GE introduces additional considerations regarding the preservation and exchange of useful genetic material.
+ Previous studies have investigated conventional,
+ grammar-aware,
+ and structure-preserving crossover mechanisms,
+ as well as crossover-based local improvement within hybrid evolutionary algorithms.
+ These approaches and their relationship to the methods proposed in the present study are discussed in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Related-work"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
 
 \end_inset
 
- subsequently introduced grammar-informed operators,
- including Matching Crossover,
- which aligns crossover positions according to the non-terminal expanded at the corresponding codon,
- and Left Hand Side (LHS) Replacement Crossover,
- which exchanges complete expansions of matching non-terminals.
- Their work establishes the distinction between grammatical matching at a position and the preservation of complete grammatical structures.
- In a separate direction,
- crossover has been used as a local improvement mechanism within memetic algorithms 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "memetic_lozano"
-literal "false"
-
-\end_inset
-
-,
- and Local Crossover 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "localCrossover"
-literal "false"
-
-\end_inset
-
- applied repeated recombination with fitness-based acceptance to GE.
- Building on these studies,
- the present work investigates whether grammatical-category matching,
- bounded codon exchange,
- and class-performance-guided modification can improve crossover-based refinement within GenClass.
+.
 \end_layout
 
 \begin_layout Standard
@@ -845,9 +812,8 @@ where the corresponding training set is defined as
 \end_layout
 
 \begin_layout Standard
-Although the aforementioned technique has demonstrated particularly promising performance,
- even when applied to challenging data classification problems,
- it still exhibits several limitations that may adversely affect the effectiveness of the evolutionary search process.
+Although the aforementioned technique has been evaluated on a variety of classification problems,
+ several aspects of its evolutionary search process may still benefit from further investigation and improvement.
  One of the most important issues is premature convergence,
  where the population rapidly loses genetic diversity and converges before sufficiently exploring the search space.
  As a consequence,
@@ -933,6 +899,19 @@ The remainder of this article is organized as follows.
  Section 
 \begin_inset CommandInset ref
 LatexCommand ref
+reference "sec:Related-work"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+ reviews previous research on crossover operators in Grammatical Evolution and discusses the relationship between the proposed techniques and hybrid evolutionary and memetic algorithms.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "sec:Materials-and-Methods"
 plural "false"
 caps "false"
@@ -942,7 +921,7 @@ tuple "list"
 
 \end_inset
 
- introduces the original rule construction method and describes the proposed crossover techniques in detail.
+ introduces the original GenClass rule construction method and describes the proposed crossover strategies in detail.
  Section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -955,8 +934,9 @@ tuple "list"
 
 \end_inset
 
- presents the classification datasets used in the experimental evaluation,
- followed by the experimental results and the corresponding statistical analysis.
+ presents the classification datasets,
+ experimental results,
+ and corresponding statistical analysis.
  Finally,
  Section 
 \begin_inset CommandInset ref
@@ -970,7 +950,187 @@ tuple "list"
 
 \end_inset
 
- summarizes the main findings of the study and outlines the conclusions drawn from the experimental evaluation.
+ summarizes the main findings and conclusions of the study.
+\end_layout
+
+\begin_layout Section
+Related work
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Related-work"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Crossover Operators in Grammatical Evolution
+\end_layout
+
+\begin_layout Standard
+Crossover is one of the fundamental operators of evolutionary computation,
+ enabling the exchange of genetic material between candidate solutions.
+ In Grammatical Evolution (GE),
+ however,
+ crossover presents additional challenges because chromosomes are indirectly mapped to executable expressions or programs through a formal grammar.
+ Consequently,
+ exchanging chromosome segments may affect not only the genetic representation but also the grammatical derivation and the resulting program structure.
+\end_layout
+
+\begin_layout Standard
+O'Neill et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_crossover"
+literal "false"
+
+\end_inset
+
+ investigated conventional and homologous crossover operators in GE,
+ examining the effects of recombination on the genotype-to-phenotype mapping process.
+ Their study highlighted the importance of crossover-induced disruption and demonstrated that homologous crossover does not necessarily outperform conventional one-point crossover.
+ These findings indicate that increasing the structural sophistication of recombination does not automatically lead to improved evolutionary performance.
+\end_layout
+
+\begin_layout Standard
+Harper and Blair 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ge_harper"
+literal "false"
+
+\end_inset
+
+ introduced grammar-informed crossover mechanisms designed to exploit information obtained during grammatical derivation.
+ Their Matching Crossover operator identifies crossover positions associated with corresponding grammatical symbols,
+ whereas Left Hand Side (LHS) Replacement Crossover exchanges complete expansions associated with matching non-terminal symbols.
+ These approaches represent important developments toward grammar-aware recombination,
+ particularly by distinguishing between matching grammatical positions and preserving complete grammatical structures.
+\end_layout
+
+\begin_layout Standard
+Another relevant research direction involves the use of crossover as a local improvement mechanism rather than exclusively as a population-level reproductive operator.
+ Tsoulos et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "localCrossover"
+literal "false"
+
+\end_inset
+
+ introduced Local Crossover for GE,
+ employing repeated recombination and fitness-based acceptance to improve individual chromosomes.
+ This approach demonstrates how crossover can be incorporated into an additional refinement procedure,
+ allowing beneficial genetic modifications to accumulate during the evolutionary process.
+\end_layout
+
+\begin_layout Standard
+The present study builds upon these research directions by investigating three additional crossover strategies within the GenClass rule construction framework.
+ The Standard strategy employs repeated one-point crossover with strict fitness-based acceptance.
+ The Targeted strategy exploits genotype-to-phenotype mapping information to identify active codons associated with compatible grammatical categories,
+ while selecting donor chromosomes from an elite subset of the population.
+ TargetedWorst extends this approach by incorporating class-specific classification performance to prioritize modifications associated with poorly performing classes.
+\end_layout
+
+\begin_layout Standard
+Unlike crossover operators that exchange complete grammatical expansions,
+ the proposed Targeted strategies transfer bounded codon blocks between grammatically compatible positions.
+ Therefore,
+ they do not guarantee the preservation of complete grammatical substructures or equivalent program behavior after remapping.
+ Their objective is instead to investigate whether grammatical compatibility,
+ restricted genetic exchange,
+ and classification-performance information can improve the effectiveness of crossover-based refinement.
+\end_layout
+
+\begin_layout Subsection
+Hybrid Evolutionary and Memetic Algorithms
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Hybrid-Evolutionary-and"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hybrid evolutionary algorithms combine population-based evolutionary search with additional optimization mechanisms to improve search effectiveness.
+ A particularly important category consists of memetic algorithms,
+ in which evolutionary operators are complemented by local improvement procedures.
+ Such approaches attempt to combine the global exploration capabilities of evolutionary algorithms with the exploitation capabilities of local search.
+\end_layout
+
+\begin_layout Standard
+Local improvement is commonly associated with mutation-based neighborhood exploration or numerical optimization procedures.
+ However,
+ crossover can also serve as a mechanism for local refinement by generating candidate solutions through recombination with other members of the population.
+ Lozano et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "memetic_lozano"
+literal "false"
+
+\end_inset
+
+ investigated crossover hill-climbing within memetic algorithms,
+ demonstrating the relevance of recombination-based improvement procedures in hybrid evolutionary optimization.
+\end_layout
+
+\begin_layout Standard
+Within GE,
+ Local Crossover 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "localCrossover"
+literal "false"
+
+\end_inset
+
+ provides a related example in which repeated recombination is used to refine chromosomes through fitness-based acceptance.
+ This establishes a direct connection between grammatical evolution and memetic search strategies,
+ since crossover is employed not only to generate offspring for subsequent generations but also to improve existing candidate solutions.
+\end_layout
+
+\begin_layout Standard
+The methods investigated in the present work can be interpreted within this broader memetic framework.
+ The original GenClass evolutionary process retains its conventional selection,
+ crossover,
+ and mutation operators,
+ while an additional crossover-based refinement stage is applied to a limited number of chromosomes during each generation.
+ Candidate modifications are accepted only when they improve the corresponding training fitness,
+ and accepted improvements are immediately available for subsequent refinement trials.
+\end_layout
+
+\begin_layout Standard
+An important distinction from approaches in which local improvement dominates the evolutionary search is that the proposed framework limits the number of chromosomes subjected to additional refinement.
+ This design aims to supplement the population-based evolutionary process without replacing its conventional search mechanisms.
+ Nevertheless,
+ the additional operations introduce computational overhead,
+ making the relationship between classification performance and computational effort an important aspect of the experimental evaluation.
+\end_layout
+
+\begin_layout Standard
+From this perspective,
+ the principal contribution of the present study is not the introduction of grammar-aware crossover or crossover-based local search as entirely new concepts.
+ Rather,
+ it is the systematic investigation of additional crossover refinement strategies within a grammatical-evolution-based rule construction method.
+ In particular,
+ the study examines whether grammatical-category matching,
+ elite donor selection,
+ bounded codon exchange,
+ and class-specific performance guidance provide measurable advantages over simpler stochastic recombination.
+\end_layout
+
+\begin_layout Standard
+The experimental comparison of Standard,
+ Targeted,
+ and TargetedWorst also provides evidence concerning the trade-off between operator complexity and practical effectiveness.
+ This is particularly relevant to the design of hybrid and memetic evolutionary algorithms,
+ where more informed local search mechanisms may introduce additional computational cost without necessarily producing superior solutions.
 \end_layout
 
 \begin_layout Section
@@ -1736,7 +1896,7 @@ placement H
 alignment document
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -1780,6 +1940,28 @@ name "fig:onePoint"
 
 \begin_layout Subsection
 The proposed crossover methods
+\end_layout
+
+\begin_layout Standard
+The additional crossover procedures investigated in this work can be interpreted as crossover-based local improvement mechanisms embedded within a conventional evolutionary algorithm.
+ Their repeated application,
+ together with the immediate acceptance of fitness-improving modifications,
+ follows a greedy hill-climbing strategy in which candidate neighbors are generated through recombination with other population members.
+ Consequently,
+ the overall framework is closely related to hybrid evolutionary and memetic algorithms,
+ as discussed in subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Hybrid-Evolutionary-and"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1828,7 +2010,7 @@ The proposed crossover techniques,
 \end_layout
 
 \begin_layout Standard
-The Standard procedure is closely related to the Local Crossover operator introduced by Tsoulos et al.
+The Standard crossover strategy is closely related to the Local Crossover operator previously introduced by Tsoulos et al.
  
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -1838,20 +2020,13 @@ literal "false"
 \end_inset
 
 .
- Both methods apply repeated one-point crossover between a selected chromosome and other members of the population,
- evaluate the resulting offspring,
- and retain beneficial modifications so that they participate in subsequent trials.
- The two procedures differ in how chromosomes are selected for refinement and in the acceptance criterion:
- the earlier method applies the operator to each chromosome with probability 
-\begin_inset Formula $p_{cr}$
-\end_inset
-
- and accepts a candidate whose fitness is no worse than that of the current chromosome,
- whereas Standard refines a fixed number 
-\begin_inset Formula $N_{K}$
-\end_inset
-
- of chromosomes per generation and accepts a candidate only when it achieves a strictly lower classification error.
+ Both methods employ repeated one-point recombination with fitness-based acceptance and sequential improvement of selected chromosomes.
+ The differences concern the selection of chromosomes for refinement,
+ the acceptance criterion,
+ and the computational effort allocated to the refinement stage.
+ Therefore,
+ Standard is considered here as an adapted crossover-based refinement strategy rather than a fundamentally new local-search operator.
+ It also serves as a reference for evaluating the additional grammatical and class-performance guidance introduced by Targeted and TargetedWorst.
 \end_layout
 
 \begin_layout Standard
@@ -11525,22 +11700,17 @@ tuple "list"
 
 \end_inset
 
- compares the proposed method (STANDARD) with the original GenClass method (CLASS) and with the other classifiers over the 31 datasets.
- All values are classification errors,
- so lower values indicate better performance.
- STANDARD attained the lowest average error,
- 13.42%,
- followed by CLASS with 16.13%,
- while the average errors of the remaining methods ranged from 33.25% (GEN) to 44.04% (NEAT).
- STANDARD achieved the lowest error in 23 of the 31 datasets,
- CLASS in 3,
- and each of the other methods in at most 2.
- Compared with CLASS,
- the average error decreases by 2.71 percentage points,
- a relative reduction of 16.8%.
- Therefore,
- the new crossover procedure improves the original method on average,
- while the improvement over the other methods is considerably larger.
+ presents the classification errors obtained by STANDARD,
+ the original GenClass method (CLASS),
+ and the additional classification methods considered in this study across the 31 datasets.
+ Lower values indicate better classification performance.
+ STANDARD achieved an average classification error of 13.42%,
+ compared with 16.13% for CLASS,
+ corresponding to a reduction of 2.71 percentage points (approximately 16.8% relative reduction).
+ STANDARD also obtained the lowest error on 23 of the 31 datasets.
+ These findings provide evidence of improved classification performance within the GenClass framework under the examined experimental configuration.
+ The remaining classifiers are included as external reference methods,
+ rather than as part of an exhaustive comparison of supervised learning algorithms.
 \end_layout
 
 \begin_layout Standard
@@ -11881,8 +12051,8 @@ To examine the potential influence of dependent benchmark datasets,
 \end_inset
 
 ) were not statistically significant after applying the Holm correction for multiple comparisons.
- These findings indicate that the superiority of the STANDARD method remains robust to the exclusion of the related EEG datasets,
- whereas the evidence supporting the other two crossover strategies is less conclusive.
+ These findings indicate that the statistically significant improvement of STANDARD over the original GenClass method persists after excluding the related EEG datasets,
+ whereas the evidence supporting improvements from the other two crossover strategies is less conclusive.
 \end_layout
 
 \begin_layout Subsection
@@ -15160,6 +15330,35 @@ AVERAGE
 \end_layout
 
 \begin_layout Standard
+The identical results obtained by Targeted and TargetedWorst on the Hepatitis and Phoneme datasets can be attributed to their binary classification structure.
+ In the proposed chromosome representation,
+ a problem with 
+\begin_inset Formula $C$
+\end_inset
+
+ classes contains
+\begin_inset Formula $C-1$
+\end_inset
+
+ explicit classification rules,
+ with the remaining class handled by a default rule.
+ Consequently,
+ for binary classification problems,
+ the single explicit rule spans the entire chromosome,
+ making the class-specific crossover restriction of TargetedWorst equivalent to the unrestricted selection employed by Targeted.
+\end_layout
+
+\begin_layout Standard
+For the BEED dataset,
+ the identical classification error reported for CLASS and TargetedWorst (31.93%) should not be interpreted as algorithmic equivalence.
+ BEED contains four classes,
+ and TargetedWorst performs additional class-directed crossover operations that are absent from the CLASS baseline.
+ Supplementary implementation checks confirmed that these operations were executed and produced accepted fitness improvements.
+ However,
+ the numerical coincidence in the original results has not been independently reproduced.
+\end_layout
+
+\begin_layout Standard
 Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -18131,7 +18330,7 @@ ref{fig:accepted-crossover-rate}
 
 \begin_layout Standard
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -18188,6 +18387,12 @@ end{figure}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+These findings describe the acceptance dynamics on Dermatology and should not be interpreted as evidence of superiority across all datasets.
+ In particular,
+ acceptance frequency alone does not establish whether a method yields better final classification performance.
 \end_layout
 
 \begin_layout Section
@@ -18274,7 +18479,11 @@ tuple "list"
  However,
  this higher diversity did not consistently translate into better final fitness or lower classification error.
  Thus,
- the superior overall classification performance of Standard cannot be attributed simply to its preservation of greater genotypic diversity.
+ the lower average classification error achieved by Standard in the present experiments cannot be explained simply by greater preservation of genotypic diversity.
+ Donor selection,
+ the extent of exchanged genetic material,
+ and the balance between exploration and exploitation are plausible contributing factors,
+ but the present results do not establish a causal relationship between these mechanisms and generalization performance.
  Donor selection,
  the extent of exchanged genetic material,
  and the balance between exploration and exploitation are plausible contributing factors,
@@ -18361,6 +18570,13 @@ Several limitations should be acknowledged.
  four EEG-derived benchmark problems originate from related recordings and cannot be treated as fully independent observations.
  Although a sensitivity analysis excluding these problems was performed,
  the remaining datasets do not necessarily represent a random sample of all classification tasks.
+\end_layout
+
+\begin_layout Standard
+It should also be emphasized that the objective of this study is to assess the effects of additional crossover strategies within the GenClass framework,
+ rather than to establish GenClass as a universally superior classification method.
+ The comparisons with other classifiers provide supplementary performance references and should not be interpreted as a comprehensive benchmark of supervised learning algorithms.
+ Different classification methods may be more suitable for different datasets and application domains.
 \end_layout
 
 \begin_layout Standard
