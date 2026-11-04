@@ -443,141 +443,56 @@ void ClassProgram::getPrecisionAndRecall(
         }
     }
 
-    Data recallArray;
-    Data precisionArray;
-
-    precisionArray.resize(
-        classCount
-        );
-
-    recallArray.resize(
-        classCount
-        );
-
+    // Fixed training-class universe for all macro metrics.
+    // Zero-denominator precision and recall are defined as zero.
+    Data recallArray(classCount,0.0);
+    Data precisionArray(classCount,0.0);
+    vector<int> support(classCount,0);
     for(i=0;i<classCount;i++)
     {
-        double sum=0.0;
-
-        for(j=0;j<classCount;j++)sum+=CM[j][i];
-
-        precisionArray[i]=sum==0?-1.0:CM[i][i]/sum;
-        sum=0.0;
-        for(j=0;j<classCount;j++)sum+=CM[i][j];
-
-        recallArray[i]=sum==0?-1.0:CM[i][i]/sum;
+        double predicted=0.0, actual=0.0;
+        for(j=0;j<classCount;j++)
+        {
+            predicted+=CM[j][i];
+            actual+=CM[i][j];
+        }
+        precisionArray[i]=predicted>0.0?CM[i][i]/predicted:0.0;
+        recallArray[i]=actual>0.0?CM[i][i]/actual:0.0;
+        support[i]=(int)actual;
     }
 
-    double avg_precision=0.0;
-    double avg_recall=0.0;
-
-    int total_classes1=classCount;
-
-    int total_classes2=classCount;
-
-    for(i=0;i<classCount;i++)
-    {
-        if(precisionArray[i]<0)
-            total_classes1--;
-        else
-            avg_precision+=
-                precisionArray[i];
-
-        if(recallArray[i]<0)
-            total_classes2--;
-        else
-            avg_recall+=
-                recallArray[i];
-    }
-
-    if(total_classes1>0)
-        avg_precision/=
-            total_classes1;
-
-    if(total_classes2>0)
-        avg_recall/=total_classes2;
-
-    precision =avg_precision;
-
-    recall =avg_recall;
-
-    for(i=0;i<classCount;i++) delete[] CM[i];
-    delete[] CM;
-
+    precision=0.0;
+    recall=0.0;
     macroF1=0.0;
     weightedF1=0.0;
     gmean=0.0;
-
-    vector<int> belong;
-
-    belong.resize(classCount,0);
-
-    /*
-     * IMPORTANT:
-     *
-     * Use the supplied Dataset t here.
-     *
-     * This means that if a class exists in TRAIN but not TEST,
-     * belong[i] will simply remain zero.
-     */
-
-    Data metricY =t->getAllYPoints();
-    for(unsigned int i=0;i<metricY.size();i++)
-    {
-        int pos =findMapper(metricY[i]);
-
-        if(pos>=0 &&pos<classCount)
-        {
-            belong[pos]++;
-        }
-    }
-
-    int total_class=0;
-
+    double supportTotal=0.0;
+    bool allRecallsPositive=(classCount>0);
     double gmeanLog=0.0;
-
     for(i=0;i<classCount;i++)
     {
-        /*
-         * No examples of this class in this particular set:
-         * skip it from macro metrics.
-         */
-        if(belong[i]==0 ||recallArray[i]<0)
-        {
-            continue;
-        }
-
-        double p =precisionArray[i];
-        double r =recallArray[i];
-        if(p<0) p=0.0;
-
-        double denominator =p+r;
-
-        double f1 =denominator>0.0?2.0*p*r/denominator:0.0;
-
-        macroF1 +=f1;
-
-        /*
-         * Small epsilon prevents log(0).
-         */
-        gmeanLog +=log(r+0.001);
-
-        if(!metricY.empty())
-        {
-            weightedF1 +=belong[i] *1.0 /metricY.size() *f1;
-        }
-        total_class++;
+        const double p=precisionArray[i];
+        const double r=recallArray[i];
+        const double f1=(p+r>0.0)?2.0*p*r/(p+r):0.0;
+        precision+=p;
+        recall+=r;
+        macroF1+=f1;
+        weightedF1+=support[i]*f1;
+        supportTotal+=support[i];
+        if(r<=0.0) allRecallsPositive=false;
+        else gmeanLog+=log(r);
     }
-
-    if(total_class>0)
+    if(classCount>0)
     {
-        macroF1 /=total_class;
-        gmean =exp(gmeanLog /total_class);
+        precision/=classCount;
+        recall/=classCount;
+        macroF1/=classCount;
+        if(allRecallsPositive) gmean=exp(gmeanLog/classCount);
     }
-    else
-    {
-        macroF1=0.0;
-        gmean=0.0;
-    }
+    if(supportTotal>0.0) weightedF1/=supportTotal;
+
+    for(i=0;i<classCount;i++) delete[] CM[i];
+    delete[] CM;
 }
 
 // ============================================================

@@ -43,11 +43,11 @@ void 	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
         for(j=0;j<nclass;j++)
             sum+=CM[j][i];
 
-        precision[i]=sum==0?-1.0:CM[i][i]/sum;
+        precision[i]=sum==0?0.0:CM[i][i]/sum;
         sum = 0.0;
         for(j=0;j<nclass;j++)
             sum+=CM[i][j];
-        recall[i]=sum==0?-1.0:CM[i][i]/sum;
+        recall[i]=sum==0?0.0:CM[i][i]/sum;
     }
 
     for(i=0;i<nclass;i++)
@@ -323,24 +323,24 @@ void run()
     vector<double> precision;
     vector<double> recall;
     printConfusionMatrix(precision,recall);
-    double avg_precision = 0.0, avg_recall = 0.0;
+    // Macro metrics over the fixed class set defined by training data.
+    // Undefined per-class precision/recall is treated as zero.
+    double avg_precision = 0.0, avg_recall = 0.0, avg_f1score = 0.0;
     int nclass=program->getClass();
-    int total_classes1 = nclass;
-    int total_classes2 = nclass;
     for(int i=0;i<nclass;i++)
     {
-        if(precision[i]<0)
-            total_classes1--;
-        else
-            avg_precision+=precision[i];
-        if(recall[i]<0)
-            total_classes2--;
-        else
-            avg_recall+=recall[i];
+        const double p=precision[i];
+        const double r=recall[i];
+        avg_precision+=p;
+        avg_recall+=r;
+        avg_f1score+=(p+r>0.0)?2.0*p*r/(p+r):0.0;
     }
-    avg_precision/=total_classes1;
-    avg_recall/=total_classes2;
-    double avg_f1score = 2.0 * avg_precision*avg_recall/(avg_precision+avg_recall);
+    if(nclass>0)
+    {
+        avg_precision/=nclass;
+        avg_recall/=nclass;
+        avg_f1score/=nclass;
+    }
     printf("CLASS_ERROR: %15.10lf PRECISION: %15.10lf RECALL: %15.10lf F1SCORE: %15.10lf\n",
            -program->getClassError(genome),
            avg_precision,avg_recall,avg_f1score);
