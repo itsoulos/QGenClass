@@ -19,6 +19,7 @@ using namespace std;
 #define FITNESS_MEAN 16
 #define FITNESS_MACRO_F1 32
 #define FITNESS_WEIGHTED_F1 64
+#define FITNESS_MACRO_PR 128
 
 typedef vector<double> Data;
 
@@ -55,6 +56,7 @@ private:
     Data outy;
 
     int fitness_mode =FITNESS_CLASS;
+    double macro_pr_alpha = 0.5;
     double class_percent =1.0;
     double average_percent =0.0;
     double squared_percent =0.0;
@@ -75,6 +77,7 @@ public:
     // ========================================================
 
     void setFitnessMode(int m);
+    void setMacroPRAlpha(double alpha);
 
     void setFitnessPercentages(double p1,double p2,double p3);
 

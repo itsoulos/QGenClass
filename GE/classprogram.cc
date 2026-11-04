@@ -801,6 +801,13 @@ double ClassProgram::fitness(vector<int> &genome)
         getPrecisionAndRecall(precision,recall,macroF1,weightedF1,gmean);
         return 100.0-100.0*gmean;
     }
+    else if(fitness_mode==FITNESS_MACRO_PR)
+    {
+        double precision=0.0, recall=0.0, macroF1=0.0;
+        double weightedF1=0.0, gmean=0.0;
+        getPrecisionAndRecall(precision,recall,macroF1,weightedF1,gmean);
+        return 100.0*(1.0-(macro_pr_alpha*recall+(1.0-macro_pr_alpha)*precision));
+    }
     else if(fitness_mode==FITNESS_MACRO_F1)
     {
         double precision=0.0;
@@ -930,6 +937,11 @@ void ClassProgram::getErrorPerClass(vector<int> &genome,vector<double> &x)
 // ============================================================
 // FITNESS MODE
 // ============================================================
+
+void ClassProgram::setMacroPRAlpha(double alpha)
+{
+    if(alpha>=0.0 && alpha<=1.0) macro_pr_alpha=alpha;
+}
 
 void ClassProgram::setFitnessMode(int m)
 {

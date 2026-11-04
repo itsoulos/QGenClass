@@ -29,6 +29,7 @@ QGenClass parameters:
   --selection-rate             default 0.1  (QGenClass: --pop_srate)
   --mutation-rate              default 0.05  (QGenClass: --pop_mrate)
   --local                      default targeted  (QGenClass: --pop_lmethod)
+  --macropr-alpha              default 0.5 (macroPR recall weight)
   --fitness                    default class  (QGenClass: --pop_fitnessmethod)
   --termination                default maxiters  (QGenClass: --pop_termination)
   --crossitems                 default 10  (QGenClass: --pop_crossitems)
@@ -70,6 +71,7 @@ config[pop_srate]='0.1'
 config[pop_mrate]='0.05'
 config[pop_lmethod]='targeted'
 config[pop_fitnessmethod]='class'
+config[pop_macropr_alpha]='0.5'
 config[pop_termination]='maxiters'
 config[pop_crossitems]='10'
 config[pop_localitems]='20'
@@ -101,6 +103,7 @@ options[selection-rate]=pop_srate
 options[mutation-rate]=pop_mrate
 options[local]=pop_lmethod
 options[fitness]=pop_fitnessmethod
+options[macropr-alpha]=pop_macropr_alpha
 options[termination]=pop_termination
 options[crossitems]=pop_crossitems
 options[localitems]=pop_localitems
@@ -157,7 +160,7 @@ done
 (( seed + runs - 1 <= 1000 )) || { echo 'QGenClass random_seed range is 0..1000' >&2; exit 2; }
 case ${config[mode]} in standard|feature_construction) ;; *) echo 'Invalid mode' >&2; exit 2;; esac
 case ${config[pop_lmethod]} in none|crossover|mutate|mutateWorst|siman|hill|de|gd|adam|targeted|targetedWorst|targetedBest|constants) ;; *) echo 'Invalid local search' >&2; exit 2;; esac
-case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
+case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
 case ${config[cross_method]} in standard|targeted|targetedWorst) ;; *) echo 'Invalid crossover' >&2; exit 2;; esac
 case ${config[pop_termination]} in maxiters|doublebox|similarity) ;; *) echo 'Invalid termination' >&2; exit 2;; esac
 case ${config[enable_smote]} in yes|no) ;; *) echo 'Invalid smote value' >&2; exit 2;; esac

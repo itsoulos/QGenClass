@@ -4,8 +4,10 @@
 \usepackage{textcomp}
 \usepackage[utf8]{inputenc}
 \synctex=-1
+\usepackage{longtable}
 \usepackage{float}
 \usepackage{url}
+\usepackage{pdflscape}
 \usepackage{amstext}
 \usepackage{graphicx}
 
@@ -44,21 +46,27 @@ convergence, which can prevent the method from discovering high-quality
 classification rules. The present work proposes an enhanced version
 of GenClass through the introduction of advanced crossover techniques
 operating on the integer-valued chromosomes employed by the method,
-with the aim of achieving a significant reduction in classification
-error. The proposed crossover operators follow two different strategies.
-Some of them are purely stochastic, introducing greater diversity
-into the evolutionary search, whereas others exploit information already
-generated during the Grammatical Evolution process to perform targeted
-exchanges of genetic material between chromosomes. In this way, the
-latter operators attempt to guide the evolutionary search toward more
-promising regions of the search space while preserving useful information
-discovered during previous generations. The proposed techniques were
-evaluated on a diverse collection of real-world classification datasets,
-including several problems characterized by a large number of patterns
-and/or a large number of classes. The experimental results demonstrate
-that the proposed crossover strategies can substantially improve the
-performance of the original method, leading to a noticeable reduction
-in classification error across a wide range of classification problems.}
+with the aim of improving the evolutionary search process and reducing
+classification error. The proposed crossover operators follow two
+different strategies. Some of them are purely stochastic, introducing
+greater diversity into the evolutionary search, whereas others exploit
+information already generated during the Grammatical Evolution process
+to perform targeted exchanges of genetic material between chromosomes.
+In this way, the latter operators attempt to guide the evolutionary
+search toward more promising regions of the search space while preserving
+useful information discovered during previous generations. The proposed
+techniques were evaluated on a diverse collection of real-world classification
+datasets, including several problems characterized by a large number
+of patterns and/or a large number of classes. The experimental results
+demonstrate that the Standard crossover strategy provides the most
+consistent improvement over the original GenClass method, reducing
+the average classification error from 16.13\% to 13.42\% across 31
+classification datasets. This improvement remains statistically significant
+after excluding four related EEG-derived datasets and applying a correction
+for multiple comparisons. Among the three investigated crossover strategies,
+the simplest approach, Standard, achieved the lowest average classification
+error, whereas the more elaborate grammar-guided Targeted and TargetedWorst
+variants did not provide further improvements.}
 
 
 \keyword{Grammatical Evolution; Classification; Crossover Operators; Evolutionary
@@ -236,6 +244,18 @@ programs. The primary objective of Grammatical Evolution is therefore
 to evolve programs or expressions in a target language whose syntax
 is specified by the underlying grammar.
 
+During genotype-to-phenotype mapping, chromosome codons are read sequentially.
+When the end of the chromosome is reached before the derivation is
+completed, the mapping process returns to the beginning of the chromosome
+(wrapping). The maximum number of wrappings is set to two. If the
+derivation cannot be completed within this limit, the chromosome is
+considered invalid and is assigned a large fitness value. Mathematical
+expressions are evaluated using the FunctionParser library, which
+detects invalid mathematical operations, such as division by zero
+or logarithms with non-positive arguments. In such cases, an evaluation
+error is reported, and the corresponding chromosome is penalized with
+a large fitness value rather than using protected mathematical operators.
+
 Grammatical Evolution has been successfully applied to a wide range
 of real-world problems across diverse scientific and engineering domains.
 Representative applications include data fitting \citep{ge_program1,ge_program2},
@@ -255,6 +275,17 @@ circuit design \citep{ge_analog}, taxonomy discovery from Wikipedia
 The diversity of these applications demonstrates the flexibility of
 Grammatical Evolution as a general-purpose evolutionary framework
 for addressing complex problems in different domains.
+
+Despite the extensive application of Grammatical Evolution across
+different domains, the design of effective crossover operators remains
+an important research challenge. In particular, the indirect genotype-to-phenotype
+mapping employed by GE introduces additional considerations regarding
+the preservation and exchange of useful genetic material. Previous
+studies have investigated conventional, grammar-aware, and structure-preserving
+crossover mechanisms, as well as crossover-based local improvement
+within hybrid evolutionary algorithms. These approaches and their
+relationship to the methods proposed in the present study are discussed
+in Section \ref{sec:Related-work}.
 
 Among the techniques that have been proposed based on Grammatical
 Evolution is a recently introduced rule construction method \citep{genclassMain},
@@ -290,12 +321,11 @@ is true and 0 otherwise. Therefore, $E_{C}(C)$ expresses the percentage
 of training patterns that are incorrectly classified by the generated
 program.
 
-Although the aforementioned technique has demonstrated particularly
-promising performance, even when applied to challenging data classification
-problems, it still exhibits several limitations that may adversely
-affect the effectiveness of the evolutionary search process. One of
-the most important issues is premature convergence, where the population
-rapidly loses genetic diversity and converges before sufficiently
+Although the aforementioned technique has been evaluated on a variety
+of classification problems, several aspects of its evolutionary search
+process may still benefit from further investigation and improvement.
+One of the most important issues is premature convergence, where the
+population rapidly loses genetic diversity and converges before sufficiently
 exploring the search space. As a consequence, potentially useful genetic
 material may disappear from the population, reducing the ability of
 the evolutionary process to discover alternative and potentially more
@@ -322,9 +352,11 @@ search capabilities of the original method. These techniques are applied
 at each generation to a relatively small number of chromosomes selected
 randomly from the genetic population. Restricting their application
 to a subset of the population allows the proposed operators to enhance
-the exploration of the search space without substantially increasing
-the computational cost of the evolutionary process or excessively
-disrupting the population structure.
+the exploration of the search space while limiting their application
+to a selected number of chromosomes. However, the additional crossover
+operations introduce computational overhead, which depends on the
+selected operator and the dataset, as demonstrated in the experimental
+analysis.
 
 The randomly selected chromosomes are subjected to additional crossover
 operations designed to generate new combinations of genetic material
@@ -362,14 +394,134 @@ ranging from purely random recombination to crossover operations guided
 by the performance of the evolved solutions. A detailed description
 of each strategy is provided in the following subsections.
 
-The remainder of this article is organized as follows. Section \ref{sec:Materials-and-Methods}
-introduces the original rule construction method and describes the
-proposed crossover techniques in detail. Section \ref{sec:Results}
-presents the classification datasets used in the experimental evaluation,
-followed by the experimental results and the corresponding statistical
-analysis. Finally, Section \ref{sec:Conclusions} summarizes the main
-findings of the study and outlines the conclusions drawn from the
-experimental evaluation.
+The remainder of this article is organized as follows. Section \ref{sec:Related-work}
+reviews previous research on crossover operators in Grammatical Evolution
+and discusses the relationship between the proposed techniques and
+hybrid evolutionary and memetic algorithms. Section \ref{sec:Materials-and-Methods}
+introduces the original GenClass rule construction method and describes
+the proposed crossover strategies in detail. Section \ref{sec:Results}
+presents the classification datasets, experimental results, and corresponding
+statistical analysis. Finally, Section \ref{sec:Conclusions} summarizes
+the main findings and conclusions of the study.
+
+\section{Related work\label{sec:Related-work}}
+
+\subsection{Crossover Operators in Grammatical Evolution}
+
+Crossover is one of the fundamental operators of evolutionary computation,
+enabling the exchange of genetic material between candidate solutions.
+In Grammatical Evolution (GE), however, crossover presents additional
+challenges because chromosomes are indirectly mapped to executable
+expressions or programs through a formal grammar. Consequently, exchanging
+chromosome segments may affect not only the genetic representation
+but also the grammatical derivation and the resulting program structure.
+
+O'Neill et al. \citep{ge_crossover} investigated conventional and
+homologous crossover operators in GE, examining the effects of recombination
+on the genotype-to-phenotype mapping process. Their study highlighted
+the importance of crossover-induced disruption and demonstrated that
+homologous crossover does not necessarily outperform conventional
+one-point crossover. These findings indicate that increasing the structural
+sophistication of recombination does not automatically lead to improved
+evolutionary performance.
+
+Harper and Blair \citep{ge_harper} introduced grammar-informed crossover
+mechanisms designed to exploit information obtained during grammatical
+derivation. Their Matching Crossover operator identifies crossover
+positions associated with corresponding grammatical symbols, whereas
+Left Hand Side (LHS) Replacement Crossover exchanges complete expansions
+associated with matching non-terminal symbols. These approaches represent
+important developments toward grammar-aware recombination, particularly
+by distinguishing between matching grammatical positions and preserving
+complete grammatical structures.
+
+Another relevant research direction involves the use of crossover
+as a local improvement mechanism rather than exclusively as a population-level
+reproductive operator. Tsoulos et al. \citep{localCrossover} introduced
+Local Crossover for GE, employing repeated recombination and fitness-based
+acceptance to improve individual chromosomes. This approach demonstrates
+how crossover can be incorporated into an additional refinement procedure,
+allowing beneficial genetic modifications to accumulate during the
+evolutionary process.
+
+The present study builds upon these research directions by investigating
+three additional crossover strategies within the GenClass rule construction
+framework. The Standard strategy employs repeated one-point crossover
+with strict fitness-based acceptance. The Targeted strategy exploits
+genotype-to-phenotype mapping information to identify active codons
+associated with compatible grammatical categories, while selecting
+donor chromosomes from an elite subset of the population. TargetedWorst
+extends this approach by incorporating class-specific classification
+performance to prioritize modifications associated with poorly performing
+classes.
+
+Unlike crossover operators that exchange complete grammatical expansions,
+the proposed Targeted strategies transfer bounded codon blocks between
+grammatically compatible positions. Therefore, they do not guarantee
+the preservation of complete grammatical substructures or equivalent
+program behavior after remapping. Their objective is instead to investigate
+whether grammatical compatibility, restricted genetic exchange, and
+classification-performance information can improve the effectiveness
+of crossover-based refinement.
+
+\subsection{Hybrid Evolutionary and Memetic Algorithms\label{subsec:Hybrid-Evolutionary-and}}
+
+Hybrid evolutionary algorithms combine population-based evolutionary
+search with additional optimization mechanisms to improve search effectiveness.
+A particularly important category consists of memetic algorithms,
+in which evolutionary operators are complemented by local improvement
+procedures. Such approaches attempt to combine the global exploration
+capabilities of evolutionary algorithms with the exploitation capabilities
+of local search.
+
+Local improvement is commonly associated with mutation-based neighborhood
+exploration or numerical optimization procedures. However, crossover
+can also serve as a mechanism for local refinement by generating candidate
+solutions through recombination with other members of the population.
+Lozano et al. \citep{memetic_lozano} investigated crossover hill-climbing
+within memetic algorithms, demonstrating the relevance of recombination-based
+improvement procedures in hybrid evolutionary optimization.
+
+Within GE, Local Crossover \citep{localCrossover} provides a related
+example in which repeated recombination is used to refine chromosomes
+through fitness-based acceptance. This establishes a direct connection
+between grammatical evolution and memetic search strategies, since
+crossover is employed not only to generate offspring for subsequent
+generations but also to improve existing candidate solutions.
+
+The methods investigated in the present work can be interpreted within
+this broader memetic framework. The original GenClass evolutionary
+process retains its conventional selection, crossover, and mutation
+operators, while an additional crossover-based refinement stage is
+applied to a limited number of chromosomes during each generation.
+Candidate modifications are accepted only when they improve the corresponding
+training fitness, and accepted improvements are immediately available
+for subsequent refinement trials.
+
+An important distinction from approaches in which local improvement
+dominates the evolutionary search is that the proposed framework limits
+the number of chromosomes subjected to additional refinement. This
+design aims to supplement the population-based evolutionary process
+without replacing its conventional search mechanisms. Nevertheless,
+the additional operations introduce computational overhead, making
+the relationship between classification performance and computational
+effort an important aspect of the experimental evaluation.
+
+From this perspective, the principal contribution of the present study
+is not the introduction of grammar-aware crossover or crossover-based
+local search as entirely new concepts. Rather, it is the systematic
+investigation of additional crossover refinement strategies within
+a grammatical-evolution-based rule construction method. In particular,
+the study examines whether grammatical-category matching, elite donor
+selection, bounded codon exchange, and class-specific performance
+guidance provide measurable advantages over simpler stochastic recombination.
+
+The experimental comparison of Standard, Targeted, and TargetedWorst
+also provides evidence concerning the trade-off between operator complexity
+and practical effectiveness. This is particularly relevant to the
+design of hybrid and memetic evolutionary algorithms, where more informed
+local search mechanisms may introduce additional computational cost
+without necessarily producing superior solutions.
 
 \section{Materials and Methods\label{sec:Materials-and-Methods}}
 
@@ -432,6 +584,19 @@ integer-valued chromosomes of GenClass.
 
 \end{algorithm}
 
+Although Algorithm \ref{alg:genclass_bnf} illustrates the grammar
+used to construct a binary classification rule, GenClass supports
+multi-class classification through an ordered sequence of rules. For
+a classification problem involving C classes, the chromosome is divided
+into C\textminus 1 consecutive segments of equal length, each encoding
+a separate Boolean condition generated using the BNF grammar. These
+conditions are combined into an if--else-if structure, where each
+condition corresponds to one of the first C\textminus 1 classes. The
+final class serves as the default class when none of the preceding
+conditions is satisfied. Since the conditions are evaluated sequentially,
+the first satisfied condition determines the predicted class, thereby
+avoiding conflicts between multiple matching rules.
+
 The genotype-to-phenotype mapping process employed by GenClass is
 illustrated in Figure \ref{fig:genclass_mapping}. Each chromosome
 consists of a sequence of integer-valued codons, which are sequentially
@@ -465,7 +630,7 @@ program.
 
 \begin{figure}[H]
 \begin{centering}
-\includegraphics[scale=0.25]{mapping}
+\includegraphics[scale=0.25]{mapping_new}
 \par\end{centering}
 \caption{Illustration of the genotype-to-phenotype mapping process employed
 by GenClass. Integer-valued codons are sequentially mapped to BNF
@@ -544,6 +709,15 @@ step \textbf{else} terminate.
 
 \subsection{The proposed crossover methods}
 
+The additional crossover procedures investigated in this work can
+be interpreted as crossover-based local improvement mechanisms embedded
+within a conventional evolutionary algorithm. Their repeated application,
+together with the immediate acceptance of fitness-improving modifications,
+follows a greedy hill-climbing strategy in which candidate neighbors
+are generated through recombination with other population members.
+Consequently, the overall framework is closely related to hybrid evolutionary
+and memetic algorithms, as discussed in subsection \ref{subsec:Hybrid-Evolutionary-and}.
+
 In the present work, additional crossover techniques are introduced
 with the aim of improving the performance of GenClass and enhancing
 its ability to escape from local minima of the classification error
@@ -570,6 +744,40 @@ The proposed crossover techniques, denoted throughout this work as
 Standard, Targeted, and TargetedWorst, differ in the strategy employed
 to select and exchange genetic material between chromosomes. A detailed
 description of each technique is provided in the following subsections.
+
+The Standard crossover strategy is closely related to the Local Crossover
+operator previously introduced by Tsoulos et al. \citep{localCrossover}.
+Both methods employ repeated one-point recombination with fitness-based
+acceptance and sequential improvement of selected chromosomes. The
+differences concern the selection of chromosomes for refinement, the
+acceptance criterion, and the computational effort allocated to the
+refinement stage. Therefore, Standard is considered here as an adapted
+crossover-based refinement strategy rather than a fundamentally new
+local-search operator. It also serves as a reference for evaluating
+the additional grammatical and class-performance guidance introduced
+by Targeted and TargetedWorst.
+
+The configurations also differ substantially in the allocation of
+search effort. The additional procedure performs $N_{K}k=200$ candidate
+evaluations per generation, against $p_{s}N_{c}=450$ offspring produced
+by the conventional operators. In the earlier study the corresponding
+ratio is reversed by two orders of magnitude, since the refinement
+stage dominates the evolutionary update. The additional crossover
+examined here therefore operates as a supplementary refinement within
+an otherwise conventional evolutionary search, rather than as its
+principal search mechanism.
+
+Targeted and TargetedWorst approaches introduce grammatical-category
+matching, elite donor selection, bounded codon exchange and, for TargetedWorst,
+class-performance-guided selection of the modified region. The use
+of grammatical information to guide recombination is itself not new.
+Harper and Blair \citep{ge_harper} introduced Matching Crossover,
+which aligns corresponding grammatical positions, and LHS Replacement
+Crossover, which exchanges complete expansions of matching non-terminals.
+However, unlike complete-expansion replacement, the Targeted procedures
+transfer bounded codon blocks beginning at grammatically matched positions
+and therefore do not guarantee the preservation of complete grammatical
+structures or of equivalent program behaviour after remapping.
 
 \subsubsection{The Standard crossover method }
 
@@ -605,6 +813,18 @@ current chromosome only when it achieves a lower classification error.
 Furthermore, each accepted chromosome is immediately used in the subsequent
 crossover operation, allowing improvements obtained during successive
 crossover trials to be accumulated.
+
+The proposed crossover operator generates up to two candidate offspring
+using one-point crossover. The first offspring is constructed by combining
+the prefix of the selected chromosome with the suffix of a randomly
+selected chromosome. If this offspring improves the fitness of the
+selected chromosome, it is accepted and replaces the original chromosome.
+Otherwise, a second offspring is constructed by exchanging the corresponding
+chromosome segments in the opposite direction. The second offspring
+is accepted only if it improves the fitness of the selected chromosome.
+If neither offspring yields an improvement, the original chromosome
+remains unchanged. Thus, at most one offspring is accepted during
+each crossover iteration.
 \begin{center}
 \begin{algorithm}[H]
 \caption{Standard crossover technique}
@@ -670,6 +890,21 @@ codons in the two chromosomes and is additionally restricted by a
 predefined maximum block size $B_{\max}$. In this way, the transferred
 genetic material is associated with similar grammatical components
 of the classification programs represented by the two chromosomes.
+
+An active codon is defined as a chromosome position actually accessed
+during the genotype-to-phenotype mapping process. The proposed Targeted
+crossover operator records these positions together with their associated
+semantic categories, including functions, operators, variables, and
+constants. A target codon is selected from this trace, and a compatible
+donor codon of the same semantic category is selected from an elite
+chromosome. The exchanged block length is determined by the distance
+from each selected position to the next active codon with a greater
+chromosome index, subject to the maximum block size and chromosome
+boundaries. Consequently, when active codons occupy consecutive chromosome
+positions, the exchanged block consists of a single codon. The operator
+therefore performs semantically guided codon-level or short-block
+exchanges rather than guaranteeing the exchange of complete grammatical
+subtrees.
 
 The resulting chromosome $g_{\mathrm{new}}$ is subsequently mapped
 to its corresponding classification program and its fitness is evaluated
@@ -782,6 +1017,18 @@ strategy is to modify preferentially those parts of the generated
 classification program that are more likely to contribute to the observed
 classification errors, while leaving better-performing components
 less affected.
+
+The worst-performing class is identified using the class-specific
+classification error computed on the training set. More specifically,
+for each class c, the classification error is defined as the percentage
+of incorrectly classified training patterns belonging to that class.
+The class with the highest error rate is selected as the worst-performing
+class. This criterion is equivalent to minimizing class-specific recall
+and avoids directly favoring majority classes based on their absolute
+number of misclassified patterns. Nevertheless, the estimated error
+rates of classes containing relatively few training patterns may exhibit
+higher variability, which represents a potential limitation of this
+selection strategy.
 
 For each selected chromosome $g_{c}$, the corresponding classification
 program is evaluated and the class exhibiting the worst classification
@@ -964,7 +1211,10 @@ on 3 October 2026. The used datasets are the following:
 \item \textbf{Alcohol. }This dataset contains data collected from experiments
 investigating patterns of alcohol consumption and is used as a classification
 benchmark in the present study \citep{alcohol}. 
-\item \textbf{Appendicitis.} A dataset originated in \citep{appendicitis}. 
+\item \textbf{Appendicitis.} The Appendicitis dataset is a binary classification
+dataset containing 106 instances and 7 numerical features, used to
+predict the presence or absence of acute appendicitis based on clinical
+measurements \citep{appendicitis}. 
 \item The \textbf{Beed} dataset. The Bangalore EEG Epilepsy Dataset (BEED),
 presented by Banu et al. \citep{beed}, is an EEG dataset developed
 for epileptic seizure detection and classification. The dataset contains
@@ -996,8 +1246,8 @@ votes \citep{housevotes}.
 collected from signals transmitted through the ionosphere. The classification
 task aims to distinguish between radar returns that provide evidence
 of structure in the ionosphere and those that do not \citep{ion1,ion2}.
-\item \textbf{Lymography} \citep{lymography}, which is a dataset with four
-distinct classes.
+\item \textbf{Lymphography} \citep{lymography}, which is a dataset with
+four distinct classes.
 \item \textbf{Nursery. }The Nursery dataset was derived from a hierarchical
 decision model originally developed to rank applications for admission
 to nursery schools. The model was used in Ljubljana, Slovenia, during
@@ -1038,13 +1288,17 @@ derive comprehensible classification rules for determining the conditions
 under which automatic landing control of a spacecraft would be preferable
 to manual control. The corresponding classification task involves
 distinguishing among different operational conditions based on a set
-of numerical measurements.
+of numerical measurements \citep{shuttle}.
 \item \textbf{Spambase}. The Spambase dataset contains features extracted
 from email messages, including word and character frequencies as well
 as information related to sequences of capital letters. The corresponding
 binary classification task aims to distinguish spam from non-spam
 emails \citep{spambase}.
-\item \textbf{Spiral}, which is an artificial dataset.
+\item \textbf{Spiral}, The Spiral dataset is a synthetic binary classification
+problem consisting of 1,000 two-dimensional instances equally distributed
+between two classes. The instances are generated using parametric
+equations that form two intertwined spiral patterns, resulting in
+a highly nonlinear classification problem \citep{spiral}. 
 \item \textbf{Student. }The Student dataset contains educational data collected
 from 587 students over two consecutive academic years in ten non-university
 educational centers. The attributes describe factors such as academic
@@ -1052,7 +1306,11 @@ performance, student abilities, motivation, and methodological and
 assessment preferences. The corresponding classification task aims
 to categorize students according to their educational characteristics
 and performance \citep{student}.
-\item \textbf{Splice} dataset, which is inspired by biology.
+\item \textbf{Splice} dataset, which is a biological classification benchmark
+consisting of 3,190 DNA sequences, each represented by 60 categorical
+features. The task is to classify sequences into three categories:
+exon-intron boundaries (EI), intron-exon boundaries (IE), and non-splice
+junctions (N) \citep{splice} .
 \item \textbf{Texture.} The Texture dataset is designed for the classification
 of different visual textures and comprises 11 texture classes, including
 grass lawn, pressed calf leather, handmade paper, raffia, and cotton
@@ -1071,7 +1329,7 @@ classification problem originally introduced by Breiman. The patterns
 of each class are generated from multivariate normal distributions
 with unit covariance matrices and symmetric mean vectors. Specifically,
 the two class means are $(a,a,\ldots,a)$ and $(-a,-a,\ldots,-a)$,
-where $a=2/\sqrt{20}$.
+where $a=2/\sqrt{20}$ \citep{twonorm}.
 \item \textbf{Vehicle. }The Vehicle dataset is designed to classify vehicle
 silhouettes into four different categories using a set of numerical
 features extracted from their shapes. The silhouettes were obtained
@@ -1096,72 +1354,72 @@ and ZONF\_S.
 \caption{The main characteristics of each dataset.\label{tab:The-main-characteristics}}
 
 \centering{}%
-\begin{tabular}{|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline 
-DATASET & PATTERNS & CLASSES\tabularnewline
+DATASET & FEATURES & PATTERNS & CLASSES\tabularnewline
 \hline 
 \hline 
-ALCOHOL & 476 & 4\tabularnewline
+ALCOHOL & 154 & 476 & 4\tabularnewline
 \hline 
-APPENDICITIS & 106 & 2\tabularnewline
+APPENDICITIS & 7 & 106 & 2\tabularnewline
 \hline 
-BEED & 8000 & 4\tabularnewline
+BEED & 16 & 8000 & 4\tabularnewline
 \hline 
-DERMATOLOGY & 358 & 6\tabularnewline
+DERMATOLOGY & 34 & 358 & 6\tabularnewline
 \hline 
-GENE & 3175 & 3\tabularnewline
+GENE & 120 & 3175 & 3\tabularnewline
 \hline 
-HAYES ROTH & 160 & 3\tabularnewline
+HAYES ROTH & 5 & 160 & 3\tabularnewline
 \hline 
-HEPATITIS & 80 & 2\tabularnewline
+HEPATITIS & 19 & 80 & 2\tabularnewline
 \hline 
-HOUSEVOTES & 232 & 2\tabularnewline
+HOUSEVOTES & 16 & 232 & 2\tabularnewline
 \hline 
-IONOSPHERE & 351 & 2\tabularnewline
+IONOSPHERE & 34 & 351 & 2\tabularnewline
 \hline 
-LYMOGRAPHY & 148 & 4\tabularnewline
+LYMPHOGRAPHY & 18 & 148 & 4\tabularnewline
 \hline 
-NURSERY & 12690 & 5\tabularnewline
+NURSERY & 8 & 12960 & 5\tabularnewline
 \hline 
-OPTDIGITS & 5620 & 10\tabularnewline
+OPTDIGITS & 64 & 5620 & 10\tabularnewline
 \hline 
-PENBASED & 10992 & 10\tabularnewline
+PENBASED & 16 & 10992 & 10\tabularnewline
 \hline 
-PHONEME & 5404 & 2\tabularnewline
+PHONEME & 5 & 5404 & 2\tabularnewline
 \hline 
-PIRVISION & 15302 & 3\tabularnewline
+PIRVISION & 56 & 15302 & 3\tabularnewline
 \hline 
-SATIMAGE & 6435 & 7\tabularnewline
+SATIMAGE & 36 & 6435 & 7\tabularnewline
 \hline 
-SEGMENT & 2310 & 7\tabularnewline
+SEGMENT & 19 & 2310 & 7\tabularnewline
 \hline 
-SHUTTLE & 58000 & 7\tabularnewline
+SHUTTLE & 9 & 58000 & 7\tabularnewline
 \hline 
-SPAMBASE & 4597 & 2\tabularnewline
+SPAMBASE & 57 & 4597 & 2\tabularnewline
 \hline 
-SPIRAL & 2000 & 2\tabularnewline
+SPIRAL & 2 & 2000 & 2\tabularnewline
 \hline 
-SPLICE & 3190 & 3\tabularnewline
+SPLICE & 60 & 3190 & 3\tabularnewline
 \hline 
-STUDENT & 587 & 4\tabularnewline
+STUDENT & 5 & 587 & 4\tabularnewline
 \hline 
-TEXTURE & 5500 & 11\tabularnewline
+TEXTURE & 40 & 5500 & 11\tabularnewline
 \hline 
-THYROID & 7200 & 3\tabularnewline
+THYROID & 21 & 7200 & 3\tabularnewline
 \hline 
-TWONORM & 7400 & 2\tabularnewline
+TWONORM & 20 & 7400 & 2\tabularnewline
 \hline 
-VEHICLE & 846 & 4\tabularnewline
+VEHICLE & 18 & 846 & 4\tabularnewline
 \hline 
-YEAST & 1484 & 10\tabularnewline
+YEAST & 8 & 1484 & 10\tabularnewline
 \hline 
-Z\_F\_S & 300 & 3\tabularnewline
+Z\_F\_S & 21 & 300 & 3\tabularnewline
 \hline 
-Z\_O\_N\_F\_S & 500 & 5\tabularnewline
+Z\_O\_N\_F\_S & 21 & 500 & 5\tabularnewline
 \hline 
-ZO\_NF\_S & 500 & 3\tabularnewline
+ZO\_NF\_S & 21 & 500 & 3\tabularnewline
 \hline 
-ZONF\_S & 500 & 2\tabularnewline
+ZONF\_S & 21 & 500 & 2\tabularnewline
 \hline 
 \end{tabular}
 \end{table}
@@ -1169,13 +1427,21 @@ ZONF\_S & 500 & 2\tabularnewline
 
 \subsection{Experimental results }
 
-The proposed method was implemented in C++. To ensure the reliability
-of the experimental evaluation, each experiment was independently
-repeated 30 times, using a different random seed in each run. Furthermore,
-10-fold cross-validation was employed to assess the generalization
-performance of the method and provide a robust evaluation of the experimental
-results. The values used for the experimental parameters are listed
-in Table \ref{tab:Values-for-the}.
+The proposed method was implemented in C++. For each dataset, a 10-fold
+cross-validation procedure was employed using predefined training
+and test partitions. Each experiment was repeated 30 times independently
+for every fold, resulting in a total of 300 runs per dataset and method.
+In each run, the classification model was constructed and optimized
+exclusively using the training partition, while its classification
+error was evaluated on the corresponding held-out test partition.
+The final classification error reported in the experimental tables
+was calculated as the arithmetic mean of the 300 test classification
+errors. The test partitions were not used during the evolutionary
+optimization process. The code used in the experiments with GenClass
+is a modifed version of the original algorithm located in the repository
+\url{https://github.com/itsoulos/QGenClass/}(accessed on 24 October
+2026). The values used for the experimental parameters are listed
+in Table \ref{tab:Values-for-the}. 
 
 \begin{table}[H]
 \caption{Values for the parameters in experiments.\label{tab:Values-for-the}}
@@ -1189,6 +1455,12 @@ PARAMETER & MEANING & VALUE\tabularnewline
 $N_{c}$ & Number of chromosomes & 500\tabularnewline
 \hline 
 $N_{g}$ & Number of allowed generations & 500\tabularnewline
+\hline 
+$N_{s}$ & Chromosome length & 200\tabularnewline
+\hline 
+$N_{t}$ & Tournament size & 20\tabularnewline
+\hline 
+$w$ & Maximum wrapping & 2\tabularnewline
 \hline 
 $p_{s}$ & Selection rate & 0.9\tabularnewline
 \hline 
@@ -1209,13 +1481,24 @@ $B_{\mbox{max}}$ & Maximum crossover block size & 16\tabularnewline
 below:
 \begin{enumerate}
 \item DATASET denotes the dataset used in the corresponding experiment.
+\item RBFCON, this method was presented recently \citep{rbfcon} to construct
+Radial Basis Function (RBF) neural networks, with the assistance of
+Grammatical Evolution. The parameters used for this method are presented
+in Table \ref{tab:Values-for-the}.
+\item CART, denotes the Classification and Regression Trees (CART) algorithm
+\citep{cart} used to construct binary decision trees by recursively
+partitioning the feature space. For classification tasks, the splits
+are typically selected using the Gini impurity criterion, while tree
+pruning can be employed to reduce overfitting .
+\item SVM, Support Vector Machines (SVMs) \citep{svm} was also used here
+and was implemented using the LIBSVM library \citep{libsvm}.
 \item RBF denotes a Radial Basis Function (RBF) neural network \citep{rbf1,rbf2}
 with $H=10$ hidden nodes.
 \item NEAT denotes the NeuroEvolution of Augmenting Topologies (NEAT) method
 \citep{neat}.
 \item DNN denotes a deep neural network implemented using the Tiny-DNN library,
-publicly available at the project's GitHub repository (accessed on
-3 October 2026). The network was trained using the AdaGrad optimization
+publicly available at the project's GitHub repository \url{https://github.com/tiny-dnn/tiny-dnn}(accessed
+on 27 October 2026). The network was trained using the AdaGrad optimization
 algorithm \citep{adagrad}.
 \item ADAM denotes a neural network with $H=10$ hidden nodes trained using
 the Adam optimization algorithm \citep{nn_adam}.
@@ -1225,12 +1508,260 @@ Powell's variant of the BFGS optimization method \citep{powell}.
 were optimized using a Genetic Algorithm. The Genetic Algorithm employed
 the same parameter settings reported in Table \ref{tab:Values-for-the}.
 \item CLASS denotes the original GenClass rule construction method without
-the additional crossover mechanism proposed in this work.
+the additional crossover mechanism proposed in this work. The parameters
+used for this method are presented in Table \ref{tab:Values-for-the}.
 \item STANDARD denotes GenClass enhanced with the proposed Standard crossover
-method.
+method. The parameters used for this method are presented in Table
+\ref{tab:Values-for-the}.
 \item The row AVERAGE reports the mean classification error across all datasets
 for the corresponding method.
 \end{enumerate}
+\begin{landscape}
+\begin{center}
+{\tiny{}%
+\begin{longtable}[c]{|c|c|c|c|c|c|c|c|c|c|c|c|}
+\caption{Classification error (\%) of the proposed method (STANDARD) and of
+the other classifiers on the 31 datasets. STANDARD is the GenClass
+method with the proposed additional crossover procedure, while CLASS
+is the original GenClass method without it. The last row (AVERAGE)
+reports the mean error over all datasets, and lower values indicate
+better performance.\label{tab:methods_comparison}}
+\tabularnewline
+\endfirsthead
+\caption{Classification error (\%) of the proposed method (STANDARD) and of
+the other classifiers on the 31 datasets. STANDARD is the GenClass
+method with the proposed additional crossover procedure, while CLASS
+is the original GenClass method without it. The last row (AVERAGE)
+reports the mean error over all datasets, and lower values indicate
+better performance.\label{tab:methods_comparison}}
+\tabularnewline
+\endhead
+\hline 
+DATASET & RBFCON & CART & SVM & RBF & NEAT & DNN & ADAM & BFGS & GEN & CLASS & STANDARD\tabularnewline
+\hline 
+\hline 
+ALCOHOL & 20.43\% & 23.83\% & 23.40\% & 49.38\% & 66.80\% & 39.04\% & 57.78\% & 41.50\% & 39.57\% & 16.70\% & 11.70\%\tabularnewline
+\hline 
+APPENDICITIS & 17.80\% & 16.00\% & 21.00\% & 12.23\% & 17.20\% & 17.30\% & 16.50\% & 18.00\% & 18.10\% & 16.47\% & 12.80\%\tabularnewline
+\hline 
+BEED & 43.01\% & 38.17\% & 32.17\% & 65.12\% & 67.94\% & 64.45\% & 70.38\% & 75.24\% & 46.19\% & 31.93\% & 27.45\%\tabularnewline
+\hline 
+DERMATOLOGY & 39.80\% & 7.14\% & 11.14\% & 59.48\% & 32.43\% & 24.26\% & 26.14\% & 52.92\% & 30.58\% & 5.69\% & 2.80\%\tabularnewline
+\hline 
+GENE & 50.86\% & 30.19\% & 9.21\% & 37.11\% & 52.68\% & 33.06\% & 35.17\% & 38.12\% & 34.38\% & 8.67\% & 7.29\%\tabularnewline
+\hline 
+HAYES ROTH & 40.08\% & 37.59\% & 55.39\% & 64.36\% & 50.15\% & 44.65\% & 59.70\% & 37.33\% & 56.18\% & 24.31\% & 21.08\%\tabularnewline
+\hline 
+HEPATITIS & 13.13\% & 21.25\% & 16.25\% & 18.38\% & 39.75\% & 16.65\% & 16.25\% & 21.38\% & 15.00\% & 15.50\% & 12.00\%\tabularnewline
+\hline 
+HOUSEVOTES & 4.61\% & 4.33\% & 7.32\% & 6.13\% & 10.89\% & 3.13\% & 7.48\% & 7.13\% & 6.62\% & 3.47\% & 2.96\%\tabularnewline
+\hline 
+IONOSPHERE & 12.83\% & 9.14\% & 6.12\% & 16.22\% & 19.67\% & 12.57\% & 16.64\% & 15.29\% & 15.14\% & 8.10\% & 8.74\%\tabularnewline
+\hline 
+LYMPHOGRAPHY & 24.57\% & 22.86\% & 22.71\% & 25.50\% & 33.70\% & 24.07\% & 39.79\% & 35.43\% & 28.42\% & 22.67\% & 18.86\%\tabularnewline
+\hline 
+NURSERY & 44.24\% & 17.94\% & 24.62\% & 77.10\% & 64.11\% & 59.73\% & 40.94\% & 41.40\% & 32.14\% & 19.65\% & 22.27\%\tabularnewline
+\hline 
+OPTDIGITS & 62.29\% & 32.94\% & 26.62\% & 71.97\% & 72.56\% & 64.34\% & 72.32\% & 67.13\% & 67.81\% & 27.15\% & 14.77\%\tabularnewline
+\hline 
+PENBASED & 60.33\% & 18.00\% & 26.81\% & 81.69\% & 78.58\% & 73.50\% & 77.41\% & 82.48\% & 84.01\% & 24.93\% & 17.79\%\tabularnewline
+\hline 
+PHONEME & 15.59\% & 18.60\% & 21.56\% & 23.32\% & 22.43\% & 24.34\% & 29.43\% & 15.58\% & 15.55\% & 18.89\% & 16.82\%\tabularnewline
+\hline 
+PIRVISION & 8.14\% & 1.15\% & 2.05\% & 24.58\% & 11.84\% & 18.28\% & 18.38\% & 16.94\% & 14.31\% & 6.53\% & 4.38\%\tabularnewline
+\hline 
+SATIMAGE & 32.97\% & 23.12\% & 10.86\% & 40.19\% & 76.19\% & 72.30\% & 73.22\% & 71.73\% & 54.54\% & 18.47\% & 16.14\%\tabularnewline
+\hline 
+SEGMENT & 32.47\% & 17.45\% & 30.46\% & 59.68\% & 66.72\% & 32.04\% & 49.75\% & 68.97\% & 57.72\% & 15.21\% & 9.57\%\tabularnewline
+\hline 
+SHUTTLE & 23.25\% & 0.36\% & 0.32\% & 32.83\% & 29.32\% & 2.27\% & 21.29\% & 42.07\% & 20.86\% & 1.11\% & 1.28\%\tabularnewline
+\hline 
+SPAMBASE & 10.54\% & 13.18\% & 9.33\% & 29.35\% & 35.77\% & 11.30\% & 48.05\% & 18.16\% & 6.37\% & 8.97\% & 7.28\%\tabularnewline
+\hline 
+SPIRAL & 41.03\% & 41.70\% & 54.30\% & 44.87\% & 48.66\% & 45.24\% & 47.67\% & 47.99\% & 48.66\% & 35.65\% & 31.25\%\tabularnewline
+\hline 
+SPLICE & 28.37\% & 15.83\% & 14.61\% & 40.27\% & 55.54\% & 48.18\% & 75.93\% & 30.64\% & 30.97\% & 7.68\% & 7.62\%\tabularnewline
+\hline 
+STUDENT & 12.43\% & 7.93\% & 4.70\% & 5.49\% & 10.20\% & 6.93\% & 5.13\% & 7.14\% & 5.61\% & 6.86\% & 5.72\%\tabularnewline
+\hline 
+TEXTURE & 46.87\% & 35.44\% & 24.55\% & 74.52\% & 70.82\% & 70.78\% & 56.33\% & 59.25\% & 54.00\% & 20.01\% & 10.71\%\tabularnewline
+\hline 
+THYROID & 6.35\% & 0.86\% & 5.42\% & 10.62\% & 18.06\% & 7.42\% & 3.43\% & 5.18\% & 7.65\% & 1.24\% & 0.83\%\tabularnewline
+\hline 
+TWONORM & 12.90\% & 15.58\% & 2.15\% & 2.18\% & 13.54\% & 2.16\% & 5.58\% & 9.22\% & 9.59\% & 6.77\% & 6.57\%\tabularnewline
+\hline 
+VEHICLE & 70.24\% & 41.07\% & 42.02\% & 78.06\% & 64.05\% & 59.22\% & 74.41\% & 72.99\% & 60.24\% & 36.55\% & 35.83\%\tabularnewline
+\hline 
+YEAST & 65.83\% & 50.68\% & 61.80\% & 67.14\% & 71.09\% & 68.87\% & 57.69\% & 77.28\% & 69.13\% & 45.95\% & 44.35\%\tabularnewline
+\hline 
+Z\_F\_S & 4.68\% & 5.00\% & 27.33\% & 13.16\% & 38.41\% & 9.27\% & 47.81\% & 39.37\% & 10.73\% & 7.39\% & 6.00\%\tabularnewline
+\hline 
+Z\_O\_N\_F\_S & 44.28\% & 27.80\% & 46.12\% & 48.70\% & 77.08\% & 67.80\% & 78.79\% & 65.67\% & 64.81\% & 30.32\% & 25.32\%\tabularnewline
+\hline 
+ZO\_NF\_S & 5.47\% & 5.20\% & 24.40\% & 9.02\% & 43.75\% & 8.50\% & 47.43\% & 43.04\% & 21.54\% & 5.03\% & 3.69\%\tabularnewline
+\hline 
+ZONF\_S & 1.82\% & 1.60\% & 16.40\% & 4.03\% & 5.44\% & 2.52\% & 11.99\% & 15.62\% & 4.36\% & 2.04\% & 2.00\%\tabularnewline
+\hline 
+\textbf{AVERAGE} & \textbf{28.94\%} & \textbf{19.42\%} & \textbf{21.97\%} & \textbf{38.47\%} & \textbf{44.04\%} & \textbf{33.37\%} & \textbf{41.57\%} & \textbf{40.01\%} & \textbf{33.25\%} & \textbf{16.13\%} & \textbf{13.42\%}\tabularnewline
+\hline 
+\end{longtable}}
+\par\end{center}
+\end{landscape}
+
+Figure \ref{fig:majority} compares the average classification errors
+of the evaluated methods with the majority-class baseline. The STANDARD
+method achieves the lowest average classification error (13.42\%),
+followed by TARGETED (15.08\%), TARGETEDWORST (15.42\%), and the original
+CLASS method (16.13\%). In contrast, the majority-class baseline yields
+an average error of 56.23\%. Although some competing classifiers perform
+worse than the majority-class baseline on individual datasets, the
+four GenClass variants consistently achieve lower classification errors
+across all 31 datasets. 
+\begin{figure}[H]
+\begin{raggedright}
+\includegraphics[scale=0.65]{majority_comparison}
+\par\end{raggedright}
+\caption{Average classification error (\%) of the evaluated classification
+methods across 31 benchmark datasets. The reported values represent
+the unweighted mean of the dataset-level classification errors. Lower
+values indicate better classification performance. The majority-class
+classifier is included as a simple reference baseline.\label{fig:majority}}
+
+\end{figure}
+
+To assess the influence of the additional computational effort introduced
+by the crossover mechanism, we performed a supplementary comparison
+between STANDARD and the original CLASS method under equal fitness
+evaluation budgets. For each corresponding experimental run, the total
+number of fitness evaluations performed by STANDARD was recorded and
+subsequently used as the maximum evaluation budget for CLASS.
+
+The results are presented in Table\textbf{ }\ref{tab:equal_budget}.
+STANDARD achieved an average classification error of 13.71\%, compared
+with 14.21\% for CLASS. Although STANDARD retained a small numerical
+advantage, the difference was not statistically significant according
+to the Wilcoxon signed-rank test ($p\approx0.608$).
+
+These findings suggest that the additional computational effort associated
+with the crossover mechanism may contribute to the improvements observed
+in the original generation-based comparison. Nevertheless, the proposed
+method maintains a slightly lower average classification error when
+both approaches are evaluated under equal fitness evaluation budgets.
+
+\begin{table}[htbp]
+\centering
+\caption{Classification error (\%) of STANDARD and CLASS
+under equal fitness evaluation budgets.}
+\label{tab:equal_budget}
+\small
+\begin{tabular}{|l|r|r|}
+\hline
+Dataset & STANDARD & CLASS-EQUAL \\
+\hline
+Alcohol      & \textbf{10.43} & 12.13 \\
+Appendicitis & 15.00 & \textbf{14.00} \\
+Beed         & \textbf{25.68} & 27.78 \\
+Dermatology  & 6.00 & \textbf{5.14} \\
+Gene         & 7.35 & \textbf{6.85} \\
+Hayes-Roth   & 27.69 & \textbf{22.31} \\
+Hepatitis    & \textbf{13.75} & 17.50 \\
+Housevotes   & \textbf{3.48} & 3.89 \\
+Ionosphere   & 10.00 & \textbf{7.43} \\
+Lymography   & 24.29 & \textbf{22.86} \\
+Nursery      & 19.10 & \textbf{18.41} \\
+Optdigits    & \textbf{13.29} & 16.94 \\
+Penbased     & \textbf{14.52} & 21.68 \\
+Phoneme      & \textbf{16.73} & 17.54 \\
+Pir          & 1.40 & \textbf{1.19} \\
+Satimage     & 15.26 & \textbf{15.23} \\
+Segment      & \textbf{9.05} & 10.35 \\
+Shuttle      & 1.05 & \textbf{0.20} \\
+Spambase     & \textbf{6.93} & 7.76 \\
+Spiral       & \textbf{28.90} & 34.20 \\
+Splice       & 7.21 & \textbf{6.90} \\
+Student      & 7.45 & \textbf{5.73} \\
+Texture      & \textbf{8.36} & 12.91 \\
+Thyroid      & \textbf{0.64} & 0.96 \\
+Twonorm      & 5.57 & \textbf{2.82} \\
+Vehicle      & \textbf{35.83} & 36.07 \\
+Wine         & 8.82 & 8.82 \\
+Yeast        & 46.83 & \textbf{45.15} \\
+Z\_F\_S       & \textbf{6.33} & 6.67 \\
+Z\_O\_N\_F\_S & \textbf{25.40} & 28.80 \\
+ZONF\_S      & 2.80 & \textbf{2.20} \\
+\hline
+\textbf{Mean} & \textbf{13.71} & 14.21 \\
+\hline
+\end{tabular}
+\end{table}
+
+To further examine whether the observed improvements can be attributed
+to the proposed crossover mechanism rather than to the increased computational
+budget, an additional experiment was conducted using a restart-based
+baseline. In this experiment, the original CLASS method was executed
+twice independently with different random seeds, without the additional
+crossover mechanism. The total fitness evaluation budget was divided
+between the two executions, and the best solution was selected according
+to its training fitness. Consequently, the restart-based baseline
+was allocated the same total number of fitness evaluations as STANDARD.
+
+The results of the equal-budget comparison are summarized in Table
+\ref{tab:evalBudgets}. As shown in the table, STANDARD achieved the
+lowest average classification error (14.15\%), followed by MUTATION-LS
+(14.22\%), equal-budget CLASS (14.53\%), and the restart-based baseline
+(14.97\%). The restart-based approach outperformed STANDARD on 10
+datasets, whereas STANDARD achieved lower classification errors on
+18 datasets. The two methods produced identical results on one dataset.
+A paired Wilcoxon signed-rank test yielded p-values of 0.1271 and
+0.4118 for the comparisons of the restart-based approach against STANDARD
+and equal-budget CLASS, respectively. Neither comparison revealed
+a statistically significant difference at the 0.05 significance level.
+
+\begin{table}[H]
+\begin{centering}
+\begin{tabular}{|c|c|}
+\hline 
+Method & Average classification error (\%)\tabularnewline
+\hline 
+\hline 
+STANDARD-EQUAL & 14.15\%\tabularnewline
+\hline 
+MUTATION-LS & 14.22\%\tabularnewline
+\hline 
+CLASS-EQUAL & 14.53\%\tabularnewline
+\hline 
+CLASS-RESTART & 14.97\%\tabularnewline
+\hline 
+\end{tabular}
+\par\end{centering}
+\caption{Comparison of the average classification errors obtained by STANDARD-EQUAL,
+MUTATION-LS, CLASS-EQUAL, and CLASS-RESTART under equal total fitness
+evaluation budgets. \label{tab:evalBudgets}}
+
+\end{table}
+
+An additional statistical comparison was performed between STANDARD
+and MUTATION-LS to investigate whether the proposed crossover mechanism
+provides an advantage over mutation-based local search under the same
+computational budget. MUTATION-LS achieved lower classification errors
+on 11 datasets, whereas STANDARD performed better on 16 datasets,
+with identical results observed on two datasets. The paired Wilcoxon
+signed-rank test yielded a p-value of 0.6830, indicating that the
+difference between the two methods was not statistically significant
+at the 0.05 significance level.
+
+The results of the computational-budget-controlled experiments indicate
+that STANDARD achieved the lowest average classification error among
+the four examined methods. However, the differences between STANDARD
+and the restart-based baseline, as well as between STANDARD and MUTATION-LS,
+were not statistically significant. These findings suggest that the
+proposed crossover mechanism may offer a modest practical advantage
+under equal computational budgets, but they do not establish its statistical
+superiority over alternative strategies that allocate the same number
+of fitness evaluations. Consequently, the improvements observed in
+the main experimental evaluation should be interpreted in conjunction
+with these additional controlled comparisons.
+
 \textbf{Statistical analysis.} The comparison of the methods was based
 on the average classification error of each method on each dataset,
 so that every dataset provides one observation and $N=31$ observations
@@ -1252,8 +1783,8 @@ the differences of the errors on the individual datasets, where zero
 differences are discarded and tied absolute differences receive average
 ranks. The p-values of the Wilcoxon tests were adjusted with the Holm
 method separately for each table, over the family of comparisons of
-that table. These are the seven comparisons of STANDARD with each
-of the other methods in Table \ref{tab:methods_comparison}, and all
+that table. These are the ten comparisons of STANDARD with each of
+the other methods in Table \ref{tab:methods_comparison}, and all
 the pairs of methods in Table $\ref{tab:crossover_strategies}$ (three
 comparisons) and in Table $\ref{tab:diff_NK}$ (six comparisons).
 Finally, for Table $\ref{tab:diff_NK}$, the one-sided Page trend
@@ -1261,18 +1792,24 @@ test was used to examine whether the error decreases as $N_{K}$ increases,
 together with the Spearman correlation between $N_{K}$ and the error
 in each dataset, whose sign was summarized with a sign test.
 
-Table \ref{tab:methods_comparison} compares the proposed method (STANDARD)
-with the original GenClass method (CLASS) and with the other classifiers
-over the 31 datasets. All values are classification errors, so lower
-values indicate better performance. STANDARD attained the lowest average
-error, 13.42\%, followed by CLASS with 16.13\%, while the average
-errors of the remaining methods ranged from 33.25\% (GEN) to 44.04\%
-(NEAT). STANDARD achieved the lowest error in 23 of the 31 datasets,
-CLASS in 3, and each of the other methods in at most 2. Compared with
-CLASS, the average error decreases by 2.71 percentage points, a relative
-reduction of 16.8\%. Therefore, the new crossover procedure improves
-the original method on average, while the improvement over the other
-methods is considerably larger.
+Table \ref{tab:methods_comparison} presents the classification errors
+obtained by STANDARD, the original GenClass method (CLASS), and the
+additional classification methods considered in this study across
+the 31 datasets. Lower values indicate better classification performance.
+STANDARD achieved an average classification error of 13.42\%, compared
+with 16.13\% for CLASS, corresponding to a reduction of 2.71 percentage
+points (approximately 16.8\% relative reduction). Among the external
+reference methods, the lowest average errors were obtained by CART
+(19.42\%), SVM (21.97\%), and RBFCON (28.94\%), while the remaining
+neural network methods ranged from 33.25\% (GEN) to 44.04\% (NEAT).
+STANDARD obtained the lowest error on 19 of the 31 datasets, followed
+by SVM (5 datasets), CART (3), GEN (2), RBF (1), and RBFCON (1), whereas
+CLASS did not obtain the lowest error on any dataset. These findings
+provide evidence of improved classification performance within the
+GenClass framework under the examined experimental configuration.
+The remaining classifiers are included as external reference methods,
+rather than as part of an exhaustive comparison of supervised learning
+algorithms.
 
 The critical difference of the Nemenyi test is $CD=\frac{q_{\alpha}}{\sqrt{2}}\sqrt{\frac{k(k+1)}{6N}}$,
 where $q_{\alpha}$ is the critical value of the studentized range
@@ -1304,135 +1841,73 @@ datasets and the grey lines join the same dataset.}}{\small\par}
 A is the first method named and B the second. The dot is the Hodges-Lehmann
 median paired difference, error(B) \textminus{} error(A), with its
 95\% confidence interval. Right of the dashed line, A has lower error.
-The label gives the Holm-adjusted Wilcoxon p-value and the wins/ties/losses
-of A.}}{\small\par}
+The label gives the significance stars of the Holm-adjusted Wilcoxon
+test and the wins/ties/losses of A.}}{\small\par}
 \item {\small\textit{Mean ranks (bottom left): Mean Friedman rank (1 = best)
 $\pm CD/2$, where $CD$ is the Nemenyi critical difference. Non-overlapping
 bars differ at $\alpha=0.05$.}}{\small\par}
 \item {\small\textit{Bottom right: In Figures $\ref{fig:standart_vs_others}$
-and $\ref{fig:crossover_strategies}$, the per-dataset differences
-error(B) \textminus{} error(A) (blue: A better, red: B better). In
-Figure $\ref{fig:effect_of_NK}$, the mean change in error relative
-to $N_{K}=2$ and the mean rank as a function of $N_{K}$, with bootstrap
-95\% confidence intervals.}}{\small\par}
-\item {\small\textit{Stars: {*}{*}{*} \$p\textless 0.001\$, {*}{*} \$p\textless 0.01\$,
-{*} \$p\textless 0.05\$, ns = not significant (Holm-adjusted).}}{\small\par}
+and $\ref{fig:crossover_strategies}$,the distribution of error(B)
+\textminus{} error(A) over the datasets for each pair (blue: A better,
+red: B better). In Figure $\ref{fig:effect_of_NK}$,the mean change
+in error relative to $N_{K}=2$ (upper) and the mean rank (lower)
+as a function of $N_{K}$, with bootstrap 95\% confidence intervals.}}{\small\par}
+\item {\small\textit{Stars: {*}{*}{*} $p<0.001$, {*}{*} $p<0.01$, {*}
+$p<0.05$, ns = not significant (Holm-adjusted).}}{\small\par}
 \end{itemize}
-\begin{table}[H]
-\caption{Classification error (\%) of the proposed method (STANDARD) and of
-the other classifiers on the 31 datasets. STANDARD is the GenClass
-method with the proposed additional crossover procedure, while CLASS
-is the original GenClass method without it. The last row (AVERAGE)
-reports the mean error over all datasets, and lower values indicate
-better performance.\label{tab:methods_comparison}}
-
-\begin{centering}
-{\footnotesize{}%
-\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
-\hline 
-{\footnotesize DATASET} & {\footnotesize RBF} & {\footnotesize NEAT} & {\footnotesize DNN} & {\footnotesize ADAM} & {\footnotesize BFGS} & {\footnotesize GEN} & {\footnotesize CLASS} & {\footnotesize STANDARD}\tabularnewline
-\hline 
-\hline 
-{\footnotesize ALCOHOL} & {\footnotesize 49.38\%} & {\footnotesize 66.80\%} & {\footnotesize 39.04\%} & {\footnotesize 57.78\%} & {\footnotesize 41.50\%} & {\footnotesize 39.57\%} & {\footnotesize 16.70\%} & {\footnotesize 11.70\%}\tabularnewline
-\hline 
-{\footnotesize APPENDICITIS} & {\footnotesize 12.23\%} & {\footnotesize 17.20\%} & {\footnotesize 17.30\%} & {\footnotesize 16.50\%} & {\footnotesize 18.00\%} & {\footnotesize 18.10\%} & {\footnotesize 16.47\%} & {\footnotesize 12.80\%}\tabularnewline
-\hline 
-{\footnotesize BEED} & {\footnotesize 65.12\%} & {\footnotesize 67.94\%} & {\footnotesize 64.45\%} & {\footnotesize 70.38\%} & {\footnotesize 75.24\%} & {\footnotesize 46.19\%} & {\footnotesize 31.93\%} & {\footnotesize 27.45\%}\tabularnewline
-\hline 
-{\footnotesize DERMATOLOGY} & {\footnotesize 59.48\%} & {\footnotesize 32.43\%} & {\footnotesize 24.26\%} & {\footnotesize 26.14\%} & {\footnotesize 52.92\%} & {\footnotesize 30.58\%} & {\footnotesize 5.69\%} & {\footnotesize 2.80\%}\tabularnewline
-\hline 
-{\footnotesize GENE} & {\footnotesize 37.11\%} & {\footnotesize 52.68\%} & {\footnotesize 33.06\%} & {\footnotesize 35.17\%} & {\footnotesize 38.12\%} & {\footnotesize 34.38\%} & {\footnotesize 8.67\%} & {\footnotesize 7.29\%}\tabularnewline
-\hline 
-{\footnotesize HAYES ROTH} & {\footnotesize 64.36\%} & {\footnotesize 50.15\%} & {\footnotesize 44.65\%} & {\footnotesize 59.70\%} & {\footnotesize 37.33\%} & {\footnotesize 56.18\%} & {\footnotesize 24.31\%} & {\footnotesize 21.08\%}\tabularnewline
-\hline 
-{\footnotesize HEPATITIS} & {\footnotesize 18.38\%} & {\footnotesize 39.75\%} & {\footnotesize 16.65\%} & {\footnotesize 16.25\%} & {\footnotesize 21.38\%} & {\footnotesize 15.00\%} & {\footnotesize 15.50\%} & {\footnotesize 12.00\%}\tabularnewline
-\hline 
-{\footnotesize HOUSEVOTES} & {\footnotesize 6.13\%} & {\footnotesize 10.89\%} & {\footnotesize 3.13\%} & {\footnotesize 7.48\%} & {\footnotesize 7.13\%} & {\footnotesize 6.62\%} & {\footnotesize 3.47\%} & {\footnotesize 2.96\%}\tabularnewline
-\hline 
-{\footnotesize IONOSPHERE} & {\footnotesize 16.22\%} & {\footnotesize 19.67\%} & {\footnotesize 12.57\%} & {\footnotesize 16.64\%} & {\footnotesize 15.29\%} & {\footnotesize 15.14\%} & {\footnotesize 8.10\%} & {\footnotesize 8.74\%}\tabularnewline
-\hline 
-{\footnotesize LYMOGRAPHY} & {\footnotesize 25.50\%} & {\footnotesize 33.70\%} & {\footnotesize 24.07\%} & {\footnotesize 39.79\%} & {\footnotesize 35.43\%} & {\footnotesize 28.42\%} & {\footnotesize 22.67\%} & {\footnotesize 18.86\%}\tabularnewline
-\hline 
-{\footnotesize NURSERY} & {\footnotesize 77.10\%} & {\footnotesize 64.11\%} & {\footnotesize 59.73\%} & {\footnotesize 40.94\%} & {\footnotesize 41.40\%} & {\footnotesize 32.14\%} & {\footnotesize 19.65\%} & {\footnotesize 22.27\%}\tabularnewline
-\hline 
-{\footnotesize OPTDIGITS} & {\footnotesize 71.97\%} & {\footnotesize 72.56\%} & {\footnotesize 64.34\%} & {\footnotesize 72.32\%} & {\footnotesize 67.13\%} & {\footnotesize 67.81\%} & {\footnotesize 27.15\%} & {\footnotesize 14.77\%}\tabularnewline
-\hline 
-{\footnotesize PENBASED} & {\footnotesize 81.69\%} & {\footnotesize 78.58\%} & {\footnotesize 73.50\%} & {\footnotesize 77.41\%} & {\footnotesize 82.48\%} & {\footnotesize 84.01\%} & {\footnotesize 24.93\%} & {\footnotesize 17.79\%}\tabularnewline
-\hline 
-{\footnotesize PHONEME} & {\footnotesize 23.32\%} & {\footnotesize 22.43\%} & {\footnotesize 24.34\%} & {\footnotesize 29.43\%} & {\footnotesize 15.58\%} & {\footnotesize 15.55\%} & {\footnotesize 18.89\%} & {\footnotesize 16.82\%}\tabularnewline
-\hline 
-{\footnotesize PIRVISION} & {\footnotesize 24.58\%} & {\footnotesize 11.84\%} & {\footnotesize 18.28\%} & {\footnotesize 18.38\%} & {\footnotesize 16.94\%} & {\footnotesize 14.31\%} & {\footnotesize 6.53\%} & {\footnotesize 4.38\%}\tabularnewline
-\hline 
-{\footnotesize SATIMAGE} & {\footnotesize 40.19\%} & {\footnotesize 76.19\%} & {\footnotesize 72.30\%} & {\footnotesize 73.22\%} & {\footnotesize 71.73\%} & {\footnotesize 54.54\%} & {\footnotesize 18.47\%} & {\footnotesize 16.14\%}\tabularnewline
-\hline 
-{\footnotesize SEGMENT} & {\footnotesize 59.68\%} & {\footnotesize 66.72\%} & {\footnotesize 32.04\%} & {\footnotesize 49.75\%} & {\footnotesize 68.97\%} & {\footnotesize 57.72\%} & {\footnotesize 15.21\%} & {\footnotesize 9.57\%}\tabularnewline
-\hline 
-{\footnotesize SHUTTLE} & {\footnotesize 32.83\%} & {\footnotesize 29.32\%} & {\footnotesize 2.27\%} & {\footnotesize 21.29\%} & {\footnotesize 42.07\%} & {\footnotesize 20.86\%} & {\footnotesize 1.11\%} & {\footnotesize 1.28\%}\tabularnewline
-\hline 
-{\footnotesize SPAMBASE} & {\footnotesize 29.35\%} & {\footnotesize 35.77\%} & {\footnotesize 11.30\%} & {\footnotesize 48.05\%} & {\footnotesize 18.16\%} & {\footnotesize 6.37\%} & {\footnotesize 8.97\%} & {\footnotesize 7.28\%}\tabularnewline
-\hline 
-{\footnotesize SPIRAL} & {\footnotesize 44.87\%} & {\footnotesize 48.66\%} & {\footnotesize 45.24\%} & {\footnotesize 47.67\%} & {\footnotesize 47.99\%} & {\footnotesize 48.66\%} & {\footnotesize 35.65\%} & {\footnotesize 31.25\%}\tabularnewline
-\hline 
-{\footnotesize SPLICE} & {\footnotesize 40.27\%} & {\footnotesize 55.54\%} & {\footnotesize 48.18\%} & {\footnotesize 75.93\%} & {\footnotesize 30.64\%} & {\footnotesize 30.97\%} & {\footnotesize 7.68\%} & {\footnotesize 7.62\%}\tabularnewline
-\hline 
-{\footnotesize STUDENT} & {\footnotesize 5.49\%} & {\footnotesize 10.20\%} & {\footnotesize 6.93\%} & {\footnotesize 5.13\%} & {\footnotesize 7.14\%} & {\footnotesize 5.61\%} & {\footnotesize 6.86\%} & {\footnotesize 5.72\%}\tabularnewline
-\hline 
-{\footnotesize TEXTURE} & {\footnotesize 74.52\%} & {\footnotesize 70.82\%} & {\footnotesize 70.78\%} & {\footnotesize 56.33\%} & {\footnotesize 59.25\%} & {\footnotesize 54.00\%} & {\footnotesize 20.01\%} & {\footnotesize 10.71\%}\tabularnewline
-\hline 
-{\footnotesize THYROID} & {\footnotesize 10.62\%} & {\footnotesize 18.06\%} & {\footnotesize 7.42\%} & {\footnotesize 3.43\%} & {\footnotesize 5.18\%} & {\footnotesize 7.65\%} & {\footnotesize 1.24\%} & {\footnotesize 0.83\%}\tabularnewline
-\hline 
-{\footnotesize TWONORM} & {\footnotesize 2.18\%} & {\footnotesize 13.54\%} & {\footnotesize 2.16\%} & {\footnotesize 5.58\%} & {\footnotesize 9.22\%} & {\footnotesize 9.59\%} & {\footnotesize 6.77\%} & {\footnotesize 6.57\%}\tabularnewline
-\hline 
-{\footnotesize VEHICLE} & {\footnotesize 78.06\%} & {\footnotesize 64.05\%} & {\footnotesize 59.22\%} & {\footnotesize 74.41\%} & {\footnotesize 72.99\%} & {\footnotesize 60.24\%} & {\footnotesize 36.55\%} & {\footnotesize 35.83\%}\tabularnewline
-\hline 
-{\footnotesize YEAST} & {\footnotesize 67.14\%} & {\footnotesize 71.09\%} & {\footnotesize 68.87\%} & {\footnotesize 57.69\%} & {\footnotesize 77.28\%} & {\footnotesize 69.13\%} & {\footnotesize 45.95\%} & {\footnotesize 44.35\%}\tabularnewline
-\hline 
-{\footnotesize Z\_F\_S} & {\footnotesize 13.16\%} & {\footnotesize 38.41\%} & {\footnotesize 9.27\%} & {\footnotesize 47.81\%} & {\footnotesize 39.37\%} & {\footnotesize 10.73\%} & {\footnotesize 7.39\%} & {\footnotesize 6.00\%}\tabularnewline
-\hline 
-{\footnotesize Z\_O\_N\_F\_S} & {\footnotesize 48.70\%} & {\footnotesize 77.08\%} & {\footnotesize 67.80\%} & {\footnotesize 78.79\%} & {\footnotesize 65.67\%} & {\footnotesize 64.81\%} & {\footnotesize 30.32\%} & {\footnotesize 25.32\%}\tabularnewline
-\hline 
-{\footnotesize ZO\_NF\_S} & {\footnotesize 9.02\%} & {\footnotesize 43.75\%} & {\footnotesize 8.50\%} & {\footnotesize 47.43\%} & {\footnotesize 43.04\%} & {\footnotesize 21.54\%} & {\footnotesize 5.03\%} & {\footnotesize 3.69\%}\tabularnewline
-\hline 
-{\footnotesize ZONF\_S} & {\footnotesize 4.03\%} & {\footnotesize 5.44\%} & {\footnotesize 2.52\%} & {\footnotesize 11.99\%} & {\footnotesize 15.62\%} & {\footnotesize 4.36\%} & {\footnotesize 2.04\%} & {\footnotesize 2.00\%}\tabularnewline
-\hline 
-{\footnotesize\textbf{AVERAGE}} & {\footnotesize\textbf{38.47\%}} & {\footnotesize\textbf{44.04\%}} & {\footnotesize\textbf{33.37\%}} & {\footnotesize\textbf{41.57\%}} & {\footnotesize\textbf{40.01\%}} & {\footnotesize\textbf{33.25\%}} & {\footnotesize\textbf{16.13\%}} & {\footnotesize\textbf{13.42\%}}\tabularnewline
-\hline 
-\end{tabular}}{\footnotesize\par}
-\par\end{centering}
-\end{table}
-
 The statistical analysis of Table \ref{tab:methods_comparison} is
 summarized in Figure \ref{fig:standart_vs_others}. The Friedman test
-rejects the hypothesis that all eight methods perform equally ($\chi^{2}(7)=121.47$,
-$p=3.8\times10^{-23}$), a result confirmed by the Iman-Davenport
-correction ($F(7,210)=38.15$, $p=3.3\times10^{-34}$), with a substantial
-effect size (Kendall's $W=0.56$). STANDARD obtains the best mean
-rank (1.42), followed by CLASS (2.29), while all the other methods
-have mean ranks above 4. In the paired comparisons, STANDARD has lower
-error than every other method, with Holm-adjusted Wilcoxon signed-rank
-p-values between $8.6\times10^{-6}$ and $1.7\times10^{-5}$ and wins
-in 28 to 31 of the 31 datasets. The Hodges-Lehmann estimates of the
-median paired difference range from approximately 2.4 percentage points
-(CLASS) to 30.4 percentage points (NEAT), none of the 95\% confidence
-intervals includes zero, and the effect sizes are large ($r\geq0.77$,
-where values around 0.5 or above are conventionally considered large).
-The comparison with CLASS requires a careful reading. The bars of
-the two methods overlap in the mean-rank panel, which means that the
-conservative Nemenyi test does not separate them, since the difference
-in mean rank (0.87) is smaller than the critical difference (1.89).
-The paired Wilcoxon test, which also takes into account the magnitude
-of the differences, detects nevertheless a consistent improvement
-(28 wins and 3 losses). STANDARD is worse than CLASS only in three
-datasets (IONOSPHERE, NURSERY and SHUTTLE).
+rejects the hypothesis that all eleven methods perform equally ($\chi^{2}(10)=164.49$,
+$p=3.8\times10^{-30}$), a result confirmed by the Iman-Davenport
+correction ($F(10,300)=33.91$, $p=9.9\times10^{-44}$), with a substantial
+effect size (Kendall’s $W=0.53$). STANDARD obtains the best mean
+rank (1.87), followed by CLASS (2.97), CART (3.90) and SVM (4.73),
+while all the other methods have mean ranks above 5.5. In the paired
+comparisons, STANDARD has lower error than every other method, with
+Holm-adjusted Wilcoxon signed-rank p-values between$1.2\times10^{-5}$
+and $1.0\times10^{-4}$ and wins in 25 to 31 of the 31 datasets. The
+Hodges-Lehmann estimates of the median paired difference range from
+approximately 2.4 percentage points (CLASS) to 30.4 percentage points
+(NEAT), with 5.2 percentage points against CART and 8.0 percentage
+points against SVM. None of the 95\% confidence intervals includes
+zero, and the effect sizes are large ($r\geq0.72$, where values around
+0.5 or above are conventionally considered large). The comparisons
+with CLASS and CART require a careful reading. Their bars overlap
+with that of STANDARD in the mean-rank panel, which means that the
+conservative Nemenyi test does not separate them from STANDARD, since
+the differences in mean rank (1.10 and 2.03) are smaller than the
+critical difference (2.71). The paired Wilcoxon test, which also takes
+into account the magnitude of the differences, nevertheless detects
+a consistent improvement (28 wins and 3 losses against CLASS, 26 wins
+and 5 losses against CART). STANDARD is worse than CLASS only on IONOSPHERE,
+NURSERY and SHUTTLE, and worse than CART on NURSERY, PIRVISION, SHUTTLE,
+Z\_F\_S and ZONF\_S. The competitor with the most individual wins
+against STANDARD is SVM, which achieves lower error on six datasets
+(IONOSPHERE, PIRVISION, SATIMAGE, SHUTTLE, STUDENT and TWONORM), although
+the overall difference remains significant in favor of STANDARD (25
+wins and 6 losses).
 
 \begin{figure}[H]
 \begin{centering}
-\includegraphics[scale=0.43]{tbl3_summary}
+\includegraphics[scale=0.85]{tbl3_summary}
 \par\end{centering}
 \caption{Statistical comparison of the proposed method (STANDARD) against the
 other classifiers over 31 datasets.\label{fig:standart_vs_others}}
 \end{figure}
 
+To examine the potential influence of dependent benchmark datasets,
+an additional statistical analysis was conducted by excluding the
+four EEG-derived datasets, which originate from the same underlying
+recordings. The Wilcoxon signed-rank test was applied to the remaining
+27 datasets. The STANDARD method retained a statistically significant
+advantage over CLASS $\left(p=0.54\times10^{-6}\right)$. In contrast,
+the differences between TARGETED and CLASS ($p=0.11105$) and between
+TARGETEDWORST and CLASS ($p=0.04215$) were not statistically significant
+after applying the Holm correction for multiple comparisons. These
+findings indicate that the statistically significant improvement of
+STANDARD over the original GenClass method persists after excluding
+the related EEG datasets, whereas the evidence supporting improvements
+from the other two crossover strategies is less conclusive.
 
 \subsection{Crossover methods }
 
@@ -1479,7 +1954,7 @@ HOUSEVOTES & 2.96\% & 3.72\% & 3.04\%\tabularnewline
 \hline 
 IONOSPHERE & 8.74\% & 7.77\% & 7.77\%\tabularnewline
 \hline 
-LYMOGRAPHY & 18.86\% & 25.00\% & 21.86\%\tabularnewline
+LYMPHOGRAPHY & 18.86\% & 25.00\% & 21.86\%\tabularnewline
 \hline 
 NURSERY & 22.27\% & 21.44\% & 21.02\%\tabularnewline
 \hline 
@@ -1548,14 +2023,38 @@ $r=0.09$).
 
 \begin{figure}[H]
 \begin{centering}
-\includegraphics[scale=0.43]{tbl4_summary}
+\includegraphics[scale=0.85]{tbl4_summary}
 \par\end{centering}
-\caption{Statistical comparison of the three three crossover strategies. (STANDARD,
+\caption{Statistical comparison of the three crossover strategies. (STANDARD,
 TARGETED, TARGETEDWORST).\label{fig:crossover_strategies}}
 \end{figure}
 
+To further assess the effectiveness of the three crossover strategies,
+we performed pairwise comparisons against the original CLASS method
+using two-sided Wilcoxon signed-rank tests. For the complete set of
+31 datasets, the p-values were $1.381\times10^{-6}$ for STANDARD,
+0.022385 for TARGETED, and 0.030285 for TARGETEDWORST. Since four
+EEG-derived datasets originate from the same underlying recordings,
+we additionally repeated the analysis after excluding these related
+problems. For the remaining 27 datasets, the corresponding p-values
+were $9.537\times10^{-6}$, 0.106917, and 0.040013, respectively.
+After applying the Holm correction for the three comparisons, only
+STANDARD retained statistical significance at the 0.05 level in the
+analysis excluding the EEG-derived datasets. These findings indicate
+that STANDARD provides the most robust improvement over the original
+CLASS method, whereas the evidence supporting the two targeted strategies
+is less conclusive.
 
 \subsection{Number of crossing items}
+
+The value $N_{K}=10$ was used as the default configuration in the
+main experiments without performing a dataset-specific parameter optimization
+procedure. The experiments presented in this subsection constitute
+a sensitivity analysis intended to investigate the influence of the
+number of chromosomes participating in the crossover operation. Although
+$N_{K}=15$ achieved the lowest average classification error, the
+default configuration was retained for the main comparisons rather
+than selecting the best-performing value separately for each dataset.
 
 Table \ref{tab:diff_NK} reports the results of the proposed method
 when $N_{K}$=2, 5, 10 and 15 chromosomes participate in the crossover.
@@ -1597,7 +2096,7 @@ HOUSEVOTES & 3.63\% & 2.78\% & 2.96\% & 3.28\%\tabularnewline
 \hline 
 IONOSPHERE & 7.60\% & 7.31\% & 8.74\% & 8.80\%\tabularnewline
 \hline 
-LYMOGRAPHY & 23.71\% & 23.00\% & 18.86\% & 20.57\%\tabularnewline
+LYMPHOGRAPHY & 23.71\% & 23.00\% & 18.86\% & 20.57\%\tabularnewline
 \hline 
 NURSERY & 20.33\% & 22.16\% & 22.27\% & 18.76\%\tabularnewline
 \hline 
@@ -1646,6 +2145,24 @@ ZONF\_S & 1.96\% & 1.44\% & 2.00\% & 1.16\%\tabularnewline
 \end{tabular}
 \end{table}
 
+The identical results obtained by Targeted and TargetedWorst on the
+Hepatitis and Phoneme datasets can be attributed to their binary classification
+structure. In the proposed chromosome representation, a problem with
+$C$ classes contains$C-1$ explicit classification rules, with the
+remaining class handled by a default rule. Consequently, for binary
+classification problems, the single explicit rule spans the entire
+chromosome, making the class-specific crossover restriction of TargetedWorst
+equivalent to the unrestricted selection employed by Targeted.
+
+For the BEED dataset, the identical classification error reported
+for CLASS and TargetedWorst (31.93\%) should not be interpreted as
+algorithmic equivalence. BEED contains four classes, and TargetedWorst
+performs additional class-directed crossover operations that are absent
+from the CLASS baseline. Supplementary implementation checks confirmed
+that these operations were executed and produced accepted fitness
+improvements. However, the numerical coincidence in the original results
+has not been independently reproduced.
+
 Figure \ref{fig:effect_of_NK} presents the corresponding statistical
 analysis. The Friedman test detects significant differences among
 the four settings ($\chi^{2}(3)=21.97$, $p=6.6\times10^{-5}$, Iman-Davenport
@@ -1673,17 +2190,21 @@ mean rank.
 
 \begin{figure}[H]
 \begin{centering}
-\includegraphics[scale=0.43]{tbl5_summary}
+\includegraphics[scale=0.85]{tbl5_summary}
 \par\end{centering}
 \caption{Effect of the number of chromosomes ($N_{K}$) participating in the
 crossover on the proposed method.\label{fig:effect_of_NK}}
 \end{figure}
 \begin{figure}[H]
 \begin{centering}
-\includegraphics{time}
+\includegraphics[scale=0.75]{time}
 \par\end{centering}
-\caption{Execution time of the Standard technique for different values of $N_{K}$
-(Dermatology dataset).\label{fig:time_dermatology}}
+\caption{Execution time of the STANDARD crossover technique on the Dermatology
+dataset for different values of $(N_{K})$. The baseline configuration
+$((N_{K}=0))$ required 81.80 seconds, while execution time increased
+to 302.60 seconds for $(N_{K}=15)$. The baseline value represents
+a single execution, whereas the remaining values correspond to the
+previously reported average execution times. \label{fig:time_dermatology}}
 \end{figure}
 
 The figure shows the average execution time of the Standard technique
@@ -1692,88 +2213,766 @@ increases with$N_{K}$, from 104.4 s for $N_{K}=2$ to 302.6 s for
 $N_{K}=15$, which is about 2.9 times higher. The increase is approximately
 linear up to $N_{K}=10$, at about 19 s per additional chromosome,
 and becomes slower from $N_{K}=10$ to $N_{K}=15$, at about 9 s per
-additional chromosome. The time does not grow in proportion to $N_{K}$,
-because the rest of the algorithm has a cost that does not depend
-on $N_{K}$. The default value $N_{K}=10$ requires 255.6 s, whereas
-$N_{K}=15$ needs 47 s more (18\%) and, in this dataset, does not
-give a lower error (Table $\ref{tab:diff_NK}$, 4.00\% against 2.80\%
-for $N_{K}=10$).
+additional chromosome. The observed execution-time increase is not
+uniform across the examined values of $N_{K}$. Although the increase
+becomes smaller between $N_{K}=10$ and $N_{K}=15$, the available
+measurements do not establish the underlying cause of this behavior.
+Consequently, no specific explanation for the change in the slope
+of the execution-time curve can be confirmed from these results alone. 
+
+For the Dermatology dataset, the default value $N_{K}=10$ requires
+255.6 s, whereas $N_{K}=15$ requires 302.6 s, representing an increase
+of approximately 18\%. This dataset is used solely to illustrate the
+computational cost associated with increasing $N_{K}$ and should
+not be considered representative of the overall classification performance.
+Across all 31 datasets, $N_{K}=15$ achieves the lowest average classification
+error and the best mean rank, although its advantage over $N_{K}=5$
+and $N_{K}=10$ is not statistically significant after correction
+for multiple comparisons.
+
+\subsection{\textbf{Computational Cost Analysis}}
+
+To provide a more comprehensive assessment of the computational cost
+of the proposed crossover operators, additional experiments were conducted
+on three relatively large datasets: Nursery, Pirvision, and Shuttle.
+Both wall-clock execution time and the total number of fitness evaluations
+were measured for the original CLASS configuration and the STANDARD,
+TARGETED, and TARGETEDWORST crossover variants. All configurations
+were evaluated using identical experimental settings and the same
+random seed, with $N_{K}=0$ for CLASS and $N_{K}=10$ for the crossover
+variants.
+
+Table \ref{tab:computational_cost} reports the measured execution
+times and total fitness evaluation counts. The results reveal substantial
+differences in computational cost among the examined approaches. STANDARD
+consistently exhibits the highest overhead, requiring approximately
+3.49-{}-3.93 times the execution time of CLASS. In contrast, TARGETED
+introduces a more moderate overhead, with execution-time ratios ranging
+from 1.40 to 1.67. TARGETEDWORST exhibits dataset-dependent behavior,
+with execution-time ratios ranging from 0.64 to 1.85.
+
+The number of fitness evaluations generally follows a similar pattern,
+although execution time is not strictly proportional to the evaluation
+count. This suggests that factors beyond the number of evaluations
+may also influence total execution time. In particular, STANDARD introduces
+a substantial increase in both execution time and fitness evaluations.
+
+An additional baseline measurement was performed on the Dermatology
+dataset with $N_{K}=0$. The recorded execution time was 81.80 seconds,
+with 2,041,800 fitness evaluations. The previously reported time of
+255.60 seconds at $N_{K}=10$ is approximately 3.12 times this baseline;
+this comparison is valid only if both measurements were obtained under
+equivalent experimental conditions.
+
+These findings demonstrate that the computational overhead of the
+proposed crossover strategies depends on the operator and dataset
+and can be substantial, particularly for STANDARD. The additional
+crossover operations therefore represent a trade-off between classification
+performance and computational cost rather than a computationally negligible
+modification. Because these measurements correspond to a single execution
+per configuration, they are intended to characterize computational
+overhead rather than establish statistically significant timing differences.
+
+% Computational cost comparison (single run per configuration).
+% Requires \usepackage{booktabs} in the preamble.
+\begin{table}[H]
+\centering
+\caption{Wall-clock execution time and total fitness evaluations for CLASS and the three crossover variants on Nursery, Pirvision, and Shuttle. The baseline uses $N_K=0$, while the crossover variants use $N_K=10$. Results correspond to one run per configuration.}
+\label{tab:computational_cost}
+\begin{tabular}{llrr}
+\toprule
+Dataset & Method & Time (s) & Fitness evaluations \\
+\midrule
+Nursery & CLASS & 1230.76 & 1595309 \\
+        & STANDARD & 4293.11 & 5564200 \\
+        & TARGETED & 1755.92 & 2038902 \\
+        & TARGETEDWORST & 2275.75 & 2079594 \\
+\midrule
+Pirvision & CLASS & 1984.78 & 2072441 \\
+          & STANDARD & 7805.84 & 6776246 \\
+          & TARGETED & 2771.94 & 2676918 \\
+          & TARGETEDWORST & 1267.48 & 2160418 \\
+\midrule
+Shuttle & CLASS & 4750.54 & 1783945 \\
+        & STANDARD & 18632.64 & 6335527 \\
+        & TARGETED & 7912.64 & 2481313 \\
+        & TARGETEDWORST & 7386.76 & 2364263 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Crossover Ablation Study}
+
+To examine whether the observed behavior of targeted crossover is
+attributable to donor selection, exchange geometry, or local grammar-based
+matching, we conducted a controlled ablation study. Six crossover
+configurations were considered: 
+\begin{enumerate}
+\item \emph{Standard}, the original standard crossover using donors sampled
+from the population and tail exchange; 
+\item \emph{Standard+Elite}, which retains the standard exchange but restricts
+donor selection to the top 20\% of the population; 
+\item \emph{Standard+Block}, which retains population-wide donor selection
+but limits the exchanged segment to at most 16 codons; 
+\item \emph{Targeted}, which combines elite donor selection, a maximum
+exchanged block length of 16 codons, and local grammar-based matching;
+\item \emph{Targeted+Full}, which replaces elite donor selection in Targeted
+with population-wide sampling; and 
+\item \emph{TargetedWorst}, the corresponding targeted variant using its
+alternative recipient-selection strategy. These controls examine individual
+design choices but do not constitute a complete factorial isolation
+of all possible interactions.
+\end{enumerate}
+Experiments used ten classification datasets (Dermatology, Hepatitis,
+Housevotes, Ionosphere, Optdigits, Segment, Spambase, Thyroid, Vehicle,
+and Yeast). For each dataset and configuration, 30 runs were performed
+using the same set of random seed values, giving 1,800 runs in total.
+All runs were constrained to exactly 100,000 fitness evaluations,
+with a maximum of 1,000 generations. The number of crossover items
+was 10; the targeted variants used 20 crossover iterations and a maximum
+block length of 16 codons. The results refer to one predefined training/test
+split per dataset, rather than a complete ten-fold cross-validation.
+Consequently, the conclusions are conditional on the selected splits.
+The recorded test classification errors are reported as mean $\pm$
+sample standard deviation across the 30 runs.
+
+\begin{table*}[t]
+\centering
+\caption{Classification error (\%, mean $\pm$ standard deviation over 30 runs) under an equal budget of 100,000 fitness evaluations per run. Lower values are better.}
+\label{tab:crossover_ablation_error}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrr}
+\hline
+Dataset & Standard & Std.+Elite & Std.+Block & Targeted & Targeted+Full & TargetedWorst \\
+\hline
+Dermatology & $6.48\pm5.19$ & $10.67\pm6.75$ & $9.05\pm5.26$ & $6.86\pm5.49$ & $8.19\pm5.45$ & $7.24\pm5.02$ \\
+Hepatitis & $21.25\pm16.46$ & $25.42\pm16.89$ & $16.25\pm13.19$ & $24.58\pm14.86$ & $22.50\pm15.19$ & $24.58\pm14.86$ \\
+Housevotes & $4.06\pm1.10$ & $4.35\pm0.00$ & $4.20\pm0.79$ & $4.06\pm1.10$ & $3.48\pm1.77$ & $4.06\pm1.10$ \\
+Ionosphere & $13.14\pm3.80$ & $13.71\pm4.34$ & $12.67\pm4.09$ & $11.52\pm3.71$ & $11.62\pm3.26$ & $11.52\pm3.71$ \\
+Optdigits & $43.62\pm5.69$ & $44.86\pm5.00$ & $43.74\pm5.97$ & $43.14\pm5.01$ & $42.98\pm3.72$ & $46.36\pm4.69$ \\
+Segment & $27.56\pm6.46$ & $29.60\pm6.06$ & $26.93\pm6.40$ & $25.57\pm4.85$ & $25.02\pm5.46$ & $25.32\pm7.19$ \\
+Spambase & $10.09\pm2.12$ & $10.61\pm2.10$ & $9.51\pm2.25$ & $9.69\pm1.95$ & $8.69\pm1.84$ & $9.69\pm1.95$ \\
+Thyroid & $4.79\pm1.61$ & $4.25\pm2.04$ & $5.00\pm1.64$ & $4.48\pm1.78$ & $3.51\pm1.78$ & $4.20\pm1.78$ \\
+Vehicle & $39.29\pm5.99$ & $42.54\pm8.11$ & $42.78\pm7.84$ & $40.71\pm8.08$ & $39.64\pm6.12$ & $39.33\pm6.63$ \\
+Yeast & $55.59\pm4.50$ & $57.18\pm4.03$ & $54.48\pm3.55$ & $54.84\pm3.70$ & $55.09\pm8.14$ & $53.81\pm4.33$ \\
+\hline
+\end{tabular}
+\end{table*}
+
+Table \ref{tab:crossover_ablation_error} shows that no single operator
+is best on every dataset. Targeted+Full achieves the lowest mean classification
+error on five datasets, while Standard performs best on Dermatology
+and Standard+Block on Hepatitis. The relatively small differences
+between several configurations should not be interpreted as evidence
+of universal superiority.
+
+\begin{table}[t]
+\centering
+\caption{Crossover statistics aggregated over all ten datasets and 30 runs per dataset. Accepted improvements and skipped trials are mean counts per run; the last column is the ratio of total accepted improvements to total crossover fitness evaluations, multiplied by 1,000.}
+\label{tab:crossover_ablation_efficiency}
+\scriptsize
+\begin{tabular}{lrrr}
+\hline
+Operator & Accepted/run & Skipped/run & Accepted/1,000 evals \\
+\hline
+Standard & 965.5 & 0.0 & 12.18 \\
+Standard+Elite & 810.0 & 0.0 & 10.22 \\
+Standard+Block & 904.0 & 0.0 & 11.40 \\
+Targeted & 629.8 & 489.2 & 29.33 \\
+Targeted+Full & 636.1 & 560.7 & 29.67 \\
+TargetedWorst & 479.8 & 1355.1 & 23.06 \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table \ref{tab:crossover_ablation_efficiency}, the targeted
+configurations produce more accepted improvements per crossover fitness
+evaluation than the standard configurations. In particular, Targeted
+yields approximately 2.41 times the normalized acceptance count of
+Standard. However, these are not equal numbers of crossover evaluations:
+the fixed total evaluation budget also covers other algorithmic operations,
+and the crossover implementations use different numbers of trials
+and evaluations. The normalized ratio is therefore an operational
+efficiency measure, not direct proof that grammar-based matching alone
+causes the difference. TargetedWorst also records substantially more
+skipped trials, indicating that some attempted operations terminate
+without a crossover fitness evaluation.
+
+For a dataset-level statistical comparison, the six operators were
+ranked according to their mean classification error on each of the
+ten datasets. A Friedman test identified an overall difference ($\chi^{2}(5)=18.878$,
+$p=0.00203$). The mean ranks (smaller is better) were 2.20 for Targeted+Full,
+2.85 for TargetedWorst, 3.05 for Targeted, 3.50 for Standard, 3.90
+for Standard+Block, and 5.50 for Standard+Elite. Five pre-specified
+pairwise comparisons were subsequently performed using two-sided Wilcoxon
+signed-rank tests on the ten paired dataset means, with Holm correction:
+Standard versus Targeted ($p_{\mathrm{adj}}=1.0000$), Standard versus
+Standard+Elite ($p_{\mathrm{adj}}=0.0488$), Standard versus Standard+Block
+($p_{\mathrm{adj}}=1.0000$), Targeted versus Targeted+Full ($p_{\mathrm{adj}}=0.6406$),
+and Targeted versus TargetedWorst ($p_{\mathrm{adj}}=1.0000$). Only
+the Standard versus Standard+Elite comparison met the 0.05 threshold
+after correction, with Standard achieving the lower classification
+error on average. These tests use datasets as the paired analysis
+units, rather than treating all 300 runs per operator as independent
+datasets.
+
+The ablations suggest that restricting donors to the elite subset
+is not beneficial by itself and that limiting exchange length does
+not guarantee improved generalization. Local grammar-based matching
+may increase the frequency of accepted local modifications, but the
+present controls cannot establish an isolated causal effect of semantic
+matching. Importantly, matching grammar-derived types at the exchange
+site is a local constraint: changing the derivation can alter how
+subsequent codons are consumed and interpreted, so global semantic
+equivalence or validity of the entire downstream derivation is not
+guaranteed solely by the local match. These limitations motivate interpreting
+the crossover mechanisms as interacting design choices rather than
+as independently validated sources of performance improvement.
+
+\textbf{Mechanistic interpretation of local semantic compatibility.}
+
+An important limitation of grammar-guided crossover arises from the
+sequential nature of genotype-to-phenotype mapping in Grammatical
+Evolution. Although the Targeted operator attempts to identify compatible
+crossover positions based on grammar-derived semantic information,
+such compatibility is inherently local and does not guarantee preservation
+of the overall derivation structure.
+
+For example, consider a grammar containing the productions \textless expr\textgreater{}
+::= \textless expr\textgreater{} \textless op\textgreater{} \textless expr\textgreater{}
+\textbar{} \textless var\textgreater{} \textbar{} \textless func\textgreater (\textless expr\textgreater ).
+Replacing a codon that selects \textless var\textgreater{} with one
+selecting \textless expr\textgreater{} \textless op\textgreater{}
+\textless expr\textgreater{} introduces additional non-terminal symbols
+into the derivation. As a result, subsequent codons may be consumed
+in different grammatical contexts, potentially selecting different
+production rules and producing substantially different phenotypes.
+
+This phenomenon implies that exchanging locally compatible codon blocks
+does not necessarily preserve the semantic relationships of the complete
+generated expression. The resulting disruption may offset the expected
+benefits of semantic guidance and provides a plausible explanation
+for the absence of consistent improvements in classification performance.
+Importantly, this interpretation is a mechanistic hypothesis supported
+by the properties of GE mapping rather than a directly measured causal
+effect in the present experiments.
+
+\subsection{Convergence and Population Diversity Analysis\label{subsec:Convergence-and-Population}}
+
+To further investigate the evolutionary behavior of the proposed crossover
+operators, a convergence and population diversity analysis was conducted
+on four representative classification datasets: Dermatology, Ionosphere,
+Spambase, and Vehicle. These datasets include binary and multiclass
+classification problems, allowing the crossover strategies to be examined
+under different chromosome structures. Each configuration was evaluated
+over 30 independent runs using a fixed budget of 100,000 fitness evaluations.
+
+Population diversity was quantified using the normalized average pairwise
+Hamming distance between chromosomes. This measure expresses the proportion
+of differing codon positions across pairs of individuals in the population.
+Higher values indicate greater genotypic diversity, whereas lower
+values indicate increasing population homogeneity. The convergence
+curves show the mean best-so-far fitness, and the diversity curves
+show the mean population diversity. Shaded regions indicate one standard
+deviation around the mean.
+
+Figure \ref{fig:convergence_diversity} presents the convergence and
+diversity trajectories for all four datasets. The left column shows
+best-so-far fitness against the number of fitness evaluations; the
+right column shows normalized population diversity. Since the fixed
+evaluation budget may interrupt the final generation, the diversity
+curves are restricted to evaluation ranges with observations from
+all 30 runs for each operator, avoiding comparisons based on unequal
+sample counts.
+
+On Dermatology, TargetedWorst exhibits relatively rapid initial fitness
+improvements. Both targeted variants maintain greater population diversity
+than Standard over substantial portions of the search. At 60,000 fitness
+evaluations, the diversity differences between Standard and Targeted
+and between Standard and TargetedWorst are statistically significant
+(Holm-adjusted Wilcoxon $p=3.18\times10^{-5}$ and $p=9.94\times10^{-5}$,
+respectively). No statistically significant diversity difference was
+observed between the two targeted variants. Although TargetedWorst
+obtained the best mean final fitness in this experiment, pairwise
+tests did not identify statistically significant differences in final
+fitness.
+
+On Ionosphere, Targeted achieves significantly better final fitness
+than Standard. The recorded convergence and diversity trajectories
+of Targeted and TargetedWorst coincide. On Spambase, the targeted
+variants maintain greater population diversity than Standard over
+substantial portions of the search, but the final-fitness difference
+between Standard and Targeted is not statistically significant. The
+two targeted variants again exhibit identical recorded trajectories.
+
+Vehicle provides a multiclass case in which the targeted variants
+generally maintain greater genotypic diversity than Standard, while
+the observed final-fitness difference between Standard and Targeted
+is not statistically significant. Thus, increased diversity does not
+necessarily translate into better final optimization performance under
+the available evaluation budget.
+
+An implementation-specific characteristic explains the identical behavior
+of Targeted and TargetedWorst observed on the binary datasets. For
+a problem with $C$ classes, the chromosome contains $C-1$ explicit
+classification rules, with the remaining class represented by the
+default branch. TargetedWorst restricts crossover positions to the
+segment corresponding to the worst-performing class, except when that
+class is the default class, in which case the entire chromosome is
+considered. When $C=2$, the single explicit-rule segment already
+spans the entire chromosome. Therefore, the class-specific restriction
+is ineffective for either possible worst-performing class, and TargetedWorst
+can select the same candidate crossover positions as Targeted. With
+otherwise equivalent selection and exchange operations and the same
+random seed, the operators can follow identical evolutionary trajectories,
+as observed on Ionosphere and Spambase.
+
+Overall, Figure \ref{fig:convergence_diversity} indicates that the
+targeted crossover variants often preserve greater genotypic diversity,
+particularly on Dermatology, Spambase, and Vehicle, without consistently
+producing statistically significant improvements in final fitness.
+The effects are dataset-dependent. Furthermore, higher genotypic diversity
+should not be interpreted as direct evidence of improved generalization
+performance or a causal explanation for differences in classification
+accuracy.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{convergence_4datasets_8panels.pdf}
+\caption{Convergence and population diversity of the Standard, Targeted, and TargetedWorst crossover operators on Dermatology, Ionosphere, Spambase, and Vehicle. The left column presents mean best-so-far fitness, while the right column presents mean normalized average pairwise Hamming distance. Results are aggregated over 30 independent runs per operator. Shaded regions represent the mean $\pm$ one standard deviation. Diversity curves are restricted to evaluation ranges with complete observations across all runs, whereas convergence curves extend to the fixed budget of 100,000 fitness evaluations.}
+\label{fig:convergence_diversity}
+\end{figure}
+
+\subsection{Interpretability and Program Complexity}
+
+Interpretability was evaluated through the complexity of the final,
+expressed classification programs. Four complementary measures were
+considered:
+\begin{enumerate}
+\item Program length in lexical tokens.
+\item The number of distinct input features referenced.
+\item The number of relational comparisons .
+\item The number of conditional statements. 
+\end{enumerate}
+These measures characterize different aspects of the readability of
+the generated rule systems: a program may be syntactically long without
+introducing additional decision branches or input features.We analyzed
+the final logged programs of the Standard, Targeted, and TargetedWorst
+crossover variants on ten datasets. For each dataset-{}-operator combination,
+up to 30 independently seeded runs were available. In total, 898 programs
+were successfully extracted: 298 for Standard and 300 for each of
+Targeted and TargetedWorst. The Standard results include 29 runs forDermatology
+and 29 for Yeast; the remaining combinations contain 30 runs. The
+measurements describe the final logged best programs, not the mean
+complexity of the evolving populations.
+
+
+\begin{table*}[t]
+\centering
+\caption{Complexity of final evolved programs. Values are mean $\pm$
+standard deviation across independent runs. Program length is measured in
+lexical tokens; $F$ is the number of distinct features, $C$ the number of
+relational comparisons, and $I$ the number of conditional statements.}
+\label{tab:rule_complexity}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrr}
+\toprule
+Dataset & Method & $n$ & Tokens & $F$ & $C$ & $I$ \\
+\midrule
+Dermatology & Standard & 29 & 105.76 $\pm$ 18.32 & 12.79 $\pm$ 3.02 & 8.45 $\pm$ 1.97 & 5.00 \\
+Dermatology & Targeted & 30 & 94.47 $\pm$ 17.88 & 11.83 $\pm$ 2.29 & 7.77 $\pm$ 1.65 & 5.00 \\
+Dermatology & TargetedWorst & 30 & 96.43 $\pm$ 18.44 & 12.30 $\pm$ 2.09 & 7.73 $\pm$ 1.55 & 5.00 \\
+\midrule
+Hepatitis & Standard & 30 & 56.03 $\pm$ 28.71 & 7.33 $\pm$ 2.68 & 3.80 $\pm$ 1.83 & 1.00 \\
+Hepatitis & Targeted & 30 & 55.90 $\pm$ 30.52 & 7.87 $\pm$ 2.42 & 4.17 $\pm$ 1.84 & 1.00 \\
+Hepatitis & TargetedWorst & 30 & 55.90 $\pm$ 30.52 & 7.87 $\pm$ 2.42 & 4.17 $\pm$ 1.84 & 1.00 \\
+\midrule
+Housevotes & Standard & 30 & 44.57 $\pm$ 23.25 & 4.50 $\pm$ 2.69 & 2.63 $\pm$ 1.65 & 1.00 \\
+Housevotes & Targeted & 30 & 35.57 $\pm$ 13.52 & 4.80 $\pm$ 2.01 & 2.60 $\pm$ 1.59 & 1.00 \\
+Housevotes & TargetedWorst & 30 & 35.57 $\pm$ 13.52 & 4.80 $\pm$ 2.01 & 2.60 $\pm$ 1.59 & 1.00 \\
+\midrule
+Ionosphere & Standard & 30 & 54.67 $\pm$ 28.10 & 6.60 $\pm$ 3.04 & 3.60 $\pm$ 2.04 & 1.00 \\
+Ionosphere & Targeted & 30 & 51.90 $\pm$ 17.00 & 6.43 $\pm$ 2.06 & 3.70 $\pm$ 1.42 & 1.00 \\
+Ionosphere & TargetedWorst & 30 & 51.90 $\pm$ 17.00 & 6.43 $\pm$ 2.06 & 3.70 $\pm$ 1.42 & 1.00 \\
+\midrule
+Optdigits & Standard & 30 & 162.23 $\pm$ 18.19 & 20.93 $\pm$ 3.38 & 13.13 $\pm$ 1.91 & 9.00 \\
+Optdigits & Targeted & 30 & 147.13 $\pm$ 12.33 & 18.90 $\pm$ 2.68 & 12.03 $\pm$ 1.59 & 9.00 \\
+Optdigits & TargetedWorst & 30 & 144.37 $\pm$ 16.25 & 19.30 $\pm$ 2.69 & 12.13 $\pm$ 1.43 & 9.00 \\
+\midrule
+Segment & Standard & 30 & 132.57 $\pm$ 19.12 & 12.00 $\pm$ 1.78 & 9.40 $\pm$ 1.89 & 6.00 \\
+Segment & Targeted & 30 & 117.73 $\pm$ 13.16 & 10.87 $\pm$ 1.46 & 8.70 $\pm$ 1.47 & 6.00 \\
+Segment & TargetedWorst & 30 & 119.27 $\pm$ 12.27 & 11.53 $\pm$ 2.05 & 8.90 $\pm$ 1.49 & 6.00 \\
+\midrule
+Spambase & Standard & 30 & 72.30 $\pm$ 33.92 & 10.33 $\pm$ 3.92 & 6.00 $\pm$ 2.82 & 1.00 \\
+Spambase & Targeted & 30 & 72.77 $\pm$ 28.17 & 11.17 $\pm$ 3.28 & 6.87 $\pm$ 2.56 & 1.00 \\
+Spambase & TargetedWorst & 30 & 72.77 $\pm$ 28.17 & 11.17 $\pm$ 3.28 & 6.87 $\pm$ 2.56 & 1.00 \\
+\midrule
+Thyroid & Standard & 30 & 79.27 $\pm$ 26.96 & 7.67 $\pm$ 2.51 & 4.63 $\pm$ 1.83 & 2.00 \\
+Thyroid & Targeted & 30 & 70.10 $\pm$ 22.42 & 7.60 $\pm$ 2.57 & 5.00 $\pm$ 2.00 & 2.00 \\
+Thyroid & TargetedWorst & 30 & 75.67 $\pm$ 23.03 & 8.33 $\pm$ 1.75 & 5.47 $\pm$ 1.53 & 2.00 \\
+\midrule
+Vehicle & Standard & 30 & 115.63 $\pm$ 24.02 & 10.77 $\pm$ 2.61 & 6.87 $\pm$ 2.71 & 3.00 \\
+Vehicle & Targeted & 30 & 94.93 $\pm$ 22.02 & 9.90 $\pm$ 2.50 & 5.60 $\pm$ 2.18 & 3.00 \\
+Vehicle & TargetedWorst & 30 & 91.03 $\pm$ 17.33 & 9.87 $\pm$ 1.91 & 5.60 $\pm$ 1.96 & 3.00 \\
+\midrule
+Yeast & Standard & 29 & 159.24 $\pm$ 14.86 & 7.83 $\pm$ 0.47 & 11.38 $\pm$ 1.86 & 9.00 \\
+Yeast & Targeted & 30 & 156.80 $\pm$ 14.26 & 7.67 $\pm$ 0.48 & 10.87 $\pm$ 1.59 & 9.00 \\
+Yeast & TargetedWorst & 30 & 154.47 $\pm$ 14.30 & 7.87 $\pm$ 0.35 & 10.73 $\pm$ 1.17 & 9.00 \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+To assess paired differences in final program length, runs were matched
+by dataset and random seed and compared using the Wilcoxon signed-rank
+test. The Holm procedure was applied to the family of 20 length comparisons
+(Standard versus Targeted and Standard versus TargetedWorst for each
+of the ten datasets). After correction, Standard generated significantly
+longer programs on Optdigits, Segment, and Vehicle relative to both
+alternatives (Table \ref{tab:complexity_tests}). No comparison of
+the number of distinct features or relational comparisons remained
+significant after the corresponding Holm corrections. The number of
+conditional statements was identical across the three variants within
+each dataset in these extracted results. Thus, longer expressions
+did not necessarily entail more decision branches.
+
+\begin{table}[t]
+\centering
+\caption{Holm-adjusted Wilcoxon $p$-values for the significant
+paired comparisons of final program length. The positive mean differences
+indicate longer Standard programs.}
+\label{tab:complexity_tests}
+\small
+\begin{tabular}{llrr}
+\toprule
+Dataset & Comparison & Mean difference & Adjusted $p$ \\
+\midrule
+Optdigits & Standard--Targeted & 15.10 & 0.03490 \\
+Optdigits & Standard--TargetedWorst & 17.87 & 0.00654 \\
+Segment & Standard--Targeted & 14.83 & 0.01714 \\
+Segment & Standard--TargetedWorst & 13.30 & 0.01163 \\
+Vehicle & Standard--Targeted & 20.70 & 0.00987 \\
+Vehicle & Standard--TargetedWorst & 24.60 & 0.00462 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Examples of evolved rules.} 
+
+The following examples are taken verbatim from the final logged programsfor
+the Ionosphere dataset (seed 1). Both runs used a strict budget of
+100,000 fitness evaluations. Standard reached a training classification
+error of 8.23\textbackslash\% and a test error of 17.14\%, whereas
+Targeted reached 5.06\% and 11.43\%, respectively. The TargetedWorst
+program was identical to the Targeted program for this seed. These
+examples illustrate the form and complexity of the learned expressions,
+but should not be interpreted as a representative performance comparison
+from a single seed.
+
+\noindent\textbf{Standard:}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,breaklines=true]
+if(!(x1<=cos((sin(x33)*x17))&x18>((-8.55)+(-1.2))|x2*x23>=x7&x9>x24|x5<sin(x20)&!(x19<cos(((x3*(x27*sin(x29)))-(-9.40)))))) CLASS=0.00
+else 
+CLASS=1.00
+\end{lstlisting}
+
+\noindent\textbf{Targeted (also TargetedWorst):}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,breaklines=true]
+if(!(x1<=cos((sin(x33)*x9))|!(!(x5<=(x21*x16)|!(x16>=sin((-89.27))&!(x29<=cos((-9.0)))))))) CLASS=0.00
+else 
+CLASS=1.00
+\end{lstlisting}
+
+\paragraph{Program growth and bloat.}
+
+Additional illustrative evolutionary traces were examined for the
+original GenClass baseline and Standard on Shuttle and Pirvision over
+2,000 generations. In these individual runs, Standard yielded longer
+final programs, but program length fluctuated and sometimes decreased
+during optimization rather than increasing monotonically. Importantly,
+these traces are not controlled equal-evaluation comparisons: Standard
+used 6,335,527 versus 1,783,945 fitness evaluations on Shuttle and
+6,776,246 versus 2,072,441 on Pirvision. Moreover, the recorded lengths
+refer to reported best programs, not population-wide mean genome or
+phenotype sizes. Accordingly, the evidence supports the narrower finding
+that some greedy crossover variants increase final expressed rule
+length; it does not establish the presence or absence of population-level
+genetic programming bloat. A definitive bloat study would require
+matched fitness-evaluation budgets, multiple independent baseline
+runs, and population-level complexity measurements throughout evolution.
+
+\subsection{Influence of Dataset Characteristics on Classification Performance}
+
+To investigate whether the benefit of the proposed crossover mechanism
+depends on dataset characteristics, we examined all 31 datasets listed
+in Table \ref{tab:The-main-characteristics}. For each dataset, the
+improvement was defined as $\Delta E=E_{\mathrm{CLASS}}-E_{\mathrm{STANDARD}}$,
+where $E$ denotes the mean test classification error (in percentage
+points) reported in Table \ref{tab:methods_comparison}. Thus, positive
+values indicate lower error for STANDARD. Spearman's rank correlation
+was used to assess associations between $\Delta E$ and the numbers
+of patterns, input features, and classes. Each dataset constituted
+one observation ($N=31$); repeated runs were not treated as independent
+dataset-level observations.
+
+The association between improvement and dataset size was weak ($\rho=-0.087$,
+$p=0.643$), as was the association with the number of features ($\rho=0.071$,
+$p=0.706$). The number of classes showed a positive association ($\rho=0.395$,
+nominal $p=0.0277$), suggesting that larger improvements may occur
+in problems with more classes. However, this association did not remain
+statistically significant after Holm correction across the three correlations.
+The result should therefore be considered exploratory rather than
+evidence of a robust dependence on class count.
+
+We also separated the datasets into binary ($N=9$) and multiclass
+($N=22$) problems. STANDARD reduced the mean classification error
+relative to CLASS on 8 of the 9 binary datasets and 20 of the 22 multiclass
+datasets. The average improvements were 1.72 and 3.12 percentage points,
+respectively. Nevertheless, a two-sided Mann-{}-Whitney U test did
+not identify a statistically significant difference in dataset-level
+improvements between these groups ($p=0.267$).
+
+The previously mentioned results do not reveal a clear monotonic relationship
+between the advantage of STANDARD and the number of patterns or features.
+Although the class-count analysis suggests a potentially interesting
+trend, the available dataset-level evidence is insufficient to establish
+that the proposed crossover mechanism systematically benefits more
+from a larger number of classes. Moreover, these observational comparisons
+do not isolate dataset size or class count from other differences
+in problem difficulty and structure.
+
+\subsection{Analysis of Accepted Crossover Improvements}
+
+To quantify the behavior of the six crossover variants, we recorded
+the number of accepted crossover improvements at each generation in
+30 independent runs on the Dermatology dataset. All runs used the
+same limit of 100,000 fitness evaluations. An accepted improvement
+denotes an improvement accepted by the crossover mechanism; it does
+not necessarily indicate a new global-best individual. Table \ref{tab:accepted-crossover-improvements}
+reports the mean and sample standard deviation across runs. The per-generation
+measure was computed for each run by dividing its total number of
+accepted improvements by its number of completed generations, before
+aggregating across runs.
+
+\begin{table}[t]
+\centering
+\caption{Accepted crossover improvements on the Dermatology dataset
+(mean $\pm$ sample standard deviation over 30 independent runs).
+The last column normalizes by the number of crossover evaluations,
+not by the total fitness-evaluation budget.}
+\label{tab:accepted-crossover-improvements}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+Crossover variant & Accepted/run & Accepted/generation & Accepted/1,000 cross. evals \\
+\midrule
+Standard        & $968.40\pm192.93$ & $24.46\pm4.76$ & $12.26\pm2.41$ \\
+Standard+Elite  & $817.57\pm196.46$ & $20.62\pm4.78$ & $10.34\pm2.43$ \\
+Standard+Block  & $887.27\pm144.49$ & $22.47\pm3.55$ & $11.24\pm1.80$ \\
+Targeted        & $555.90\pm85.48$  & $5.62\pm0.86$  & $27.19\pm4.30$ \\
+Targeted+Full   & $558.37\pm75.82$  & $5.63\pm0.77$  & $27.23\pm3.90$ \\
+TargetedWorst   & $294.40\pm84.40$  & $2.97\pm0.85$  & $15.19\pm4.23$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Standard produced the largest number of accepted improvements per
+generation($24.46\pm4.76$), followed by Standard+Block ($22.47\pm3.55$)
+and Standard+Elite ($20.62\pm4.78$). The targeted variants produced
+fewer accepted improvements per generation, partly because they performed
+fewer crossover evaluations within each generation. Accordingly, we
+also report accepted improvements per 1,000 crossover evaluations.
+By this measure, Targeted and Targeted+Full achieved approximately
+27.2 accepted improvements, compared with 12.3 for Standard. This
+difference concerns acceptance frequency, not necessarily the magnitude
+of improvement or final classification accuracy.
+
+To examine how acceptance evolves during the search, we divided the
+common 100,000-fitness-evaluation budget into ten intervals. For each
+run, the accepted improvements and crossover evaluations of a generation
+were assigned to the interval containing that generation's ending
+cumulative fitness- evaluation count. Figure \ref{fig:accepted-crossover-count}
+shows the resulting mean counts. The Standard variants generally exhibit
+a reduction in the number of accepted improvements from the early
+to the later intervals. The targeted variants exhibit more irregular
+bin counts.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{accepted_improvements_by_budget.pdf}
+\caption{Mean number of accepted crossover improvements in successive
+10,000-fitness-evaluation intervals on Dermatology (30 runs per variant).
+Whole generations are assigned to the interval in which they finish; therefore,
+short-term fluctuations may reflect bin boundaries rather than changes in
+search behavior.}
+\label{fig:accepted-crossover-count}
+\end{figure}
+
+Figure \ref{fig:accepted-crossover-rate} accounts for the different
+numbers of crossover evaluations in each interval. The Standard acceptance
+frequency falls from approximately 17.3 to 10.4 accepted improvements
+per 1,000 crossover evaluations between the first and last intervals.
+In contrast, Targeted and Targeted+Full remain at approximately 25-{}-29
+accepted improvements per 1,000 crossover evaluations across most
+intervals. Thus, although the targeted variants accept fewer improvements
+per generation, they exhibit a higher acceptance frequency per crossover
+evaluation.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{acceptance_rate_by_budget.pdf}
+\caption{Accepted crossover improvements per 1,000 crossover evaluations
+across the fitness-evaluation budget. Each point is the ratio of the mean
+accepted improvements to the mean crossover evaluations within the corresponding
+interval (30 runs per variant). The binning uses generation endpoints.}
+\label{fig:accepted-crossover-rate}
+\end{figure}
+
+These findings describe the acceptance dynamics on Dermatology and
+should not be interpreted as evidence of superiority across all datasets.
+In particular, acceptance frequency alone does not establish whether
+a method yields better final classification performance.
 
 \section{Conclusions\label{sec:Conclusions}}
 
 This work introduced an additional crossover procedure into the GenClass
-method. At every generation, after the standard genetic operators,
-$N_{K}$ randomly selected chromosomes undergo $k$ crossover trials,
-and a candidate chromosome replaces the current one only if it achieves
-a lower classification error on the training set. The procedure was
-examined in three variants (Standard, Targeted and TargetedWorst)
-on 31 classification datasets. The Standard variant combines each
-selected chromosome with randomly chosen chromosomes of the population
-using one-point crossover. It reduced the average classification error
-of the original method from 16.13\% to 13.42\%, a relative reduction
-of 16.8\%, and obtained the lowest error in 23 of the 31 datasets.
-According to the paired Wilcoxon test with Holm correction, the improvement
-was statistically significant, and the margin over all the other classifiers
-of the comparison was considerably larger.
+method. At each generation, after the conventional genetic operators
+have been applied, $N_{K}$ randomly selected chromosomes undergo
+$k$ crossover trials. A candidate chromosome replaces the current
+chromosome only when it achieves a strictly lower training classification
+error. Three variants, denoted Standard, Targeted, and TargetedWorst,
+were evaluated on 31 classification datasets. Standard applies one-point
+crossover using donors selected from the population. It reduced the
+average classification error of the original method from 16.13\% to
+13.42\%, corresponding to a relative reduction of approximately 16.8\%,
+and obtained the lowest error on 19 of the 31 datasets among the eleven
+compared methods. Its average error was also lower than those of the
+additional reference classifiers, including CART (19.42\%) and SVM
+(21.97\%). The improvement over the original method remained statistically
+significant in the sensitivity analysis that excluded four related
+EEG-derived datasets and applied Holm correction for multiple comparisons.
 
-The comparison of the three variants gave a result that differs from
-what their design might suggest. The Targeted and TargetedWorst variants
-take donor chromosomes only from the best fraction of the population
-and transfer a bounded block of codons between semantically compatible
-positions, yet they did not improve on the random exchange of Standard.
-Standard was significantly better than both, while the two targeted
-variants could not be distinguished from each other, so the additional
-focus of TargetedWorst on the worst-performing class brought no measurable
-benefit over Targeted. All three variants obtained a lower average
-error than the original method (13.42\%, 15.08\% and 15.42\%, against
-16.13\%), but statistical significance against the original method
-was examined only for Standard. A possible explanation is related
-to the difference in the exchanged material. In Standard the donors
-come from the whole population and the genetic material after a random
-crossover point is exchanged, whereas in the targeted variants the
-donors come from the best 20\% of the population and the exchanged
-block is limited to at most $B_{\max}$ codons. The unrestricted exchange
-may therefore introduce more diverse genetic material, which relates
-to the loss of diversity identified as a limitation of the original
-method. This hypothesis was not tested directly in the present work.
+The comparison of the three variants revealed that additional grammatical
+and class-specific guidance did not necessarily improve classification
+performance. Targeted and TargetedWorst select donor chromosomes from
+an elite fraction of the population and exchange bounded blocks of
+codons at semantically compatible positions. TargetedWorst further
+restricts the modified region according to the worst-performing class.
+Nevertheless, Standard achieved a lower average classification error
+than both targeted variants. The respective mean errors were 13.42\%
+for Standard, 15.08\% for Targeted, and 15.42\% for TargetedWorst,
+compared with 16.13\% for the original GenClass method. In the reported
+pairwise comparisons, Standard outperformed both targeted variants,
+whereas no statistically significant difference was established between
+Targeted and TargetedWorst. Comparisons against the original method
+indicated that Standard provided the most robust improvement under
+the more conservative sensitivity analysis; the evidence supporting
+the targeted variants was less conclusive.
 
-The number of chromosomes participating in the crossover affects the
-performance, mainly at its lowest values. A very small number ($N_{K}=2$)
-was significantly worse than the other settings, whereas the differences
-among $N_{K}=5$, 10 and 15 were small and not statistically significant,
-although $N_{K}=15$ obtained the lowest average error and the best
-mean rank. A moderate value of $N_{K}$ therefore seems sufficient.
+A possible explanation for these findings concerns the different recombination
+mechanisms. Standard selects donors from the entire population and
+exchanges chromosome segments following randomly selected crossover
+points, whereas the targeted variants select donors from the best
+20\% of the population and transfer blocks of at most $B_{\max}$
+codons. The additional convergence and population diversity experiments
+described in subsection \ref{subsec:Convergence-and-Population},
+conducted on Dermatology, Ionosphere, Spambase, and Vehicle, showed
+that the targeted variants often maintained greater genotypic diversity
+than Standard, as measured by normalized average pairwise Hamming
+distance. However, this higher diversity did not consistently translate
+into better final fitness or lower classification error. Thus, the
+lower average classification error achieved by Standard in the present
+experiments cannot be explained simply by greater preservation of
+genotypic diversity. Donor selection, the extent of exchanged genetic
+material, and the balance between exploration and exploitation are
+plausible contributing factors, but the present results do not establish
+a causal relationship between these mechanisms and generalization
+performance. Donor selection, the extent of exchanged genetic material,
+and the balance between exploration and exploitation are plausible
+contributing factors, but the present results do not establish a causal
+relationship between these mechanisms and generalization performance.
 
-Some limitations should be noted. The additional procedure requires
-up to $N_{K}k$ extra fitness evaluations per generation, that is
-200 with the parameter values of Table \ref{tab:Values-for-the},
-while the standard genetic operators generate $p_{s}N_{c}=450$ offspring
-per generation. Moreover, the parameters $k$, $\rho$ and $B_{\max}$
-were kept fixed and their influence was not examined. The conclusions
-are limited to the datasets, the parameter values and the classification
-task used in the experiments.
+The convergence experiments also clarified an implementation-specific
+property of the targeted operators on binary classification problems.
+When the number of classes is two, the single explicitly encoded rule
+occupies the entire chromosome; consequently, the class-based restriction
+of TargetedWorst does not narrow the set of eligible crossover positions
+relative to Targeted. This explains the identical trajectories observed
+for these operators on the binary datasets considered in the convergence
+analysis. Their behavior can differ on multiclass problems, where
+the chromosome contains separate rule-encoding segments.
 
-Several directions for future work arise from the present study. First,
-the reasons why the targeted variants did not outperform the random
-one should be investigated, for example by measuring the diversity
-of the population during the evolution, by examining the influence
-of the elite fraction $\rho$ and of the maximum block size $B_{\max}$,
-and by designing guided operators that preserve diversity or combine
-random and guided exchanges. Second, the number of chromosomes $N_{K}$
-and the number of trials $k$ could be adapted automatically during
-the evolution instead of being fixed, and values of $N_{K}$ larger
-than 15 could be examined, since $N_{K}=15$ had the best mean rank
-without a statistically established advantage. Third, the computational
-cost of the procedure should be measured and analyzed together with
-possible parallel implementations. Finally, the procedure could be
-evaluated on larger datasets, on other learning tasks such as regression,
-and in other methods based on Grammatical Evolution.
+The number of chromosomes subjected to additional crossover also influenced
+performance, particularly at its smallest tested value. The setting
+$N_{K}=2$ performed significantly worse than the larger settings,
+whereas differences among $N_{K}=5$, $10$, and $15$ were small
+and not statistically significant. Although $N_{K}=15$ yielded the
+lowest average error and the best mean rank, its advantage over the
+other moderate settings was not statistically established. Therefore,
+a moderate number of selected chromosomes appears sufficient under
+the examined experimental configuration.
+
+Several limitations should be acknowledged. The additional procedure
+requires up to $N_{K}k$ candidate fitness evaluations per generation,
+corresponding to 200 evaluations for the parameter configuration used
+in the experiments, while the conventional genetic operators generate
+$p_{s}N_{c}=450$ offspring per generation. The parameters $k$, $\rho$,
+and $B_{\max}$ were kept fixed, and their individual effects were
+not systematically examined. The conclusions are therefore restricted
+to the evaluated datasets, parameter settings, and classification
+tasks. Moreover, four EEG-derived benchmark problems originate from
+related recordings and cannot be treated as fully independent observations.
+Although a sensitivity analysis excluding these problems was performed,
+the remaining datasets do not necessarily represent a random sample
+of all classification tasks.
+
+It should also be emphasized that the objective of this study is to
+assess the effects of additional crossover strategies within the GenClass
+framework, rather than to establish GenClass as a universally superior
+classification method. The comparisons with other classifiers provide
+supplementary performance references and should not be interpreted
+as a comprehensive benchmark of supervised learning algorithms. Different
+classification methods may be more suitable for different datasets
+and application domains.
+
+An additional limitation concerns the availability of run-level observations.
+For the main cross-validation experiments, the individual results
+of the 30 independent runs per fold were not retained, preventing
+the estimation of run-to-run standard deviations and within-dataset
+statistical tests from those experiments. In contrast, run-level observations
+were retained for the supplementary convergence and population diversity
+experiments reported in subsection \ref{subsec:Convergence-and-Population}.
+Accordingly, small differences in average classification error should
+be interpreted cautiously. Furthermore, because the greedy acceptance
+criterion uses training classification error, the additional refinement
+may increase the risk of overfitting, particularly on small datasets
+such as Hepatitis and Appendicitis. The present diversity measurements
+describe genotypic variation and do not, by themselves, demonstrate
+improved generalization.
+
+Future research should extend the convergence and population diversity
+analysis to more datasets and investigate the effects of the elite
+fraction $\rho$, maximum block size $B_{\max}$, and alternative
+donor-selection policies. Hybrid operators combining random and grammatically
+guided exchanges could also be examined. In addition, the number of
+selected chromosomes $N_{K}$ and the number of crossover trials $k$
+could be adapted dynamically during evolution; values of $N_{K}$
+greater than 15 merit investigation because the largest tested setting
+achieved the best mean rank without a statistically significant advantage.
+Further studies should retain run-level results across the full cross-validation
+protocol, assess generalization and overfitting more directly, and
+report computational cost alongside predictive performance. Finally,
+parallel implementations and applications to larger datasets, regression
+tasks, and other Grammatical Evolution methods would help establish
+the broader applicability of the proposed crossover procedure.
 
 \vspace{6pt}
 
 
 \authorcontributions{G.G. and I.G.T. conducted the experiments, employing several datasets
-and provided the comparative experiments. V.C. a performed the statistical
+and provided the comparative experiments. V.C. performed the statistical
 analysis and prepared the manuscript. All authors have read and agreed
 to the published version of the manuscript.}
 
@@ -2013,15 +3212,11 @@ für Informatik, Universität Karlsruhe, Germany, 1994.
 learning and the recognition and classification of exemplars. Journal
 of Verbal Learning and Verbal Behavior \textbf{16}, pp. 321-338, 1977.
 
-\bibitem{hepatitis}G. Cestnik, I. Kononenko, and I. Bratko, “Assistant-86:
-A Knowledge-Elicitation Tool for Sophisticated Users,” in Progress
-in Machine Learning, I. Bratko and N. Lavrač (Eds.), Sigma Press,
-1987, pp. 31--45.
+\bibitem{hepatitis}Hepatitis {[}Data set{]}. (1983). UCI Machine
+Learning Repository. \url{https://doi.org/10.24432/C5Q59J}
 
-\bibitem[(2002)]{housevotes}R.M. French, N. Chater, Using noise to
-compute error surfaces in connectionist networks: a novel means of
-reducing catastrophic forgetting, Neural Comput. \textbf{14}, pp.
-1755-1769, 2002.
+\bibitem[(2002)]{housevotes}Congressional Voting Records {[}Data
+set{]}. (1987). UCI Machine Learning Repository. \url{https://doi.org/10.24432/C5C01P}
 
 \bibitem[(2004)]{ion1}J.G. Dy , C.E. Brodley, Feature Selection for
 Unsupervised Learning, The Journal of Machine Learning Research \textbf{5},
@@ -2063,17 +3258,26 @@ Machine Learning Repository, 1993, doi: 10.24432/C55887.
 hierarchical clustering and its validation, Data \& Knowledge Engineering
 \textbf{44}, pp 109--138, 2003.
 
+\bibitem{shuttle}Statlog (Shuttle) {[}Data set{]}. (n.d.). UCI Machine
+Learning Repository. https://doi.org/10.24432/C5WS31
+
 \bibitem{spambase}M. Hopkins, E. Reeber, G. Forman, and J. Suermondt,
 “Spambase,” UCI Machine Learning Repository, 1999, doi: 10.24432/C53G6X.
+
+\bibitem{spiral}Gavrilis, D., Tsoulos, I. G., \& Dermatas, E. (2008).
+Selecting and constructing features using grammatical evolution. Pattern
+Recognition Letters, 29(9), 1358--1365. \url{https://doi.org/10.1016/j.patrec.2008.02.007}
 
 \bibitem[(2007)]{student}P. Cortez, A. M. Gonçalves Silva, Using
 data mining to predict secondary school student performance, In Proceedings
 of 5th FUture BUsiness TEChnology Conference (FUBUTEC 2008) (pp. 5--12).
 EUROSIS-ETI, 2008.
 
-\bibitem{texture}A. Guerin-Dugué et al., “Deliverable R3-B4-P ---
-Task B4: Benchmarks,” Technical Report, ELENA-NERVES II, ESPRIT Basic
-Research Project 6891, 1995.
+\bibitem{splice}Molecular Biology (Splice-junction Gene Sequences)
+{[}Data set{]}. (1991). UCI Machine Learning Repository. \url{https://doi.org/10.24432/C5M888}
+
+\bibitem{texture}KEEL Project. (n.d.). Texture {[}Data set{]}. University
+of Granada. \url{https://sci2s.ugr.es/keel/dataset.php?cod=72}
 
 \bibitem{thyroid}R. Quinlan, “Thyroid Disease,” UCI Machine Learning
 Repository, 1986, doi: 10.24432/C5D010.
@@ -2102,6 +3306,22 @@ Review E, vol. 64, no. 6, Article ID 061907, 8 pages, 2001.
 Artificial Neural Networks,” Computational Intelligence and Neuroscience,
 vol. 2007, Article ID 80510, 13 pages, 2007. doi:10.1155/2007/80510
 
+\bibitem{rbfcon}Tsoulos, I. G., Varvaras, I., \& Charilogis, V. (2024).
+RbfCon: construct radial basis function neural networks with grammatical
+evolution. Software, 3(4), 549-568.
+
+\bibitem{cart}Breiman, L., Friedman, J. H., Olshen, R. A., \& Stone,
+C. J. (1984). Classification and regression trees. Wadsworth International
+Group.
+
+\bibitem{svm}Kecman, V. (2005). Support vector machines--an introduction.
+In Support vector machines: theory and applications (pp. 1-47). Berlin,
+Heidelberg: Springer Berlin Heidelberg.
+
+\bibitem{libsvm}Chang, C.-C., \& Lin, C.-J. (2011). LIBSVM: A library
+for support vector machines. ACM Transactions on Intelligent Systems
+and Technology, 2(3), Article 27, 1--27. \url{https://doi.org/10.1145/1961189.1961199}
+
 \bibitem[(1991)]{rbf1}J. Park and I. W. Sandberg, Universal Approximation
 Using Radial-Basis-Function Networks, Neural Computation \textbf{3},
 pp. 246-257, 1991.
@@ -2125,6 +3345,22 @@ on Learning Representations (ICLR 2015), pp. 1--15, 2015.
 \bibitem{powell}M.J.D Powell, A Tolerant Algorithm for Linearly Constrained
 Optimization Calculations, Mathematical Programming \textbf{45}, pp.
 547-566, 1989. 
+
+\bibitem{ge_crossover}M. O'Neill, C. Ryan, M. Keijzer, M. Cattolico,
+Crossover in Grammatical Evolution, Genetic Programming and Evolvable
+Machines \textbf{4}, pp. 67-93, 2003.
+
+\bibitem{ge_harper}R. Harper, A. Blair, A Structure Preserving Crossover
+in Grammatical Evolution, 2005 IEEE Congress on Evolutionary Computation
+(CEC), pp. 2537-2544, 2005.
+
+\bibitem{memetic_lozano}M. Lozano, F. Herrera, N. Krasnogor, D. Molina,
+Real-Coded Memetic Algorithms with Crossover Hill-Climbing, Evolutionary
+Computation \textbf{12}, pp. 273-302, 2004.
+
+\bibitem{localCrossover}I. G. Tsoulos, V. Charilogis, D. Tsalikakis,
+Local Crossover: A New Genetic Operator for Grammatical Evolution,
+Algorithms \textbf{17}, 461, 2024.
 
 \end{thebibliography}
 

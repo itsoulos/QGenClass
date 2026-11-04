@@ -40,7 +40,7 @@ case "$LOCAL_METHOD" in
 esac
 
 case "$FITNESS_METHOD" in
-    class|average|squared|mixed|mean|macroF1|weightedF1) ;;
+    class|average|squared|mixed|mean|macroF1|weightedF1|macroPR) ;;
     *)
         echo "ERROR: Unknown fitness method: $FITNESS_METHOD"
         exit 1
@@ -91,6 +91,7 @@ TARGETED_CROSS_ITERATIONS="${TARGETED_CROSS_ITERATIONS:-20}"
 TARGETED_CROSS_ELITE_FRACTION="${TARGETED_CROSS_ELITE_FRACTION:-0.2}"
 TARGETED_CROSS_MAX_BLOCK="${TARGETED_CROSS_MAX_BLOCK:-16}"
 
+POP_MACROPR_ALPHA="${POP_MACROPR_ALPHA:-0.5}"
 POP_CLASSPERCENT="${POP_CLASSPERCENT:-0.50}"
 POP_AVERAGEPERCENT="${POP_AVERAGEPERCENT:-0.50}"
 POP_SQUAREDPERCENT="${POP_SQUAREDPERCENT:-0.00}"
@@ -169,6 +170,7 @@ for ((RUN=1; RUN<=REPETITIONS; RUN++)); do
 
         "--pop_classpercent=$POP_CLASSPERCENT"
         "--pop_averagepercent=$POP_AVERAGEPERCENT"
+        "--pop_macropr_alpha=$POP_MACROPR_ALPHA"
         "--pop_squaredpercent=$POP_SQUAREDPERCENT"
 
         "--random_seed=$SEED"
