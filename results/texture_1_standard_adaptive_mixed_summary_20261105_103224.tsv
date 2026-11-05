@@ -1,0 +1,2 @@
+run	seed	class_error_percent	accuracy_percent	precision	recall	f1score	logfile
+1	1	21.2727272727	78.7272727273	0.8017293498	0.7962785886	0.7902959936	results/texture_1_standard_adaptive_mixed_seed1_20261105_103224.log

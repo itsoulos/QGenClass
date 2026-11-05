@@ -343,43 +343,80 @@ void run()
     }
     program->setFitnessPercentages(p1,p2,p3);
     const int adaptiveInterval=mainParams.getParam("adaptive_interval").getValue().toInt();
-    const double adaptiveStep=mainParams.getParam("adaptive_step").getValue().toDouble();
     double adaptiveBest=-1.0;
     auto updateAdaptive = [&](int gen) {
-        double current[3]={p1,p2,p3};
-        double best[3]={p1,p2,p3};
+        // Evaluate the three independent training losses once per genome.
+        // A weighted sum then needs no further rule evaluation.
+        struct Losses { double v[3]; bool valid; };
+        std::vector<Losses> losses(pop->getCount());
+        const int modes[3]={FITNESS_CLASS,FITNESS_AVERAGE,FITNESS_SQUARED};
+        for(int k=0;k<pop->getCount();++k) {
+            std::vector<int> g=pop->getGenome(k);
+            losses[k].valid=true;
+            for(int j=0;j<3;++j) {
+                program->setFitnessMode(modes[j]);
+                losses[k].v[j]=program->fitness(g);
+                if(!std::isfinite(losses[k].v[j]) || losses[k].v[j]>=1e+7)
+                    losses[k].valid=false;
+            }
+        }
+        program->setFitnessMode(FITNESS_MIXED);
+        // Validation depends on the selected genome, not on its weights.
+        // Cache its validation score when it is selected by multiple triples.
+        std::vector<double> validationScores(pop->getCount(),-1.0);
         double bestScore=-1.0;
-        for(int candidate=-1;candidate<6;candidate++) {
-            double weights[3]={current[0],current[1],current[2]};
-            if(candidate>=0) {
-                int from=candidate/2;
-                int to=(from+1+candidate%2)%3;
-                double amount=std::min(adaptiveStep,weights[from]);
-                if(amount<1e-12) continue;
-                weights[from]-=amount;weights[to]+=amount;
-            }
-            program->setFitnessPercentages(weights[0],weights[1],weights[2]);
-            // Select the best training chromosome under this candidate objective.
-            std::vector<int> selected;
+        double best[3]={p1,p2,p3};
+        int bestCandidate=-1;
+        int bestIndex=-1;
+        double bestTraining=1e+100;
+        int candidate=0;
+        // Integer grid on the simplex: 66 triples at increments of 0.1.
+        for(int ic=0;ic<=10;++ic) for(int ia=0;ia<=10-ic;++ia) {
+            const int is=10-ic-ia;
+            const double w[3]={ic/10.0,ia/10.0,is/10.0};
+            int selectedIndex=-1;
             double minFitness=1e+100;
-            for(int k=0;k<pop->getCount();k++) {
-                std::vector<int> g=pop->getGenome(k);
-                double f=program->fitness(g);
-                if(f<minFitness) {minFitness=f;selected=g;}
+            for(int k=0;k<pop->getCount();++k) {
+                if(!losses[k].valid) continue;
+                const double f=w[0]*losses[k].v[0]
+                              +w[1]*losses[k].v[1]
+                              +w[2]*losses[k].v[2];
+                if(f<minFitness) {minFitness=f;selectedIndex=k;}
             }
-            if(selected.empty()) continue;
-            double score=program->validationMacroF1(selected,validationSet);
-            if(score>bestScore+1e-12) {
-                bestScore=score;
-                for(int j=0;j<3;j++) best[j]=weights[j];
+            if(selectedIndex<0) {
+                printf("ADAPTIVE_CANDIDATE generation=%d candidate=%d invalid=1\n",gen,candidate++);
+                continue;
             }
+            if(validationScores[selectedIndex]<0.0) {
+                std::vector<int> g=pop->getGenome(selectedIndex);
+                validationScores[selectedIndex]=program->validationMacroF1(g,validationSet);
+            }
+            const double score=validationScores[selectedIndex];
+            printf("ADAPTIVE_CANDIDATE generation=%d candidate=%d class=%.6f average=%.6f squared=%.6f chromosome=%d training_fitness=%.10f validation_macro_f1=%.10f\n",
+                   gen,candidate,w[0],w[1],w[2],selectedIndex,minFitness,score);
+            // Prefer the incumbent on ties, then lower training loss.
+            const bool incumbent=std::fabs(w[0]-p1)<1e-9 &&
+                std::fabs(w[1]-p2)<1e-9 && std::fabs(w[2]-p3)<1e-9;
+            const bool bestIncumbent=std::fabs(best[0]-p1)<1e-9 &&
+                std::fabs(best[1]-p2)<1e-9 && std::fabs(best[2]-p3)<1e-9;
+            if(std::isfinite(score) &&
+               (score>bestScore+1e-12 ||
+                (std::fabs(score-bestScore)<=1e-12 &&
+                 ((incumbent && !bestIncumbent) ||
+                  (incumbent==bestIncumbent && minFitness<bestTraining-1e-12))))) {
+                bestScore=score;bestCandidate=candidate;bestIndex=selectedIndex;
+                bestTraining=minFitness;
+                for(int j=0;j<3;++j) best[j]=w[j];
+            }
+            ++candidate;
         }
-        // Keep incumbent weights unless a candidate improves validation.
-        if(bestScore>=0 && bestScore>adaptiveBest+1e-12) {
-            p1=best[0];p2=best[1];p3=best[2];adaptiveBest=bestScore;
-        }
+        const bool changed=std::fabs(p1-best[0])>1e-9 ||
+            std::fabs(p2-best[1])>1e-9 || std::fabs(p3-best[2])>1e-9;
+        if(bestCandidate>=0) {p1=best[0];p2=best[1];p3=best[2];}
+        adaptiveBest=bestScore;
         program->setFitnessPercentages(p1,p2,p3);
-        printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_macro_f1=%.6f\n",gen,p1,p2,p3,adaptiveBest);
+        printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_macro_f1=%.6f changed=%d selected_candidate=%d chromosome=%d grid_size=66\n",
+               gen,p1,p2,p3,adaptiveBest,changed?1:0,bestCandidate,bestIndex);
         fflush(stdout);
         pop->refreshFitness();
     };
