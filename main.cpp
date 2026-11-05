@@ -21,11 +21,14 @@ Population *pop      =NULL;
 ParameterList mainParams;
 
 
-void 	printConfusionMatrix(vector<double> &precision,vector<double> &recall)
+void 	printConfusionMatrix(vector<int> &genome,vector<double> &precision,vector<double> &recall)
 {
     int i,j;
     vector<double> T;
     vector<double> O;
+    // getOutputs() reads cached outy. Validation scoring overwrites that cache.
+    // Recompute the TEST predictions for this exact genome before reading it.
+    program->getClassError(genome);
     program->getOutputs(testSet,T,O);
     int N=T.size();
     int nclass=program->getClass();
@@ -473,7 +476,7 @@ void run()
     }
     vector<double> precision;
     vector<double> recall;
-    printConfusionMatrix(precision,recall);
+    printConfusionMatrix(genome,precision,recall);
     // Macro metrics over the fixed class set defined by training data.
     // Undefined per-class precision/recall is treated as zero.
     double avg_precision = 0.0, avg_recall = 0.0, avg_f1score = 0.0;
