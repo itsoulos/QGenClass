@@ -4,6 +4,10 @@
 # include <GE/classprogram.h>
 #include <CORE/featureconstruction.h>
 #include <exception>
+#include <map>
+#include <algorithm>
+#include <random>
+#include <cmath>
 # include <QDebug>
 char    grammar_file[1024];
 int     wrapping=2;
@@ -113,10 +117,13 @@ void setParams()
     QStringList fitness_list;
     fitness_list
         <<"class"<<"average"<<"squared"<<"mixed"<<"mean"
-        <<"weightedF1"<<"macroF1"<<"macroPR";
+        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed";
 
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
 
+    mainParams.addParam(Parameter("adaptive_interval",20,1,1000,"Generations between adaptive weight updates"));
+    mainParams.addParam(Parameter("adaptive_step",0.05,0.001,0.5,"Adaptive weight transfer step"));
+    mainParams.addParam(Parameter("adaptive_validation",0.2,0.05,0.5,"Internal stratified validation fraction"));
     mainParams.addParam(Parameter("pop_macropr_alpha",0.5,0.0,1.0,"Recall weight for macroPR fitness (precision weight = 1-alpha)"));
     mainParams.addParam(Parameter("pop_classpercent",1.0,0.0,1.0,"The percentage of the class fitness method in mixed"));
     mainParams.addParam(Parameter("pop_averagepercent",0.0,0.0,1.0,"The percentage of the average fitness method in mixed"));
@@ -246,6 +253,34 @@ void run()
             error(QString("Feature construction failed: %1").arg(e.what()));
         }
     }
+    const bool adaptive = mainParams.getParam("pop_fitnessmethod").getValue()=="adaptive_mixed";
+    Dataset *validationSet = NULL;
+    if(adaptive) {
+        Matrix allX=trainSet->getAllXpoint();
+        Data allY=trainSet->getAllYPoints();
+        std::map<double,std::vector<int>> groups;
+        for(int i=0;i<(int)allY.size();i++) groups[allY[i]].push_back(i);
+        Matrix fitX, valX;
+        Data fitY, valY;
+        std::mt19937 rng(mainParams.getParam("random_seed").getValue().toUInt());
+        const double fraction=mainParams.getParam("adaptive_validation").getValue().toDouble();
+        for(auto &kv:groups) {
+            std::shuffle(kv.second.begin(),kv.second.end(),rng);
+            size_t n=kv.second.size();
+            size_t held=n<2?0:std::max((size_t)1,(size_t)std::round(n*fraction));
+            if(held>=n) held=n-1;
+            for(size_t j=0;j<n;j++) {
+                int index=kv.second[j];
+                if(j<held) {valX.push_back(allX[index]);valY.push_back(allY[index]);}
+                else {fitX.push_back(allX[index]);fitY.push_back(allY[index]);}
+            }
+        }
+        if(valY.empty()) error("adaptive_mixed needs at least two samples in a class for validation");
+        trainSet->setData(fitX,fitY);
+        validationSet=new Dataset();
+        validationSet->setData(valX,valY);
+        printf("ADAPTIVE_SPLIT training=%zu validation=%zu\n",fitY.size(),valY.size());
+    }
     program = new ClassProgram(trainSet,testSet);
     pop=new Population(
                 mainParams.getParam("pop_count").getValue().toInt(),
@@ -283,7 +318,7 @@ void run()
     if(fmethod == "squared")
         program->setFitnessMode(FITNESS_SQUARED);
     else
-        if(fmethod=="mixed")
+        if(fmethod=="mixed" || fmethod=="adaptive_mixed")
         program->setFitnessMode(FITNESS_MIXED);
     else
         if(fmethod == "mean")
@@ -303,13 +338,59 @@ void run()
     double p2 = mainParams.getParam("pop_averagepercent").getValue().toDouble();
     double p3 = mainParams.getParam("pop_squaredpercent").getValue().toDouble();
 
+    if(adaptive) {
+        p1=p2=p3=1.0/3.0;
+    }
     program->setFitnessPercentages(p1,p2,p3);
+    const int adaptiveInterval=mainParams.getParam("adaptive_interval").getValue().toInt();
+    const double adaptiveStep=mainParams.getParam("adaptive_step").getValue().toDouble();
+    double adaptiveBest=-1.0;
+    auto updateAdaptive = [&](int gen) {
+        double current[3]={p1,p2,p3};
+        double best[3]={p1,p2,p3};
+        double bestScore=-1.0;
+        for(int candidate=-1;candidate<6;candidate++) {
+            double weights[3]={current[0],current[1],current[2]};
+            if(candidate>=0) {
+                int from=candidate/2;
+                int to=(from+1+candidate%2)%3;
+                double amount=std::min(adaptiveStep,weights[from]);
+                if(amount<1e-12) continue;
+                weights[from]-=amount;weights[to]+=amount;
+            }
+            program->setFitnessPercentages(weights[0],weights[1],weights[2]);
+            // Select the best training chromosome under this candidate objective.
+            std::vector<int> selected;
+            double minFitness=1e+100;
+            for(int k=0;k<pop->getCount();k++) {
+                std::vector<int> g=pop->getGenome(k);
+                double f=program->fitness(g);
+                if(f<minFitness) {minFitness=f;selected=g;}
+            }
+            if(selected.empty()) continue;
+            double score=program->validationMacroF1(selected,validationSet);
+            if(score>bestScore+1e-12) {
+                bestScore=score;
+                for(int j=0;j<3;j++) best[j]=weights[j];
+            }
+        }
+        // Keep incumbent weights unless a candidate improves validation.
+        if(bestScore>=0 && bestScore>adaptiveBest+1e-12) {
+            p1=best[0];p2=best[1];p3=best[2];adaptiveBest=bestScore;
+        }
+        program->setFitnessPercentages(p1,p2,p3);
+        printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_macro_f1=%.6f\n",gen,p1,p2,p3,adaptiveBest);
+        fflush(stdout);
+        pop->refreshFitness();
+    };
+    if(adaptive) updateAdaptive(0);
 
     int gens = mainParams.getParam("pop_gens").getValue().toInt();
     vector<int> genome;
     for(int i=1;i<=gens;i++)
     {
         pop->nextGeneration();
+        if(adaptive && i%adaptiveInterval==0) updateAdaptive(i);
         //print
         genome=pop->getBestGenome();
         pop->evaluateBestFitness();

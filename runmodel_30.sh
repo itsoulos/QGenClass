@@ -40,7 +40,7 @@ case "$LOCAL_METHOD" in
 esac
 
 case "$FITNESS_METHOD" in
-    class|average|squared|mixed|mean|macroF1|weightedF1|macroPR) ;;
+    class|average|squared|mixed|mean|macroF1|weightedF1|macroPR|adaptive_mixed) ;;
     *)
         echo "ERROR: Unknown fitness method: $FITNESS_METHOD"
         exit 1
@@ -171,6 +171,9 @@ for ((RUN=1; RUN<=REPETITIONS; RUN++)); do
         "--pop_classpercent=$POP_CLASSPERCENT"
         "--pop_averagepercent=$POP_AVERAGEPERCENT"
         "--pop_macropr_alpha=$POP_MACROPR_ALPHA"
+        "--adaptive_interval=${ADAPTIVE_INTERVAL:-20}"
+        "--adaptive_step=${ADAPTIVE_STEP:-0.05}"
+        "--adaptive_validation=${ADAPTIVE_VALIDATION:-0.2}"
         "--pop_squaredpercent=$POP_SQUAREDPERCENT"
 
         "--random_seed=$SEED"

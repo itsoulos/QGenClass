@@ -254,6 +254,13 @@ private:
         );
 
 public:
+    vector<int> getGenome(int index) const {
+        vector<int> result(genome_size);
+        for(int j=0;j<genome_size;j++) result[j]=genome[index][j];
+        return result;
+    }
+    void refreshFitness() { calcFitnessArray(); select(); }
+
 
     // ========================================================
     // CONSTRUCTOR

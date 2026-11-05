@@ -602,7 +602,7 @@ double ClassProgram::getClassError(vector<int> &genome)
         }
     }
 
-    printf("TEST REPORT=>\n");
+    if(!quietTestReport) printf("TEST REPORT=>\n");
 
     for(int i=0;i<nclass;i++)
     {
@@ -612,7 +612,7 @@ double ClassProgram::getClassError(vector<int> &genome)
          */
         if(belong[i]==0)continue;
 
-        printf(
+        if(!quietTestReport) printf(
             "CLASS[%3d (%3d)] FAIL=%5.2lf%% \n",
             i, belong[i], fail[i]*100.0/belong[i]
             );
@@ -946,6 +946,34 @@ void ClassProgram::setMacroPRAlpha(double alpha)
 void ClassProgram::setFitnessMode(int m)
 {
     fitness_mode=m;
+}
+
+// Evaluate on a held-out subset of the outer training fold only.
+// The external test fold is never used to tune weights.
+double ClassProgram::validationMacroF1(vector<int> &genome, Dataset *validation)
+{
+    if(!validation || validation->count()==0) return -1.0;
+    Dataset *saved = testSet;
+    testSet = validation;
+    quietTestReport = true;
+    double error = getClassError(genome);
+    quietTestReport = false;
+    testSet = saved;
+    if(error > 1e+7) return -1.0;
+    vector<double> real, predicted;
+    getOutputs(validation,real,predicted);
+    double total=0.0;
+    for(int c=0;c<nclass;c++) {
+        double tp=0.0, fp=0.0, fn=0.0;
+        for(size_t i=0;i<real.size();i++) {
+            if((int)real[i]==c && (int)predicted[i]==c) tp++;
+            else if((int)real[i]!=c && (int)predicted[i]==c) fp++;
+            else if((int)real[i]==c && (int)predicted[i]!=c) fn++;
+        }
+        const double denom=2.0*tp+fp+fn;
+        if(denom>0.0) total+=2.0*tp/denom;
+    }
+    return total/nclass;
 }
 
 // ============================================================

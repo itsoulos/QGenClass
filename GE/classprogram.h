@@ -60,6 +60,7 @@ private:
     double class_percent =1.0;
     double average_percent =0.0;
     double squared_percent =0.0;
+    bool quietTestReport = false;
 
     Data realCached;
     Data estCached;
@@ -80,6 +81,7 @@ public:
     void setMacroPRAlpha(double alpha);
 
     void setFitnessPercentages(double p1,double p2,double p3);
+    double validationMacroF1(vector<int> &genome, Dataset *validation);
 
     // ========================================================
     // PHENOTYPE / OUTPUT
