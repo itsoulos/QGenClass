@@ -169,7 +169,7 @@ done
 (( seed + runs - 1 <= 1000 )) || { echo 'QGenClass random_seed range is 0..1000' >&2; exit 2; }
 case ${config[mode]} in standard|feature_construction) ;; *) echo 'Invalid mode' >&2; exit 2;; esac
 case ${config[pop_lmethod]} in none|crossover|mutate|mutateWorst|siman|hill|de|gd|adam|targeted|targetedWorst|targetedBest|constants) ;; *) echo 'Invalid local search' >&2; exit 2;; esac
-case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR|adaptive_mixed) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
+case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR|adaptive_mixed|adaptive_mixed_gmean) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
 case ${config[cross_method]} in standard|targeted|targetedWorst) ;; *) echo 'Invalid crossover' >&2; exit 2;; esac
 case ${config[pop_termination]} in maxiters|doublebox|similarity) ;; *) echo 'Invalid termination' >&2; exit 2;; esac
 case ${config[enable_smote]} in yes|no) ;; *) echo 'Invalid smote value' >&2; exit 2;; esac

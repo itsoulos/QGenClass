@@ -1,6 +1,7 @@
 #include <GE/classprogram.h>
 
 #include <math.h>
+#include <cmath>
 
 #define NAN_CLASS 1e+10
 
@@ -293,7 +294,8 @@ void ClassProgram::printC(vector<int> &genome,std::string outname)
     ofstream outprogram;
 
     std::string strprogram(
-        "#include <math.h>\n\n"
+        "#include <math.h>
+#include <cmath>\n\n"
         "int classifier(double *x){\n\n"
         "\tint CLASS = 0;\n\n"
         );
@@ -974,6 +976,36 @@ double ClassProgram::validationMacroF1(vector<int> &genome, Dataset *validation)
         if(denom>0.0) total+=2.0*tp/denom;
     }
     return total/nclass;
+}
+
+// Geometric mean of per-class recalls on the held-out training subset.
+// A missing class or zero recall gives score zero (conservative).
+double ClassProgram::validationGmean(vector<int> &genome, Dataset *validation)
+{
+    if(!validation || validation->count()==0) return -1.0;
+    Dataset *saved=testSet;
+    testSet=validation;
+    quietTestReport=true;
+    double error=getClassError(genome);
+    quietTestReport=false;
+    testSet=saved;
+    if(!std::isfinite(error) || error>1e+7) return -1.0;
+    vector<double> real,predicted;
+    getOutputs(validation,real,predicted);
+    if(nclass<=0 || real.empty()) return -1.0;
+    vector<double> support(nclass,0.0),correct(nclass,0.0);
+    for(size_t i=0;i<real.size();++i) {
+        const int c=(int)real[i];
+        if(c<0 || c>=nclass) return -1.0;
+        support[c]+=1.0;
+        if((int)predicted[i]==c) correct[c]+=1.0;
+    }
+    double logSum=0.0;
+    for(int c=0;c<nclass;++c) {
+        if(support[c]==0.0 || correct[c]==0.0) return 0.0;
+        logSum+=std::log(correct[c]/support[c]);
+    }
+    return std::exp(logSum/nclass);
 }
 
 // ============================================================

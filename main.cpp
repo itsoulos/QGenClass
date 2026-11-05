@@ -117,13 +117,13 @@ void setParams()
     QStringList fitness_list;
     fitness_list
         <<"class"<<"average"<<"squared"<<"mixed"<<"mean"
-        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed";
+        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed"<<"adaptive_mixed_gmean";
 
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
 
     mainParams.addParam(Parameter("adaptive_interval",20,1,1000,"Generations between adaptive weight updates"));
     mainParams.addParam(Parameter("adaptive_step",0.05,0.001,0.5,"Adaptive weight transfer step"));
-    mainParams.addParam(Parameter("adaptive_validation",0.2,0.05,0.5,"Internal stratified validation fraction"));
+    mainParams.addParam(Parameter("adaptive_validation",0.2,0.05,0.5,"Internal random validation fraction"));
     mainParams.addParam(Parameter("pop_macropr_alpha",0.5,0.0,1.0,"Recall weight for macroPR fitness (precision weight = 1-alpha)"));
     mainParams.addParam(Parameter("pop_classpercent",1.0,0.0,1.0,"The percentage of the class fitness method in mixed"));
     mainParams.addParam(Parameter("pop_averagepercent",0.0,0.0,1.0,"The percentage of the average fitness method in mixed"));
@@ -253,27 +253,27 @@ void run()
             error(QString("Feature construction failed: %1").arg(e.what()));
         }
     }
-    const bool adaptive = mainParams.getParam("pop_fitnessmethod").getValue()=="adaptive_mixed";
+    const QString adaptiveMethod=mainParams.getParam("pop_fitnessmethod").getValue();
+    const bool adaptive = adaptiveMethod=="adaptive_mixed" || adaptiveMethod=="adaptive_mixed_gmean";
+    const bool useGmean = adaptiveMethod=="adaptive_mixed_gmean";
     Dataset *validationSet = NULL;
     if(adaptive) {
         Matrix allX=trainSet->getAllXpoint();
         Data allY=trainSet->getAllYPoints();
-        std::map<double,std::vector<int>> groups;
-        for(int i=0;i<(int)allY.size();i++) groups[allY[i]].push_back(i);
         Matrix fitX, valX;
         Data fitY, valY;
         std::mt19937 rng(mainParams.getParam("random_seed").getValue().toUInt());
         const double fraction=mainParams.getParam("adaptive_validation").getValue().toDouble();
-        for(auto &kv:groups) {
-            std::shuffle(kv.second.begin(),kv.second.end(),rng);
-            size_t n=kv.second.size();
-            size_t held=n<2?0:std::max((size_t)1,(size_t)std::round(n*fraction));
-            if(held>=n) held=n-1;
-            for(size_t j=0;j<n;j++) {
-                int index=kv.second[j];
-                if(j<held) {valX.push_back(allX[index]);valY.push_back(allY[index]);}
-                else {fitX.push_back(allX[index]);fitY.push_back(allY[index]);}
-            }
+        // Unstratified random holdout: no class-based sampling or balancing.
+        std::vector<int> indices(allY.size());
+        for(size_t j=0;j<indices.size();++j) indices[j]=(int)j;
+        std::shuffle(indices.begin(),indices.end(),rng);
+        size_t held=std::max((size_t)1,(size_t)std::round(indices.size()*fraction));
+        if(held>=indices.size()) held=indices.size()-1;
+        for(size_t j=0;j<indices.size();++j) {
+            int index=indices[j];
+            if(j<held) {valX.push_back(allX[index]);valY.push_back(allY[index]);}
+            else {fitX.push_back(allX[index]);fitY.push_back(allY[index]);}
         }
         if(valY.empty()) error("adaptive_mixed needs at least two samples in a class for validation");
         trainSet->setData(fitX,fitY);
@@ -318,7 +318,7 @@ void run()
     if(fmethod == "squared")
         program->setFitnessMode(FITNESS_SQUARED);
     else
-        if(fmethod=="mixed" || fmethod=="adaptive_mixed")
+        if(fmethod=="mixed" || fmethod=="adaptive_mixed" || fmethod=="adaptive_mixed_gmean")
         program->setFitnessMode(FITNESS_MIXED);
     else
         if(fmethod == "mean")
@@ -389,11 +389,11 @@ void run()
             }
             if(validationScores[selectedIndex]<0.0) {
                 std::vector<int> g=pop->getGenome(selectedIndex);
-                validationScores[selectedIndex]=program->validationMacroF1(g,validationSet);
+                validationScores[selectedIndex]=useGmean ? program->validationGmean(g,validationSet) : program->validationMacroF1(g,validationSet);
             }
             const double score=validationScores[selectedIndex];
-            printf("ADAPTIVE_CANDIDATE generation=%d candidate=%d class=%.6f average=%.6f squared=%.6f chromosome=%d training_fitness=%.10f validation_macro_f1=%.10f\n",
-                   gen,candidate,w[0],w[1],w[2],selectedIndex,minFitness,score);
+            printf("ADAPTIVE_CANDIDATE generation=%d candidate=%d class=%.6f average=%.6f squared=%.6f chromosome=%d training_fitness=%.10f validation_score=%.10f metric=%s\n",
+                   gen,candidate,w[0],w[1],w[2],selectedIndex,minFitness,score,useGmean?"gmean":"macro_f1");
             // Prefer the incumbent on ties, then lower training loss.
             const bool incumbent=std::fabs(w[0]-p1)<1e-9 &&
                 std::fabs(w[1]-p2)<1e-9 && std::fabs(w[2]-p3)<1e-9;
@@ -415,8 +415,8 @@ void run()
         if(bestCandidate>=0) {p1=best[0];p2=best[1];p3=best[2];}
         adaptiveBest=bestScore;
         program->setFitnessPercentages(p1,p2,p3);
-        printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_macro_f1=%.6f changed=%d selected_candidate=%d chromosome=%d grid_size=66\n",
-               gen,p1,p2,p3,adaptiveBest,changed?1:0,bestCandidate,bestIndex);
+        printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_score=%.6f metric=%s changed=%d selected_candidate=%d chromosome=%d grid_size=66\n",
+               gen,p1,p2,p3,adaptiveBest,useGmean?"gmean":"macro_f1",changed?1:0,bestCandidate,bestIndex);
         fflush(stdout);
         pop->refreshFitness();
     };
