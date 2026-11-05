@@ -120,7 +120,7 @@ void setParams()
     QStringList fitness_list;
     fitness_list
         <<"class"<<"average"<<"squared"<<"mixed"<<"mean"
-        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed"<<"adaptive_mixed_gmean"<<"adaptive_mixed_minority_f1";
+        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed"<<"adaptive_mixed_gmean"<<"adaptive_mixed_minority_f1"<<"minority_f1";
 
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
 
@@ -344,6 +344,8 @@ void run()
 
     if(fmethod == "macroPR")
         program->setFitnessMode(FITNESS_MACRO_PR);
+    if(fmethod == "minority_f1")
+        program->setFitnessMode(FITNESS_MINORITY_F1);
     program->setMacroPRAlpha(mainParams.getParam("pop_macropr_alpha").getValue().toDouble());
 
     double p1 = mainParams.getParam("pop_classpercent").getValue().toDouble();

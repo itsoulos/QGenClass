@@ -762,6 +762,30 @@ double ClassProgram::fitness(vector<int> &genome)
         return 1e+8;
     }
 
+    // Direct minority-class F1 objective on the TRAINING partition only.
+    // This is a loss: smaller is better, with 0 being perfect F1.
+    if(fitness_mode==FITNESS_MINORITY_F1)
+    {
+        int minority=-1;
+        for(int c=0;c<nclass;c++) {
+            if(belong[c]==0) continue;
+            if(minority<0 || belong[c]<belong[minority]) minority=c;
+        }
+        if(minority<0) return 1e+8;
+        double tp=0.0, fp=0.0, fn=0.0;
+        for(size_t i=0;i<trainy.size();++i) {
+            const int actual=findMapper(trainy[i]);
+            const bool positive=(actual==minority);
+            const bool predicted=(fabs(outy[i]-minority)<1e-5);
+            if(positive && predicted) tp+=1.0;
+            else if(!positive && predicted) fp+=1.0;
+            else if(positive && !predicted) fn+=1.0;
+        }
+        const double denom=2.0*tp+fp+fn;
+        const double f1=denom>0.0 ? 2.0*tp/denom : 0.0;
+        return 100.0*(1.0-f1);
+    }
+
     if(fitness_mode==FITNESS_CLASS)
     {
         if(trainy.empty())

@@ -20,6 +20,7 @@ using namespace std;
 #define FITNESS_MACRO_F1 32
 #define FITNESS_WEIGHTED_F1 64
 #define FITNESS_MACRO_PR 128
+#define FITNESS_MINORITY_F1 256
 
 typedef vector<double> Data;
 
