@@ -1008,6 +1008,44 @@ double ClassProgram::validationGmean(vector<int> &genome, Dataset *validation)
     return std::exp(logSum/nclass);
 }
 
+// Minority-class F1 on the random validation holdout. The minority class
+// is determined ONLY from the internal training partition, not validation.
+// No samples are added, removed, reweighted, or stratified.
+double ClassProgram::validationMinorityF1(vector<int> &genome, Dataset *validation)
+{
+    if(!validation || validation->count()==0 || nclass<2) return -1.0;
+    std::vector<size_t> counts(nclass,0);
+    for(size_t i=0;i<trainy.size();++i) {
+        const int c=findMapper(trainy[i]);
+        if(c>=0 && c<nclass) ++counts[c];
+    }
+    int minority=-1;
+    for(int c=0;c<nclass;++c) {
+        if(counts[c]==0) continue;
+        if(minority<0 || counts[c]<counts[minority]) minority=c;
+    }
+    if(minority<0) return -1.0;
+    Dataset *saved=testSet;
+    testSet=validation;
+    quietTestReport=true;
+    const double error=getClassError(genome);
+    quietTestReport=false;
+    testSet=saved;
+    if(!std::isfinite(error) || error>1e+7) return -1.0;
+    std::vector<double> real,predicted;
+    getOutputs(validation,real,predicted);
+    double tp=0.0,fp=0.0,fn=0.0;
+    for(size_t i=0;i<real.size();++i) {
+        const bool actual=((int)real[i]==minority);
+        const bool predictedMinority=((int)predicted[i]==minority);
+        if(actual && predictedMinority) ++tp;
+        else if(!actual && predictedMinority) ++fp;
+        else if(actual && !predictedMinority) ++fn;
+    }
+    const double denom=2.0*tp+fp+fn;
+    return denom>0.0 ? 2.0*tp/denom : 0.0;
+}
+
 // ============================================================
 // FITNESS PERCENTAGES
 // ============================================================

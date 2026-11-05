@@ -40,7 +40,7 @@ case "$LOCAL_METHOD" in
 esac
 
 case "$FITNESS_METHOD" in
-    class|average|squared|mixed|mean|macroF1|weightedF1|macroPR|adaptive_mixed) ;;
+    class|average|squared|mixed|mean|macroF1|weightedF1|macroPR|adaptive_mixed|adaptive_mixed_gmean|adaptive_mixed_minority_f1) ;;
     *)
         echo "ERROR: Unknown fitness method: $FITNESS_METHOD"
         exit 1

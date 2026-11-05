@@ -83,6 +83,7 @@ public:
     void setFitnessPercentages(double p1,double p2,double p3);
     double validationMacroF1(vector<int> &genome, Dataset *validation);
     double validationGmean(vector<int> &genome, Dataset *validation);
+    double validationMinorityF1(vector<int> &genome, Dataset *validation);
 
     // ========================================================
     // PHENOTYPE / OUTPUT

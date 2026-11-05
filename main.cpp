@@ -117,7 +117,7 @@ void setParams()
     QStringList fitness_list;
     fitness_list
         <<"class"<<"average"<<"squared"<<"mixed"<<"mean"
-        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed"<<"adaptive_mixed_gmean";
+        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed"<<"adaptive_mixed_gmean"<<"adaptive_mixed_minority_f1";
 
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
 
@@ -254,8 +254,9 @@ void run()
         }
     }
     const QString adaptiveMethod=mainParams.getParam("pop_fitnessmethod").getValue();
-    const bool adaptive = adaptiveMethod=="adaptive_mixed" || adaptiveMethod=="adaptive_mixed_gmean";
+    const bool adaptive = adaptiveMethod=="adaptive_mixed" || adaptiveMethod=="adaptive_mixed_gmean" || adaptiveMethod=="adaptive_mixed_minority_f1";
     const bool useGmean = adaptiveMethod=="adaptive_mixed_gmean";
+    const bool useMinorityF1 = adaptiveMethod=="adaptive_mixed_minority_f1";
     Dataset *validationSet = NULL;
     if(adaptive) {
         Matrix allX=trainSet->getAllXpoint();
@@ -318,7 +319,7 @@ void run()
     if(fmethod == "squared")
         program->setFitnessMode(FITNESS_SQUARED);
     else
-        if(fmethod=="mixed" || fmethod=="adaptive_mixed" || fmethod=="adaptive_mixed_gmean")
+        if(fmethod=="mixed" || fmethod=="adaptive_mixed" || fmethod=="adaptive_mixed_gmean" || fmethod=="adaptive_mixed_minority_f1")
         program->setFitnessMode(FITNESS_MIXED);
     else
         if(fmethod == "mean")
@@ -389,11 +390,11 @@ void run()
             }
             if(validationScores[selectedIndex]<0.0) {
                 std::vector<int> g=pop->getGenome(selectedIndex);
-                validationScores[selectedIndex]=useGmean ? program->validationGmean(g,validationSet) : program->validationMacroF1(g,validationSet);
+                validationScores[selectedIndex]=useMinorityF1 ? program->validationMinorityF1(g,validationSet) : (useGmean ? program->validationGmean(g,validationSet) : program->validationMacroF1(g,validationSet));
             }
             const double score=validationScores[selectedIndex];
             printf("ADAPTIVE_CANDIDATE generation=%d candidate=%d class=%.6f average=%.6f squared=%.6f chromosome=%d training_fitness=%.10f validation_score=%.10f metric=%s\n",
-                   gen,candidate,w[0],w[1],w[2],selectedIndex,minFitness,score,useGmean?"gmean":"macro_f1");
+                   gen,candidate,w[0],w[1],w[2],selectedIndex,minFitness,score,useMinorityF1?"minority_f1":(useGmean?"gmean":"macro_f1"));
             // Prefer the incumbent on ties, then lower training loss.
             const bool incumbent=std::fabs(w[0]-p1)<1e-9 &&
                 std::fabs(w[1]-p2)<1e-9 && std::fabs(w[2]-p3)<1e-9;
@@ -416,7 +417,7 @@ void run()
         adaptiveBest=bestScore;
         program->setFitnessPercentages(p1,p2,p3);
         printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_score=%.6f metric=%s changed=%d selected_candidate=%d chromosome=%d grid_size=66\n",
-               gen,p1,p2,p3,adaptiveBest,useGmean?"gmean":"macro_f1",changed?1:0,bestCandidate,bestIndex);
+               gen,p1,p2,p3,adaptiveBest,useMinorityF1?"minority_f1":(useGmean?"gmean":"macro_f1"),changed?1:0,bestCandidate,bestIndex);
         fflush(stdout);
         pop->refreshFitness();
     };
