@@ -294,8 +294,8 @@ void ClassProgram::printC(vector<int> &genome,std::string outname)
     ofstream outprogram;
 
     std::string strprogram(
-        "#include <math.h>
-#include <cmath>\n\n"
+        "#include <math.h>\n"
+        "#include <cmath>\n\n"
         "int classifier(double *x){\n\n"
         "\tint CLASS = 0;\n\n"
         );
