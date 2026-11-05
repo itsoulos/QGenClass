@@ -281,6 +281,13 @@ void run()
         validationSet=new Dataset();
         validationSet->setData(valX,valY);
         printf("ADAPTIVE_SPLIT training=%zu validation=%zu\n",fitY.size(),valY.size());
+        // Diagnostics only: original labels and class counts, no resampling.
+        std::map<double,size_t> trainCounts, valCounts;
+        for(double y:fitY) ++trainCounts[y];
+        for(double y:valY) ++valCounts[y];
+        for(const auto &kv:trainCounts)
+            printf("ADAPTIVE_CLASS_COUNTS label=%.10g training=%zu validation=%zu\n",
+                   kv.first,kv.second,valCounts[kv.first]);
     }
     program = new ClassProgram(trainSet,testSet);
     pop=new Population(
@@ -419,7 +426,20 @@ void run()
         printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_score=%.6f metric=%s changed=%d selected_candidate=%d chromosome=%d grid_size=66\n",
                gen,p1,p2,p3,adaptiveBest,useMinorityF1?"minority_f1":(useGmean?"gmean":"macro_f1"),changed?1:0,bestCandidate,bestIndex);
         fflush(stdout);
+        std::vector<int> selectedBeforeRefresh;
+        if(useMinorityF1 && bestIndex>=0)
+            selectedBeforeRefresh=pop->getGenome(bestIndex);
         pop->refreshFitness();
+        // Compare the chromosome chosen on validation against the chromosome
+        // actually returned by the population after its fitness refresh.
+        if(useMinorityF1 && bestIndex>=0) {
+            std::vector<int> reported=pop->getBestGenome();
+            const double selectedVal=program->validationMinorityF1(selectedBeforeRefresh,validationSet);
+            const double reportedVal=program->validationMinorityF1(reported,validationSet);
+            printf("ADAPTIVE_DIAGNOSTIC generation=%d selected_index=%d selected_validation_f1=%.10f reported_validation_f1=%.10f same_genome=%d\n",
+                   gen,bestIndex,selectedVal,reportedVal,selectedBeforeRefresh==reported?1:0);
+            fflush(stdout);
+        }
     };
     if(adaptive) updateAdaptive(0);
 
@@ -444,6 +464,13 @@ void run()
 
 	    if(fabs(bestf)<1e-6) break;
 
+    if(adaptive && useMinorityF1 && validationSet) {
+        std::vector<int> finalGenome=pop->getBestGenome();
+        const double finalValidation=program->validationMinorityF1(finalGenome,validationSet);
+        printf("ADAPTIVE_FINAL_DIAGNOSTIC generation=%d final_genome_validation_minority_f1=%.10f last_selected_validation_score=%.10f\n",
+               i,finalValidation,adaptiveBest);
+        fflush(stdout);
+    }
     vector<double> precision;
     vector<double> recall;
     printConfusionMatrix(precision,recall);
