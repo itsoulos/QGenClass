@@ -127,6 +127,7 @@ void setParams()
     mainParams.addParam(Parameter("adaptive_interval",20,1,1000,"Generations between adaptive weight updates"));
     mainParams.addParam(Parameter("adaptive_step",0.05,0.001,0.5,"Adaptive weight transfer step"));
     mainParams.addParam(Parameter("adaptive_validation",0.2,0.05,0.5,"Internal random validation fraction"));
+    mainParams.addParam(Parameter("adaptive_hysteresis",0.02,0.0,1.0,"Minimum validation score improvement needed to change adaptive weights"));
     mainParams.addParam(Parameter("pop_macropr_alpha",0.5,0.0,1.0,"Recall weight for macroPR fitness (precision weight = 1-alpha)"));
     mainParams.addParam(Parameter("pop_classpercent",1.0,0.0,1.0,"The percentage of the class fitness method in mixed"));
     mainParams.addParam(Parameter("pop_averagepercent",0.0,0.0,1.0,"The percentage of the average fitness method in mixed"));
@@ -354,6 +355,8 @@ void run()
     }
     program->setFitnessPercentages(p1,p2,p3);
     const int adaptiveInterval=mainParams.getParam("adaptive_interval").getValue().toInt();
+    const double adaptiveHysteresis=mainParams.getParam("adaptive_hysteresis").getValue().toDouble();
+    bool adaptiveInitialized=false;
     double adaptiveBest=-1.0;
     auto updateAdaptive = [&](int gen) {
         // Evaluate the three independent training losses once per genome.
@@ -421,10 +424,42 @@ void run()
             }
             ++candidate;
         }
+        // Evaluate the incumbent weights on THIS generation's population.
+        // Comparing with the previous generation's score would not be fair.
+        int incumbentIndex=-1;
+        double incumbentTraining=1e+100;
+        for(int k=0;k<pop->getCount();++k) {
+            if(!losses[k].valid) continue;
+            const double f=p1*losses[k].v[0]+p2*losses[k].v[1]+p3*losses[k].v[2];
+            if(f<incumbentTraining) { incumbentTraining=f; incumbentIndex=k; }
+        }
+        double incumbentScore=-1.0;
+        if(incumbentIndex>=0) {
+            if(validationScores[incumbentIndex]<0.0) {
+                std::vector<int> g=pop->getGenome(incumbentIndex);
+                validationScores[incumbentIndex]=useMinorityF1 ? program->validationMinorityF1(g,validationSet) : (useGmean ? program->validationGmean(g,validationSet) : program->validationMacroF1(g,validationSet));
+            }
+            incumbentScore=validationScores[incumbentIndex];
+        }
+        const bool proposedChange=std::fabs(p1-best[0])>1e-9 ||
+            std::fabs(p2-best[1])>1e-9 || std::fabs(p3-best[2])>1e-9;
+        const double proposedScore=bestScore;
+        const bool keepIncumbent=adaptiveInitialized && proposedChange &&
+            std::isfinite(incumbentScore) && incumbentScore>=0.0 &&
+            bestScore<incumbentScore+adaptiveHysteresis-1e-12;
+        if(keepIncumbent) {
+            best[0]=p1; best[1]=p2; best[2]=p3;
+            bestScore=incumbentScore;
+            bestIndex=incumbentIndex;
+            bestCandidate=-1; // incumbent retained by hysteresis
+        }
         const bool changed=std::fabs(p1-best[0])>1e-9 ||
             std::fabs(p2-best[1])>1e-9 || std::fabs(p3-best[2])>1e-9;
         if(bestCandidate>=0) {p1=best[0];p2=best[1];p3=best[2];}
         adaptiveBest=bestScore;
+        adaptiveInitialized=true;
+        printf("ADAPTIVE_HYSTERESIS generation=%d threshold=%.6f incumbent_score=%.10f candidate_score=%.10f kept=%d\n",
+               gen,adaptiveHysteresis,incumbentScore,proposedScore,keepIncumbent?1:0);
         program->setFitnessPercentages(p1,p2,p3);
         printf("ADAPTIVE_MIXED generation=%d class=%.6f average=%.6f squared=%.6f validation_score=%.6f metric=%s changed=%d selected_candidate=%d chromosome=%d grid_size=66\n",
                gen,p1,p2,p3,adaptiveBest,useMinorityF1?"minority_f1":(useGmean?"gmean":"macro_f1"),changed?1:0,bestCandidate,bestIndex);

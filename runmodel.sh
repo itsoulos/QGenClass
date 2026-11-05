@@ -33,6 +33,7 @@ QGenClass parameters:
   --adaptive-interval          default 20
   --adaptive-step              default 0.05
   --adaptive-validation        default 0.2
+  --adaptive-hysteresis        default 0.02
   --fitness                    default class  (QGenClass: --pop_fitnessmethod)
   --termination                default maxiters  (QGenClass: --pop_termination)
   --crossitems                 default 10  (QGenClass: --pop_crossitems)
@@ -113,6 +114,7 @@ options[macropr-alpha]=pop_macropr_alpha
 options[adaptive-interval]=adaptive_interval
 options[adaptive-step]=adaptive_step
 options[adaptive-validation]=adaptive_validation
+options[adaptive-hysteresis]=adaptive_hysteresis
 options[termination]=pop_termination
 options[crossitems]=pop_crossitems
 options[localitems]=pop_localitems
