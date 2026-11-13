@@ -31,6 +31,7 @@ QGenClass parameters:
   --local                      default targeted  (QGenClass: --pop_lmethod)
   --sampling-interval          default 20 (resample every K generations)
   --sampling-ratio             default 1 (majority/minority ratio)
+  --sampling-lambda            default 0.75 (hybrid sampled-loss weight)
   --sampling-minority-n        default 0 (all minority examples)
   --macropr-alpha              default 0.5 (macroPR recall weight)
   --adaptive-interval          default 20
@@ -81,6 +82,7 @@ config[pop_fitnessmethod]='class'
 config[pop_macropr_alpha]='0.5'
 config[sampling_interval]='20'
 config[sampling_ratio]='1'
+config[sampling_lambda]='0.75'
 config[sampling_minority_n]='0'
 config[adaptive_interval]='20'
 config[adaptive_step]='0.05'
@@ -119,6 +121,7 @@ options[fitness]=pop_fitnessmethod
 options[macropr-alpha]=pop_macropr_alpha
 options[sampling-interval]=sampling_interval
 options[sampling-ratio]=sampling_ratio
+options[sampling-lambda]=sampling_lambda
 options[sampling-minority-n]=sampling_minority_n
 options[adaptive-interval]=adaptive_interval
 options[adaptive-step]=adaptive_step
@@ -180,7 +183,10 @@ done
 (( seed + runs - 1 <= 1000 )) || { echo 'QGenClass random_seed range is 0..1000' >&2; exit 2; }
 case ${config[mode]} in standard|feature_construction) ;; *) echo 'Invalid mode' >&2; exit 2;; esac
 case ${config[pop_lmethod]} in none|crossover|mutate|mutateWorst|siman|hill|de|gd|adam|targeted|targetedWorst|targetedBest|constants) ;; *) echo 'Invalid local search' >&2; exit 2;; esac
-case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR|adaptive_mixed|adaptive_mixed_gmean|adaptive_mixed_minority_f1|minority_f1|balanced_sampling) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
+case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR|adaptive_mixed|adaptive_mixed_gmean|adaptive_mixed_minority_f1|minority_f1|balanced_sampling|hybrid_sampling) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
+if ! awk -v x="${config[sampling_lambda]}" 'BEGIN {exit !(x ~ /^([0-9]+([.][0-9]*)?|[.][0-9]+)$/ && x>=0 && x<=1)}'; then
+  echo "sampling-lambda must be between 0 and 1" >&2; exit 2
+fi
 case ${config[cross_method]} in standard|targeted|targetedWorst) ;; *) echo 'Invalid crossover' >&2; exit 2;; esac
 case ${config[pop_termination]} in maxiters|doublebox|similarity) ;; *) echo 'Invalid termination' >&2; exit 2;; esac
 case ${config[enable_smote]} in yes|no) ;; *) echo 'Invalid smote value' >&2; exit 2;; esac

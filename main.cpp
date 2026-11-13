@@ -120,12 +120,13 @@ void setParams()
     QStringList fitness_list;
     fitness_list
         <<"class"<<"average"<<"squared"<<"mixed"<<"mean"
-        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed"<<"adaptive_mixed_gmean"<<"adaptive_mixed_minority_f1"<<"minority_f1"<<"balanced_sampling";
+        <<"weightedF1"<<"macroF1"<<"macroPR"<<"adaptive_mixed"<<"adaptive_mixed_gmean"<<"adaptive_mixed_minority_f1"<<"minority_f1"<<"balanced_sampling"<<"hybrid_sampling";
 
     mainParams.addParam(Parameter("pop_fitnessmethod",fitness_list[0],fitness_list,"Fitness calculation method"));
 
     mainParams.addParam(Parameter("sampling_interval",20,1,10000,"Generations per fixed balanced subset"));
     mainParams.addParam(Parameter("sampling_ratio",1,1,100,"Majority samples per minority sample"));
+    mainParams.addParam(Parameter("sampling_lambda",0.75,0.0,1.0,"Weight of sampled balanced error in hybrid_sampling"));
     mainParams.addParam(Parameter("sampling_minority_n",0,0,1000000,"Minority subset size (0=all)"));
     mainParams.addParam(Parameter("adaptive_interval",20,1,1000,"Generations between adaptive weight updates"));
     mainParams.addParam(Parameter("adaptive_step",0.05,0.001,0.5,"Adaptive weight transfer step"));
@@ -349,8 +350,9 @@ void run()
         program->setFitnessMode(FITNESS_MACRO_PR);
     if(fmethod == "minority_f1")
         program->setFitnessMode(FITNESS_MINORITY_F1);
-    if(fmethod == "balanced_sampling") {
-        program->setFitnessMode(FITNESS_BALANCED_SAMPLING);
+    if(fmethod == "balanced_sampling" || fmethod == "hybrid_sampling") {
+        program->setFitnessMode(fmethod == "hybrid_sampling" ? FITNESS_HYBRID_SAMPLING : FITNESS_BALANCED_SAMPLING);
+        program->setSamplingLambda(mainParams.getParam("sampling_lambda").getValue().toDouble());
         program->configureBalancedSampling(
             mainParams.getParam("sampling_interval").getValue().toInt(),
             mainParams.getParam("sampling_ratio").getValue().toInt(),

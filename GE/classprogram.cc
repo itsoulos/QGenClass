@@ -657,9 +657,14 @@ void ClassProgram::configureBalancedSampling(int interval,int ratio,int minority
     balancedSample.clear();
 }
 
+void ClassProgram::setSamplingLambda(double lambda)
+{
+    samplingLambda=std::max(0.0,std::min(1.0,lambda));
+}
+
 void ClassProgram::updateBalancedSampling(int generation)
 {
-    if(fitness_mode!=FITNESS_BALANCED_SAMPLING)return;
+    if(fitness_mode!=FITNESS_BALANCED_SAMPLING && fitness_mode!=FITNESS_HYBRID_SAMPLING)return;
     const int block=generation/sampleInterval;
     if(block==lastSampleBlock)return;
     lastSampleBlock=block;
@@ -800,7 +805,7 @@ double ClassProgram::fitness(vector<int> &genome)
         return 1e+8;
     }
 
-    if(fitness_mode==FITNESS_BALANCED_SAMPLING)
+    if(fitness_mode==FITNESS_BALANCED_SAMPLING || fitness_mode==FITNESS_HYBRID_SAMPLING)
     {
         // Balanced class error on a common subset, NOT raw subset accuracy.
         // Predictions are computed on all training rows above; only scoring is sampled.
@@ -813,7 +818,10 @@ double ClassProgram::fitness(vector<int> &genome)
             if(fabs(c-outy[i])>1e-5)errors[c]+=1.0;
         }
         if(counts[0]==0.0 || counts[1]==0.0)return 1e+8;
-        return 50.0*(errors[0]/counts[0]+errors[1]/counts[1]);
+        const double sampledError=50.0*(errors[0]/counts[0]+errors[1]/counts[1]);
+        if(fitness_mode==FITNESS_BALANCED_SAMPLING)return sampledError;
+        const double fullError=100.0*value/static_cast<double>(trainy.size());
+        return samplingLambda*sampledError+(1.0-samplingLambda)*fullError;
     }
 
     // Direct minority-class F1 objective on the TRAINING partition only.
