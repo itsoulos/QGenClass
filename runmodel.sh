@@ -30,6 +30,8 @@ QGenClass parameters:
   --mutation-rate              default 0.05  (QGenClass: --pop_mrate)
   --local                      default targeted  (QGenClass: --pop_lmethod)
   --fbeta-beta                 default 2.0 (minority F-beta; higher favors recall)
+  --fpr-limit                  default 0.10 (majority false-positive rate threshold)
+  --fpr-penalty                default 5.0 (soft penalty strength)
   --sampling-interval          default 20 (resample every K generations)
   --sampling-ratio             default 1 (majority/minority ratio)
   --sampling-lambda            default 0.75 (hybrid sampled-loss weight)
@@ -85,6 +87,8 @@ config[sampling_interval]='20'
 config[sampling_ratio]='1'
 config[sampling_lambda]='0.75'
 config[fbeta_beta]='2.0'
+config[fpr_limit]='0.10'
+config[fpr_penalty]='5.0'
 config[sampling_minority_n]='0'
 config[adaptive_interval]='20'
 config[adaptive_step]='0.05'
@@ -125,6 +129,8 @@ options[sampling-interval]=sampling_interval
 options[sampling-ratio]=sampling_ratio
 options[sampling-lambda]=sampling_lambda
 options[fbeta-beta]=fbeta_beta
+options[fpr-limit]=fpr_limit
+options[fpr-penalty]=fpr_penalty
 options[sampling-minority-n]=sampling_minority_n
 options[adaptive-interval]=adaptive_interval
 options[adaptive-step]=adaptive_step
@@ -186,12 +192,18 @@ done
 (( seed + runs - 1 <= 1000 )) || { echo 'QGenClass random_seed range is 0..1000' >&2; exit 2; }
 case ${config[mode]} in standard|feature_construction) ;; *) echo 'Invalid mode' >&2; exit 2;; esac
 case ${config[pop_lmethod]} in none|crossover|mutate|mutateWorst|siman|hill|de|gd|adam|targeted|targetedWorst|targetedBest|constants) ;; *) echo 'Invalid local search' >&2; exit 2;; esac
-case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR|adaptive_mixed|adaptive_mixed_gmean|adaptive_mixed_minority_f1|minority_f1|minority_fbeta|balanced_sampling|hybrid_sampling) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
+case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR|adaptive_mixed|adaptive_mixed_gmean|adaptive_mixed_minority_f1|minority_f1|minority_fbeta|constrained_recall|balanced_sampling|hybrid_sampling) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
 if ! awk -v x="${config[sampling_lambda]}" 'BEGIN {exit !(x ~ /^([0-9]+([.][0-9]*)?|[.][0-9]+)$/ && x>=0 && x<=1)}'; then
   echo "sampling-lambda must be between 0 and 1" >&2; exit 2
 fi
 if ! awk -v x="${config[fbeta_beta]}" 'BEGIN {exit !(x ~ /^([0-9]+([.][0-9]*)?|[.][0-9]+)$/ && x>0 && x<=100)}'; then
   echo "fbeta-beta must be in (0,100]" >&2; exit 2
+fi
+if ! awk -v x="${config[fpr_limit]}" 'BEGIN {exit !(x ~ /^([0-9]+([.][0-9]*)?|[.][0-9]+)$/ && x>=0 && x<=1)}'; then
+  echo "fpr-limit must be between 0 and 1" >&2; exit 2
+fi
+if ! awk -v x="${config[fpr_penalty]}" 'BEGIN {exit !(x ~ /^([0-9]+([.][0-9]*)?|[.][0-9]+)$/ && x>=0 && x<=1000)}'; then
+  echo "fpr-penalty must be between 0 and 1000" >&2; exit 2
 fi
 case ${config[cross_method]} in standard|targeted|targetedWorst) ;; *) echo 'Invalid crossover' >&2; exit 2;; esac
 case ${config[pop_termination]} in maxiters|doublebox|similarity) ;; *) echo 'Invalid termination' >&2; exit 2;; esac

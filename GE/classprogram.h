@@ -24,6 +24,7 @@ using namespace std;
 #define FITNESS_BALANCED_SAMPLING 512
 #define FITNESS_HYBRID_SAMPLING 1024
 #define FITNESS_MINORITY_FBETA 2048
+#define FITNESS_CONSTRAINED_RECALL 4096
 
 typedef vector<double> Data;
 
@@ -66,6 +67,8 @@ private:
     unsigned sampleSeed = 1;
     double samplingLambda = 0.75;
     double minorityFbeta = 2.0;
+    double fprLimit = 0.10;
+    double fprPenalty = 5.0;
     int lastSampleBlock = -1;
 
 
@@ -96,6 +99,7 @@ public:
     void updateBalancedSampling(int generation);
     void setSamplingLambda(double lambda);
     void setMinorityFbeta(double beta);
+    void setConstrainedRecall(double limit,double penalty);
 
     void setMacroPRAlpha(double alpha);
 

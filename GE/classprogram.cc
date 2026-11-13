@@ -657,6 +657,12 @@ void ClassProgram::configureBalancedSampling(int interval,int ratio,int minority
     balancedSample.clear();
 }
 
+void ClassProgram::setConstrainedRecall(double limit,double penalty)
+{
+    fprLimit=std::max(0.0,std::min(1.0,limit));
+    fprPenalty=std::max(0.0,penalty);
+}
+
 void ClassProgram::setMinorityFbeta(double beta)
 {
     minorityFbeta = beta > 0.0 && std::isfinite(beta) ? beta : 2.0;
@@ -827,6 +833,24 @@ double ClassProgram::fitness(vector<int> &genome)
         if(fitness_mode==FITNESS_BALANCED_SAMPLING)return sampledError;
         const double fullError=100.0*value/static_cast<double>(trainy.size());
         return samplingLambda*sampledError+(1.0-samplingLambda)*fullError;
+    }
+
+    // Minimize minority recall loss, with a soft penalty for excessive
+    // majority false-positive rate. All counts use TRAINING data only.
+    if(fitness_mode==FITNESS_CONSTRAINED_RECALL)
+    {
+        if(nclass!=2)return 1e+8;
+        int minority=-1;
+        for(int c=0;c<nclass;c++) {
+            if(belong[c]<=0)continue;
+            if(minority<0 || belong[c]<belong[minority])minority=c;
+        }
+        if(minority<0)return 1e+8;
+        const int majority=1-minority;
+        if(belong[majority]<=0)return 1e+8;
+        const double minorityRecall=1.0-static_cast<double>(fail[minority])/belong[minority];
+        const double majorityFpr=static_cast<double>(fail[majority])/belong[majority];
+        return 100.0*((1.0-minorityRecall)+fprPenalty*std::max(0.0,majorityFpr-fprLimit));
     }
 
     // Direct minority-class F1 objective on the TRAINING partition only.
