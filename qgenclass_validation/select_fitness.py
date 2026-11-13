@@ -10,6 +10,9 @@ CANDIDATES = [
     ('fbeta_2', 'minority_fbeta', {'fbeta-beta': '2'}),
     ('fbeta_3', 'minority_fbeta', {'fbeta-beta': '3'}),
     ('hybrid_090', 'hybrid_sampling', {'sampling-lambda':'0.90','sampling-ratio':'3','sampling-interval':'20'}),
+    ('constrained_p5', 'constrained_recall', {'fpr-limit':'0.10','fpr-penalty':'5'}),
+    ('constrained_p10', 'constrained_recall', {'fpr-limit':'0.10','fpr-penalty':'10'}),
+    ('constrained_p20', 'constrained_recall', {'fpr-limit':'0.10','fpr-penalty':'20'}),
 ]
 
 def read_data(path):
@@ -68,7 +71,7 @@ def metrics(mat):
     f1=2*tp/(2*tp+fn+fp) if 2*tp+fn+fp else 0.0
     balanced=(recall+tn/(tn+fp))/2
     return dict(tp=tp,fp=fp,fn=fn,tn=tn,minority_precision=precision,
-                minority_recall=recall,minority_f1=f1,minority_f2=f2,balanced_accuracy=balanced)
+                minority_recall=recall,minority_f1=f1,minority_f2=f2,balanced_accuracy=balanced, fpr=fp/(fp+tn))
 
 def execute(args,train,test,fitness,extras,seed,log_path):
     cmd=[str(args.script),'--exe',str(args.exe),'--train',str(train),'--test',str(test),
@@ -106,7 +109,8 @@ def main():
     ap.add_argument('--generations',type=int,default=500)
     ap.add_argument('--chromosomes',type=int,default=500)
     ap.add_argument('--final-runs',type=int,default=10)
-    ap.add_argument('--criterion',choices=['minority_f2','minority_f1','balanced_accuracy'],default='minority_f2')
+    ap.add_argument('--criterion',choices=['minority_f2','minority_f1','balanced_accuracy','recall_at_fpr'],default='recall_at_fpr')
+    ap.add_argument('--fpr-limit',type=float,default=0.10,help='Validation FPR ceiling for recall_at_fpr')
     ap.add_argument('--extra',action='append',help='Optional additional runmodel option as --extra=--name=value')
     ap.add_argument('--skip-final',action='store_true',help='Tune only; do not access original test set')
     args=ap.parse_args()
@@ -114,6 +118,7 @@ def main():
     args.script=args.project/'runmodel.sh';args.exe=args.project/'QGenClass'
     if not args.script.is_file() or not args.exe.is_file(): ap.error('Expected runmodel.sh and QGenClass executable inside --project')
     if not 0<args.validation_fraction<.5 or args.splits<1 or args.seeds_per_split<1 or args.final_runs<1: ap.error('Invalid split/run settings')
+    if not 0<=args.fpr_limit<=1: ap.error('--fpr-limit must be in [0,1]')
     train_file=args.data_dir/(args.dataset+'.train')
     test_file=args.data_dir/(args.dataset+'.test')
     d,rows=read_data(train_file)
@@ -140,18 +145,29 @@ def main():
     rankings=[]
     for label,_,_ in CANDIDATES:
         items=[r for r in all_results if r['candidate']==label]
-        rankings.append(dict(candidate=label,mean_score=statistics.mean(r[args.criterion] for r in items),
+        rankings.append(dict(candidate=label,mean_score=statistics.mean(r['minority_recall' if args.criterion=='recall_at_fpr' else args.criterion] for r in items),
                              std_score=statistics.stdev(r[args.criterion] for r in items) if len(items)>1 else 0,
                              mean_precision=statistics.mean(r['minority_precision'] for r in items),
                              mean_recall=statistics.mean(r['minority_recall'] for r in items),
-                             mean_fp=statistics.mean(r['fp'] for r in items)))
-    rankings.sort(key=lambda x:(-x['mean_score'],x['mean_fp'],x['candidate']))
+                             mean_fp=statistics.mean(r['fp'] for r in items),
+                             mean_fpr=statistics.mean(r['fpr'] for r in items),
+                             max_fpr=max(r['fpr'] for r in items)))
+    if args.criterion=='recall_at_fpr':
+        # Conservative: every validation split/seed must meet the ceiling.
+        # If none is feasible, prioritize the smallest maximum violation.
+        feasible=[r for r in rankings if r['max_fpr']<=args.fpr_limit+1e-12]
+        if feasible:
+            rankings.sort(key=lambda r:(r not in feasible,-r['mean_score'] if r in feasible else r['max_fpr'],-r['mean_recall'],r['candidate']))
+        else:
+            rankings.sort(key=lambda r:(r['max_fpr'],-r['mean_recall'],r['candidate']))
+    else:
+        rankings.sort(key=lambda x:(-x['mean_score'],x['mean_fp'],x['candidate']))
     save_csv(args.output/'validation_ranking.csv',rankings)
     best=rankings[0]['candidate'];candidate=next(c for c in CANDIDATES if c[0]==best)
     print('\nValidation ranking:',flush=True)
-    for item in rankings: print(f'  {item["candidate"]:14s} {args.criterion}={item["mean_score"]:.4f} +/- {item["std_score"]:.4f}',flush=True)
+    for item in rankings: print(f'  {item["candidate"]:17s} score={item["mean_score"]:.4f} +/- {item["std_score"]:.4f} maxFPR={item["max_fpr"]:.4f} feasible={item["max_fpr"]<=args.fpr_limit if args.criterion=="recall_at_fpr" else "n/a"}',flush=True)
     print(f'\nSelected on validation ONLY: {best}',flush=True)
-    (args.output/'selected.txt').write_text(f'criterion={args.criterion}\nselected={best}\nfitness={candidate[1]}\nextras={candidate[2]}\n')
+    (args.output/'selected.txt').write_text(f'criterion={args.criterion}\nfpr_limit={args.fpr_limit}\nselected={best}\nfitness={candidate[1]}\nextras={candidate[2]}\n')
     if args.skip_final:
         print('Final test skipped (--skip-final).',flush=True);return
     # Test data is opened only after all tuning decisions are finalized.
