@@ -23,6 +23,7 @@ using namespace std;
 #define FITNESS_MINORITY_F1 256
 #define FITNESS_BALANCED_SAMPLING 512
 #define FITNESS_HYBRID_SAMPLING 1024
+#define FITNESS_MINORITY_FBETA 2048
 
 typedef vector<double> Data;
 
@@ -64,6 +65,7 @@ private:
     int sampleMinorityN = 0; // 0 means all minority training examples
     unsigned sampleSeed = 1;
     double samplingLambda = 0.75;
+    double minorityFbeta = 2.0;
     int lastSampleBlock = -1;
 
 
@@ -93,6 +95,7 @@ public:
     void configureBalancedSampling(int interval,int ratio,int minorityN,unsigned seed);
     void updateBalancedSampling(int generation);
     void setSamplingLambda(double lambda);
+    void setMinorityFbeta(double beta);
 
     void setMacroPRAlpha(double alpha);
 

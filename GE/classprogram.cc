@@ -657,6 +657,11 @@ void ClassProgram::configureBalancedSampling(int interval,int ratio,int minority
     balancedSample.clear();
 }
 
+void ClassProgram::setMinorityFbeta(double beta)
+{
+    minorityFbeta = beta > 0.0 && std::isfinite(beta) ? beta : 2.0;
+}
+
 void ClassProgram::setSamplingLambda(double lambda)
 {
     samplingLambda=std::max(0.0,std::min(1.0,lambda));
@@ -826,7 +831,7 @@ double ClassProgram::fitness(vector<int> &genome)
 
     // Direct minority-class F1 objective on the TRAINING partition only.
     // This is a loss: smaller is better, with 0 being perfect F1.
-    if(fitness_mode==FITNESS_MINORITY_F1)
+    if(fitness_mode==FITNESS_MINORITY_F1 || fitness_mode==FITNESS_MINORITY_FBETA)
     {
         int minority=-1;
         for(int c=0;c<nclass;c++) {
@@ -843,9 +848,11 @@ double ClassProgram::fitness(vector<int> &genome)
             else if(!positive && predicted) fp+=1.0;
             else if(positive && !predicted) fn+=1.0;
         }
-        const double denom=2.0*tp+fp+fn;
-        const double f1=denom>0.0 ? 2.0*tp/denom : 0.0;
-        return 100.0*(1.0-f1);
+        const double beta=(fitness_mode==FITNESS_MINORITY_F1 ? 1.0 : minorityFbeta);
+        const double b2=beta*beta;
+        const double denom=(1.0+b2)*tp+b2*fn+fp;
+        const double fbeta=denom>0.0 ? (1.0+b2)*tp/denom : 0.0;
+        return 100.0*(1.0-fbeta);
     }
 
     if(fitness_mode==FITNESS_CLASS)
