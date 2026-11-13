@@ -17,6 +17,9 @@ using std::ofstream;
 #include <regex>
 #include <iterator>
 #include <vector>
+#include <algorithm>
+#include <random>
+#include <numeric>
 
 // *******************************************************************
 #pragma GCC optimize("unroll-loops","omit-frame-pointer","inline", "unsafe-math-optimizations")
@@ -644,6 +647,41 @@ int ClassProgram::getClass() const
     return nclass;
 }
 
+void ClassProgram::configureBalancedSampling(int interval,int ratio,int minorityN,unsigned seed)
+{
+    sampleInterval=std::max(1,interval);
+    sampleMajorityRatio=std::max(1,ratio);
+    sampleMinorityN=std::max(0,minorityN);
+    sampleSeed=seed;
+    lastSampleBlock=-1;
+    balancedSample.clear();
+}
+
+void ClassProgram::updateBalancedSampling(int generation)
+{
+    if(fitness_mode!=FITNESS_BALANCED_SAMPLING)return;
+    const int block=generation/sampleInterval;
+    if(block==lastSampleBlock)return;
+    lastSampleBlock=block;
+    balancedSample.clear();
+    std::vector<std::vector<int>> byClass(nclass);
+    for(size_t i=0;i<trainy.size();++i) {
+        const int c=findMapper(trainy[i]);
+        if(c>=0 && c<nclass)byClass[c].push_back(static_cast<int>(i));
+    }
+    if(nclass!=2 || byClass[0].empty() || byClass[1].empty())return;
+    const int minority=(byClass[0].size()<=byClass[1].size()?0:1);
+    const int majority=1-minority;
+    std::mt19937 rng(sampleSeed+static_cast<unsigned>(block)*2654435761u);
+    std::shuffle(byClass[minority].begin(),byClass[minority].end(),rng);
+    std::shuffle(byClass[majority].begin(),byClass[majority].end(),rng);
+    const int nm=(sampleMinorityN==0?static_cast<int>(byClass[minority].size()):
+        std::min(sampleMinorityN,static_cast<int>(byClass[minority].size())));
+    const int nmaj=std::min(static_cast<int>(byClass[majority].size()),nm*sampleMajorityRatio);
+    balancedSample.insert(balancedSample.end(),byClass[minority].begin(),byClass[minority].begin()+nm);
+    balancedSample.insert(balancedSample.end(),byClass[majority].begin(),byClass[majority].begin()+nmaj);
+}
+
 // ============================================================
 // FITNESS
 // ============================================================
@@ -760,6 +798,22 @@ double ClassProgram::fitness(vector<int> &genome)
     if(isnan(value) ||isinf(value))
     {
         return 1e+8;
+    }
+
+    if(fitness_mode==FITNESS_BALANCED_SAMPLING)
+    {
+        // Balanced class error on a common subset, NOT raw subset accuracy.
+        // Predictions are computed on all training rows above; only scoring is sampled.
+        if(balancedSample.empty())return 1e+8;
+        double errors[2]={0.0,0.0}, counts[2]={0.0,0.0};
+        for(int i:balancedSample) {
+            const int c=findMapper(trainy[i]);
+            if(c<0 || c>=2)continue;
+            counts[c]+=1.0;
+            if(fabs(c-outy[i])>1e-5)errors[c]+=1.0;
+        }
+        if(counts[0]==0.0 || counts[1]==0.0)return 1e+8;
+        return 50.0*(errors[0]/counts[0]+errors[1]/counts[1]);
     }
 
     // Direct minority-class F1 objective on the TRAINING partition only.

@@ -1082,6 +1082,9 @@ void Population::setTargetedIterations(int n)
 
 void Population::nextGeneration()
 {
+    // A single subset is shared by all chromosomes in a generation block.
+    // calcFitnessArray recomputes ALL fitnesses, including the elite.
+    static_cast<ClassProgram*>(program)->updateBalancedSampling(generation);
     calcFitnessArray();
     select();
 

@@ -21,6 +21,7 @@ using namespace std;
 #define FITNESS_WEIGHTED_F1 64
 #define FITNESS_MACRO_PR 128
 #define FITNESS_MINORITY_F1 256
+#define FITNESS_BALANCED_SAMPLING 512
 
 typedef vector<double> Data;
 
@@ -55,6 +56,14 @@ private:
     int nclass;
 
     Data outy;
+    // Fixed common random subset for each sampling interval.
+    std::vector<int> balancedSample;
+    int sampleInterval = 20;
+    int sampleMajorityRatio = 1;
+    int sampleMinorityN = 0; // 0 means all minority training examples
+    unsigned sampleSeed = 1;
+    int lastSampleBlock = -1;
+
 
     int fitness_mode =FITNESS_CLASS;
     double macro_pr_alpha = 0.5;
@@ -79,6 +88,9 @@ public:
     // ========================================================
 
     void setFitnessMode(int m);
+    void configureBalancedSampling(int interval,int ratio,int minorityN,unsigned seed);
+    void updateBalancedSampling(int generation);
+
     void setMacroPRAlpha(double alpha);
 
     void setFitnessPercentages(double p1,double p2,double p3);
