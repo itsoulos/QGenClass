@@ -111,6 +111,8 @@ def main():
     ap.add_argument('--final-runs',type=int,default=10)
     ap.add_argument('--criterion',choices=['minority_f2','minority_f1','balanced_accuracy','recall_at_fpr'],default='recall_at_fpr')
     ap.add_argument('--fpr-limit',type=float,default=0.10,help='Validation FPR ceiling for recall_at_fpr')
+    ap.add_argument('--fpr-policy',choices=['strict_fpr','mean_fpr'],default='strict_fpr',
+                    help='strict_fpr: every validation run must meet limit; mean_fpr: mean validation FPR must meet limit')
     ap.add_argument('--extra',action='append',help='Optional additional runmodel option as --extra=--name=value')
     ap.add_argument('--skip-final',action='store_true',help='Tune only; do not access original test set')
     ap.add_argument('--resume-from',type=Path,help='Read existing validation_runs.csv instead of rerunning validation')
@@ -183,26 +185,44 @@ def main():
                              mean_fpr=statistics.mean(r['fpr'] for r in items),
                              max_fpr=max(r['fpr'] for r in items)))
     if args.criterion=='recall_at_fpr':
-        # Conservative: every validation split/seed must meet the ceiling.
-        # If none is feasible, prioritize the smallest maximum violation.
-        feasible=[r for r in rankings if r['max_fpr']<=args.fpr_limit+1e-12]
-        if feasible:
-            rankings.sort(key=lambda r:(r not in feasible,-r['mean_score'] if r in feasible else r['max_fpr'],-r['mean_recall'],r['candidate']))
+        fpr_key='max_fpr' if args.fpr_policy=='strict_fpr' else 'mean_fpr'
+        for row in rankings:
+            row['feasible']=int(row[fpr_key] <= args.fpr_limit + 1e-12)
+        # Feasible methods first, then highest mean minority recall.
+        # If none is feasible, minimize constraint violation first.
+        if any(row['feasible'] for row in rankings):
+            rankings.sort(key=lambda row:(-row['feasible'],
+                         -row['mean_recall'] if row['feasible'] else row[fpr_key],
+                         row['mean_fpr'],row['candidate']))
         else:
-            rankings.sort(key=lambda r:(r['max_fpr'],-r['mean_recall'],r['candidate']))
+            rankings.sort(key=lambda row:(row[fpr_key],-row['mean_recall'],row['candidate']))
     else:
-        rankings.sort(key=lambda x:(-x['mean_score'],x['mean_fp'],x['candidate']))
+        rankings.sort(key=lambda row:(-row['mean_score'],row['mean_fp'],row['candidate']))
     save_csv(args.output/'validation_ranking.csv',rankings)
     best=rankings[0]['candidate'];candidate=next(c for c in CANDIDATES if c[0]==best)
     print('\nValidation ranking:',flush=True)
-    for item in rankings: print(f'  {item["candidate"]:17s} score={item["mean_score"]:.4f} +/- {item["std_score"]:.4f} maxFPR={item["max_fpr"]:.4f} feasible={item["max_fpr"]<=args.fpr_limit if args.criterion=="recall_at_fpr" else "n/a"}',flush=True)
+    for item in rankings:
+        feasible=item.get('feasible','n/a')
+        print(f'  {item["candidate"]:17s} score={item["mean_score"]:.4f} +/- {item["std_score"]:.4f} meanFPR={item["mean_fpr"]:.4f} maxFPR={item["max_fpr"]:.4f} feasible={feasible}',flush=True)
     print(f'\nSelected on validation ONLY: {best}',flush=True)
-    (args.output/'selected.txt').write_text(f'criterion={args.criterion}\nfpr_limit={args.fpr_limit}\nselected={best}\nfitness={candidate[1]}\nextras={candidate[2]}\n')
+    (args.output/'selected.txt').write_text(f'criterion={args.criterion}\nfpr_policy={args.fpr_policy}\nfpr_limit={args.fpr_limit}\nselected={best}\nfitness={candidate[1]}\nextras={candidate[2]}\n')
     if args.skip_final:
         print('Final test skipped (--skip-final).',flush=True);return
     # Test data is opened only after all tuning decisions are finalized.
     if not test_file.is_file(): raise FileNotFoundError(test_file)
     final_dir=args.output/'final';final_dir.mkdir(exist_ok=True)
+    existing_final=args.output/'final_test_runs.csv'
+    if existing_final.is_file():
+        with existing_final.open(newline='') as fp:
+            existing_rows=list(csv.DictReader(fp))
+        existing_names={r.get('candidate') for r in existing_rows}
+        if existing_names and existing_names != {best}:
+            import shutil
+            backup=args.output/('final_test_runs_'+str(next(iter(existing_names)))+'.csv')
+            if backup.exists():
+                raise RuntimeError(f'Backup already exists: {backup}; move it before rerunning')
+            shutil.copy2(existing_final,backup)
+            print(f'Preserved previous final test results: {backup}',flush=True)
     final=[]
     for run in range(args.final_runs):
         seed=args.seed+run

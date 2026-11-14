@@ -111,8 +111,11 @@ def main():
     ap.add_argument('--final-runs',type=int,default=10)
     ap.add_argument('--criterion',choices=['minority_f2','minority_f1','balanced_accuracy','recall_at_fpr'],default='recall_at_fpr')
     ap.add_argument('--fpr-limit',type=float,default=0.10,help='Validation FPR ceiling for recall_at_fpr')
+    ap.add_argument('--fpr-policy',choices=['strict_fpr','mean_fpr'],default='strict_fpr',
+                    help='strict_fpr: every validation run must meet limit; mean_fpr: mean validation FPR must meet limit')
     ap.add_argument('--extra',action='append',help='Optional additional runmodel option as --extra=--name=value')
     ap.add_argument('--skip-final',action='store_true',help='Tune only; do not access original test set')
+    ap.add_argument('--resume-from',type=Path,help='Read existing validation_runs.csv instead of rerunning validation')
     args=ap.parse_args()
     args.project=args.project.resolve();args.data_dir=args.data_dir.resolve();args.output=args.output.resolve()
     args.script=args.project/'runmodel.sh';args.exe=args.project/'QGenClass'
@@ -121,58 +124,105 @@ def main():
     if not 0<=args.fpr_limit<=1: ap.error('--fpr-limit must be in [0,1]')
     train_file=args.data_dir/(args.dataset+'.train')
     test_file=args.data_dir/(args.dataset+'.test')
-    d,rows=read_data(train_file)
-    if len(set(r[-1] for r in rows))!=2: ap.error('Only binary classification is supported')
-    print('Training class counts:',dict(Counter(r[-1] for r in rows)),flush=True)
     args.output.mkdir(parents=True,exist_ok=True)
-    val_dir=args.output/'validation';val_dir.mkdir(exist_ok=True)
     all_results=[]
-    # Identical splits and random seeds across candidate methods.
-    for s in range(args.splits):
-        train,valid=split_rows(rows,args.validation_fraction,args.seed+1009*s)
-        tr=val_dir/f'split_{s+1}.train';va=val_dir/f'split_{s+1}.test'
-        write_data(tr,d,train);write_data(va,d,valid)
-        print(f'Split {s+1}/{args.splits}: train={len(train)}, validation={len(valid)}',flush=True)
-        for run in range(args.seeds_per_split):
-            seed=args.seed+run
-            for label,fitness,extras in CANDIDATES:
-                log=val_dir/f'{label}_split{s+1}_seed{seed}.log'
-                print(f'  {label}, seed={seed} ...',flush=True)
-                result=execute(args,tr,va,fitness,extras,seed,log)
-                all_results.append(dict(candidate=label,split=s+1,seed=seed,**result))
-                print(f'    F2={result["minority_f2"]:.4f}, P={result["minority_precision"]:.4f}, R={result["minority_recall"]:.4f}, FP={result["fp"]}',flush=True)
-    save_csv(args.output/'validation_runs.csv',all_results)
+    if args.resume_from:
+        source=args.resume_from.resolve()
+        if not source.is_file(): ap.error(f'Validation CSV not found: {source}')
+        with source.open(newline='') as fp:
+            reader=csv.DictReader(fp)
+            required={'candidate','split','seed','tp','fp','fn','tn','minority_precision',
+                      'minority_recall','minority_f1','minority_f2','balanced_accuracy','fpr'}
+            if not reader.fieldnames or not required.issubset(reader.fieldnames):
+                ap.error('Validation CSV has missing required columns')
+            for row in reader:
+                parsed={k:(int(v) if k in ('split','seed','tp','fp','fn','tn') else
+                           float(v) if k not in ('candidate',) else v) for k,v in row.items()}
+                all_results.append(parsed)
+        expected={label for label,_,_ in CANDIDATES}
+        present={r['candidate'] for r in all_results}
+        if present!=expected:
+            ap.error(f'Candidate mismatch: missing={sorted(expected-present)}, extra={sorted(present-expected)}')
+        keys=[(r['candidate'],r['split'],r['seed']) for r in all_results]
+        if len(keys)!=len(set(keys)):
+            ap.error('Duplicate candidate/split/seed rows in validation CSV')
+        per_candidate=Counter(r['candidate'] for r in all_results)
+        if len(set(per_candidate.values()))!=1:
+            ap.error(f'Unequal validation runs across candidates: {dict(per_candidate)}')
+        # Keep a local copy of the input for reproducibility.
+        destination=args.output/'validation_runs.csv'
+        if source!=destination:
+            save_csv(destination,all_results)
+        print(f'Resuming from {source} ({len(all_results)} validation rows); no validation runs repeated.',flush=True)
+    else:
+        d,rows=read_data(train_file)
+        if len(set(r[-1] for r in rows))!=2: ap.error('Only binary classification is supported')
+        print('Training class counts:',dict(Counter(r[-1] for r in rows)),flush=True)
+        val_dir=args.output/'validation';val_dir.mkdir(exist_ok=True)
+        # Identical splits and random seeds across candidate methods.
+        for s in range(args.splits):
+            train,valid=split_rows(rows,args.validation_fraction,args.seed+1009*s)
+            tr=val_dir/f'split_{s+1}.train';va=val_dir/f'split_{s+1}.test'
+            write_data(tr,d,train);write_data(va,d,valid)
+            print(f'Split {s+1}/{args.splits}: train={len(train)}, validation={len(valid)}',flush=True)
+            for run in range(args.seeds_per_split):
+                seed=args.seed+run
+                for label,fitness,extras in CANDIDATES:
+                    log=val_dir/f'{label}_split{s+1}_seed{seed}.log'
+                    print(f'  {label}, seed={seed} ...',flush=True)
+                    result=execute(args,tr,va,fitness,extras,seed,log)
+                    all_results.append(dict(candidate=label,split=s+1,seed=seed,**result))
+                    save_csv(args.output/'validation_runs.csv',all_results)
+                    print(f'    F2={result["minority_f2"]:.4f}, P={result["minority_precision"]:.4f}, R={result["minority_recall"]:.4f}, FP={result["fp"]}',flush=True)
     rankings=[]
     for label,_,_ in CANDIDATES:
         items=[r for r in all_results if r['candidate']==label]
         rankings.append(dict(candidate=label,mean_score=statistics.mean(r['minority_recall' if args.criterion=='recall_at_fpr' else args.criterion] for r in items),
-                             std_score=statistics.stdev(r[args.criterion] for r in items) if len(items)>1 else 0,
+                             std_score=statistics.stdev(r['minority_recall' if args.criterion=='recall_at_fpr' else args.criterion] for r in items) if len(items)>1 else 0,
                              mean_precision=statistics.mean(r['minority_precision'] for r in items),
                              mean_recall=statistics.mean(r['minority_recall'] for r in items),
                              mean_fp=statistics.mean(r['fp'] for r in items),
                              mean_fpr=statistics.mean(r['fpr'] for r in items),
                              max_fpr=max(r['fpr'] for r in items)))
     if args.criterion=='recall_at_fpr':
-        # Conservative: every validation split/seed must meet the ceiling.
-        # If none is feasible, prioritize the smallest maximum violation.
-        feasible=[r for r in rankings if r['max_fpr']<=args.fpr_limit+1e-12]
-        if feasible:
-            rankings.sort(key=lambda r:(r not in feasible,-r['mean_score'] if r in feasible else r['max_fpr'],-r['mean_recall'],r['candidate']))
+        fpr_key='max_fpr' if args.fpr_policy=='strict_fpr' else 'mean_fpr'
+        for row in rankings:
+            row['feasible']=int(row[fpr_key] <= args.fpr_limit + 1e-12)
+        # Feasible methods first, then highest mean minority recall.
+        # If none is feasible, minimize constraint violation first.
+        if any(row['feasible'] for row in rankings):
+            rankings.sort(key=lambda row:(-row['feasible'],
+                         -row['mean_recall'] if row['feasible'] else row[fpr_key],
+                         row['mean_fpr'],row['candidate']))
         else:
-            rankings.sort(key=lambda r:(r['max_fpr'],-r['mean_recall'],r['candidate']))
+            rankings.sort(key=lambda row:(row[fpr_key],-row['mean_recall'],row['candidate']))
     else:
-        rankings.sort(key=lambda x:(-x['mean_score'],x['mean_fp'],x['candidate']))
+        rankings.sort(key=lambda row:(-row['mean_score'],row['mean_fp'],row['candidate']))
     save_csv(args.output/'validation_ranking.csv',rankings)
     best=rankings[0]['candidate'];candidate=next(c for c in CANDIDATES if c[0]==best)
     print('\nValidation ranking:',flush=True)
-    for item in rankings: print(f'  {item["candidate"]:17s} score={item["mean_score"]:.4f} +/- {item["std_score"]:.4f} maxFPR={item["max_fpr"]:.4f} feasible={item["max_fpr"]<=args.fpr_limit if args.criterion=="recall_at_fpr" else "n/a"}',flush=True)
+    for item in rankings:
+        feasible=item.get('feasible','n/a')
+        print(f'  {item["candidate"]:17s} score={item["mean_score"]:.4f} +/- {item["std_score"]:.4f} meanFPR={item["mean_fpr"]:.4f} maxFPR={item["max_fpr"]:.4f} feasible={feasible}',flush=True)
     print(f'\nSelected on validation ONLY: {best}',flush=True)
-    (args.output/'selected.txt').write_text(f'criterion={args.criterion}\nfpr_limit={args.fpr_limit}\nselected={best}\nfitness={candidate[1]}\nextras={candidate[2]}\n')
+    (args.output/'selected.txt').write_text(f'criterion={args.criterion}\nfpr_policy={args.fpr_policy}\nfpr_limit={args.fpr_limit}\nselected={best}\nfitness={candidate[1]}\nextras={candidate[2]}\n')
     if args.skip_final:
         print('Final test skipped (--skip-final).',flush=True);return
     # Test data is opened only after all tuning decisions are finalized.
     if not test_file.is_file(): raise FileNotFoundError(test_file)
     final_dir=args.output/'final';final_dir.mkdir(exist_ok=True)
+    existing_final=args.output/'final_test_runs.csv'
+    if existing_final.is_file():
+        with existing_final.open(newline='') as fp:
+            existing_rows=list(csv.DictReader(fp))
+        existing_names={r.get('candidate') for r in existing_rows}
+        if existing_names and existing_names != {best}:
+            import shutil
+            backup=args.output/('final_test_runs_'+str(next(iter(existing_names)))+'.csv')
+            if backup.exists():
+                raise RuntimeError(f'Backup already exists: {backup}; move it before rerunning')
+            shutil.copy2(existing_final,backup)
+            print(f'Preserved previous final test results: {backup}',flush=True)
     final=[]
     for run in range(args.final_runs):
         seed=args.seed+run
@@ -180,7 +230,7 @@ def main():
         print(f'Final test {run+1}/{args.final_runs}: {best}, seed={seed}',flush=True)
         result=execute(args,train_file,test_file,candidate[1],candidate[2],seed,log)
         final.append(dict(candidate=best,seed=seed,**result))
-    save_csv(args.output/'final_test_runs.csv',final)
+        save_csv(args.output/'final_test_runs.csv',final)
     print('\nFINAL TEST:',flush=True)
     for metric in ['minority_precision','minority_recall','minority_f1','minority_f2','balanced_accuracy','fp','fn']:
         vals=[r[metric] for r in final]
