@@ -45,56 +45,55 @@ std::vector<int> Dataset::kNearest(
 }
 
 std::vector<Sample> Dataset::applySMOTE(
-    const std::vector<Sample>& data,
-    int k
-    )
+    const std::vector<Sample>& data, int k, double ratio, unsigned int seed)
 {
     std::map<double, std::vector<Sample>> classes;
+    for (const auto& sample : data)
+        classes[sample.label].push_back(sample);
 
-    for (const auto& s : data) {
-        classes[s.label].push_back(s);
-    }
+    if (classes.size() < 2 || data.empty()) return data;
 
-    // εύρεση πλειοψηφικής κλάσης
-    int maxCount = 0;
-    for (auto& c : classes) {
-        maxCount = std::max(maxCount, (int)c.second.size());
-    }
+    size_t maxCount = 0;
+    for (const auto& entry : classes)
+        maxCount = std::max(maxCount, entry.second.size());
 
-    std::vector<Sample> balanced = data;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dist(0.0, 1.0);
+    const size_t target = static_cast<size_t>(std::ceil(ratio * maxCount));
+    std::vector<Sample> augmented = data;
+    std::mt19937 rng(seed);
+    std::uniform_real_distribution<double> gapDistribution(0.0, 1.0);
 
-    for (auto& [label, samples] : classes) {
-        if (samples.size() == maxCount) continue;
-
-        int needed = maxCount - samples.size();
-        int idx = 0;
-
-        while (needed-- > 0) {
-            const Sample& x = samples[idx % samples.size()];
-            auto neighbors = kNearest(samples, idx % samples.size(), k);
-
-            int nIndex = neighbors[gen() % neighbors.size()];
-            const Sample& n = samples[nIndex];
-
-            Sample synthetic;
-            synthetic.label = label;
-
-            for (size_t f = 0; f < x.features.size(); f++) {
-                double gap = dist(gen);
-                double val = x.features[f] +
-                             gap * (n.features[f] - x.features[f]);
-                synthetic.features.push_back(val);
-            }
-
-            balanced.push_back(synthetic);
-            idx++;
+    for (const auto& entry : classes) {
+        const auto& samples = entry.second;
+        if (samples.size() >= target || samples.size() < 2) {
+            if (samples.size() < target && samples.size() < 2)
+                std::cerr << "SMOTE: skipping class " << entry.first
+                          << " (fewer than two samples)" << std::endl;
+            continue;
         }
-    }
 
-    return balanced;
+        const size_t needed = target - samples.size();
+        const int effectiveK = std::min(k, static_cast<int>(samples.size()) - 1);
+        std::uniform_int_distribution<size_t> baseDistribution(0, samples.size() - 1);
+        for (size_t i = 0; i < needed; ++i) {
+            const size_t baseIndex = baseDistribution(rng);
+            const auto neighbors = kNearest(samples, static_cast<int>(baseIndex), effectiveK);
+            if (neighbors.empty()) break;
+            std::uniform_int_distribution<size_t> neighborDistribution(0, neighbors.size() - 1);
+            const Sample& base = samples[baseIndex];
+            const Sample& neighbor = samples[neighbors[neighborDistribution(rng)]];
+            const double gap = gapDistribution(rng); // one gap for the whole vector
+            Sample synthetic;
+            synthetic.label = entry.first;
+            synthetic.features.reserve(base.features.size());
+            for (size_t f = 0; f < base.features.size(); ++f)
+                synthetic.features.push_back(base.features[f] +
+                                             gap * (neighbor.features[f] - base.features[f]));
+            augmented.push_back(std::move(synthetic));
+        }
+        std::cerr << "SMOTE: class " << entry.first << " original=" << samples.size()
+                  << " target=" << target << " generated=" << needed << std::endl;
+    }
+    return augmented;
 }
 
 double euclideanDistance(const vector<double>& a, const vector<double>& b) {
@@ -105,10 +104,10 @@ double euclideanDistance(const vector<double>& a, const vector<double>& b) {
     }
     return sqrt(sum);
 }
-void    Dataset::makeSmote(int k)
+void Dataset::makeSmote(int k, double ratio, unsigned int seed)
 {
     vector<Sample> dataset = getSamples();
-    vector<Sample> dataset2=applySMOTE(dataset,k);
+    vector<Sample> dataset2 = applySMOTE(dataset, k, ratio, seed);
     clearPoints();
     for(unsigned int i=0;i<dataset2.size();i++)
     {

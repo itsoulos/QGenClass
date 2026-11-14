@@ -147,6 +147,7 @@ void setParams()
     yesno<<"no"<<"yes";
     mainParams.addParam(Parameter("enable_smote",yesno[0],yesno,"Enable / disable SMOTE in training set"));
     mainParams.addParam(Parameter("smote_k",5,2,100,"The k value for the smote procedure"));
+    mainParams.addParam(Parameter("smote_ratio",1.0,0.0,1.0,"Target minority/majority ratio after SMOTE (0..1)"));
 
     mainParams.addParam(Parameter("coutput_file","classifier.c","The name of the c output file"));
     mainParams.addParam(Parameter("pythonoutput_file","classifier.py","The name of the Python output file"));
@@ -242,7 +243,9 @@ void run()
     if(hasSmote == "yes")
     {
         int k = mainParams.getParam("smote_k").getValue().toInt();
-        trainSet->makeSmote(k);
+        double ratio = mainParams.getParam("smote_ratio").getValue().toDouble();
+        unsigned int seed = mainParams.getParam("random_seed").getValue().toUInt();
+        trainSet->makeSmote(k, ratio, seed);
     }
     if(mainParams.getParam("test_file").getValue()!="")
     {

@@ -200,7 +200,7 @@ public:
      * @brief makeSmote balance the data using the smote method.
      * @param k, the parameter for the KNN method.
      */
-    void makeSmote(int k=5);
+    void makeSmote(int k=5, double ratio=1.0, unsigned int seed=1);
 
     /**
      * @brief getSamples
@@ -215,7 +215,7 @@ public:
         int k);
     std::vector<Sample> applySMOTE(
         const std::vector<Sample>& data,
-        int k = 5
+        int k = 5, double ratio = 1.0, unsigned int seed = 1
         );
     vector<int> kNearestNeighbors(const vector<Sample>& samples, int index, int k);
     ~Dataset();

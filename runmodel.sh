@@ -58,6 +58,7 @@ QGenClass parameters:
   --targeted-cross-max-block   default 16  (QGenClass: --targeted_crossmaxblock)
   --smote                      default no  (QGenClass: --enable_smote)
   --smote-k                    default 5  (QGenClass: --smote_k)
+  --smote-ratio                default 1.0 (target minority/majority ratio)
   --c-output                   default classifier.c  (QGenClass: --coutput_file)
   --python-output              default classifier.py  (QGenClass: --pythonoutput_file)
 
@@ -109,6 +110,7 @@ config[targeted_crosselitefraction]='0.2'
 config[targeted_crossmaxblock]='16'
 config[enable_smote]='no'
 config[smote_k]='5'
+config[smote_ratio]='1.0'
 config[coutput_file]='classifier.c'
 config[pythonoutput_file]='classifier.py'
 
@@ -152,6 +154,7 @@ options[targeted-cross-elite-fraction]=targeted_crosselitefraction
 options[targeted-cross-max-block]=targeted_crossmaxblock
 options[smote]=enable_smote
 options[smote-k]=smote_k
+options[smote-ratio]=smote_ratio
 options[c-output]=coutput_file
 options[python-output]=pythonoutput_file
 options[population]=pop_count
@@ -208,6 +211,9 @@ fi
 case ${config[cross_method]} in standard|targeted|targetedWorst) ;; *) echo 'Invalid crossover' >&2; exit 2;; esac
 case ${config[pop_termination]} in maxiters|doublebox|similarity) ;; *) echo 'Invalid termination' >&2; exit 2;; esac
 case ${config[enable_smote]} in yes|no) ;; *) echo 'Invalid smote value' >&2; exit 2;; esac
+if ! awk -v x="${config[smote_ratio]}" 'BEGIN {exit !(x ~ /^([0-9]+([.][0-9]*)?|[.][0-9]+)$/ && x>=0 && x<=1)}'; then
+  echo 'smote-ratio must be between 0 and 1' >&2; exit 2
+fi
 for fmt in train_format test_format; do case ${config[$fmt]} in data|csv|arff) ;; *) echo "Invalid $fmt" >&2; exit 2;; esac; done
 if [[ ! ${config[features]} =~ ^[0-9]+$ ]] || ((config[features] < 1 || config[features] > 100)); then
   echo 'features must be between 1 and 100' >&2; exit 2
