@@ -12,7 +12,8 @@ General:
   --dataset NAME              Dataset name
   --train FILE                Training file
   --test FILE                 Test file
-  --runs N                    Number of runs (default 1)
+  --folds N                   Number of folds: 1 or 10 (default 1)
+  --runs N                    Number of runs per fold (default 1)
   --seed N                    First random seed (default 1)
   --results-dir DIR           Logs directory (default results)
   --summary-file FILE         Per-run metrics TSV (default results/summary_*.tsv)
@@ -71,7 +72,7 @@ HELP
 
 exe=./QGenClass
 data_dir="$HOME/Desktop/ERGASIES/FeatureConstruction2/datasets/tenfolding"
-dataset=; train=; test=; runs=1; seed=1; results_dir=results; summary_file=
+dataset=; train=; test=; folds=1; runs=1; seed=1; results_dir=results; summary_file=
 declare -A config=()
 config[mode]='standard'
 config[features]='5'
@@ -178,10 +179,10 @@ while (($#)); do
         value=$2; shift 2
       fi
       case "$key" in
-        exe|data-dir|dataset|train|test|runs|seed|results-dir|summary-file)
+        exe|data-dir|dataset|train|test|folds|runs|seed|results-dir|summary-file)
           case "$key" in
             exe) exe=$value ;; data-dir) data_dir=$value ;; dataset) dataset=$value ;;
-            train) train=$value ;; test) test=$value ;; runs) runs=$value ;;
+            train) train=$value ;; test) test=$value ;; folds) folds=$value ;; runs) runs=$value ;;
             seed) seed=$value ;; results-dir) results_dir=$value ;;
             summary-file) summary_file=$value ;;
           esac ;;
@@ -192,9 +193,10 @@ while (($#)); do
   esac
 done
 
-for v in runs seed; do
+for v in folds runs seed; do
   if [[ ! ${!v} =~ ^[0-9]+$ ]]; then echo "Invalid $v: ${!v}" >&2; exit 2; fi
 done
+(( folds == 1 || folds == 10 )) || { echo "--folds must be 1 or 10" >&2; exit 2; }
 (( runs > 0 )) || { echo 'runs must be positive' >&2; exit 2; }
 (( seed + runs - 1 <= 1000 )) || { echo 'QGenClass random_seed range is 0..1000' >&2; exit 2; }
 case ${config[mode]} in standard|feature_construction) ;; *) echo 'Invalid mode' >&2; exit 2;; esac
@@ -223,31 +225,46 @@ for fmt in train_format test_format; do case ${config[$fmt]} in data|csv|arff) ;
 if [[ ! ${config[features]} =~ ^[0-9]+$ ]] || ((config[features] < 1 || config[features] > 100)); then
   echo 'features must be between 1 and 100' >&2; exit 2
 fi
-if [[ -n $dataset ]]; then
-  [[ -n $train ]] || train="$data_dir/$dataset.train"
-  [[ -n $test ]] || test="$data_dir/$dataset.test"
+if (( folds == 10 )); then
+  [[ -n $dataset && -z $train && -z $test ]] || { echo '--folds 10 requires --dataset only' >&2; exit 2; }
+  for ((fold=1;fold<=10;fold++)); do
+    for ext in train test; do
+      file="$data_dir/${dataset}_${fold}.$ext"
+      [[ -f $file ]] || { echo "Missing fold file: $file" >&2; exit 2; }
+    done
+  done
+else
+  if [[ -n $dataset ]]; then
+    [[ -n $train ]] || train="$data_dir/$dataset.train"
+    [[ -n $test ]] || test="$data_dir/$dataset.test"
+  fi
+  [[ -n $train && -n $test ]] || { echo 'Specify --dataset or --train and --test' >&2; exit 2; }
+  for v in train test; do
+    if [[ ! -f ${!v} && -f $data_dir/${!v} ]]; then printf -v "$v" '%s' "$data_dir/${!v}"; fi
+    [[ -f ${!v} ]] || { echo "Missing $v file: ${!v}" >&2; exit 2; }
+  done
 fi
-[[ -n $train && -n $test ]] || { echo 'Specify --dataset or --train and --test' >&2; exit 2; }
-for v in train test; do
-  if [[ ! -f ${!v} && -f $data_dir/${!v} ]]; then printf -v "$v" '%s' "$data_dir/${!v}"; fi
-  [[ -f ${!v} ]] || { echo "Missing $v file: ${!v}" >&2; exit 2; }
-done
 [[ -x $exe ]] || { echo "Missing executable: $exe" >&2; exit 2; }
 mkdir -p -- "$results_dir" || exit 2
 dataset_tag=${dataset:-$(basename "$train")}
 dataset_tag=${dataset_tag//[^a-zA-Z0-9_.-]/_}
 if [[ -z $summary_file ]]; then
-  summary_file="$results_dir/${dataset_tag}_${config[mode]}_${config[pop_fitnessmethod]}_summary_$(date +%Y%m%d_%H%M%S).tsv"
+  summary_file="$results_dir/${dataset_tag}_${config[pop_mutationmethod]}_${config[mode]}_${config[pop_fitnessmethod]}_summary_$(date +%Y%m%d_%H%M%S).tsv"
 fi
 mkdir -p -- "$(dirname "$summary_file")"
-printf 'run\tseed\tclass_error_percent\taccuracy_percent\tprecision\trecall\tf1score\tlogfile\n' > "$summary_file"
+printf 'fold\trun\tseed\tclass_error_percent\taccuracy_percent\tprecision\trecall\tf1score\tlogfile\n' > "$summary_file"
 # Sort keys to ensure reproducible argument order.
 mapfile -t keys < <(printf '%s\n' "${!config[@]}" | LC_ALL=C sort)
+for ((fold=1;fold<=folds;fold++)); do
+  if (( folds == 10 )); then
+    train="$data_dir/${dataset}_${fold}.train"
+    test="$data_dir/${dataset}_${fold}.test"
+  fi
 for ((run=0;run<runs;run++)); do
   current_seed=$((seed+run))
   cmd=("$exe" "--train_file=$train" "--test_file=$test" "--random_seed=$current_seed")
   for key in "${keys[@]}"; do cmd+=("--$key=${config[$key]}"); done
-  logfile="$results_dir/${dataset_tag}_${config[mode]}_${config[pop_fitnessmethod]}_seed${current_seed}_$(date +%Y%m%d_%H%M%S).log"
+  logfile="$results_dir/${dataset_tag}_${config[pop_mutationmethod]}_${config[mode]}_${config[pop_fitnessmethod]}_fold${fold}_seed${current_seed}_$(date +%Y%m%d_%H%M%S).log"
   printf 'Running (%d/%d): ' "$((run+1))" "$runs"; printf '%q ' "${cmd[@]}"; echo
   "${cmd[@]}" 2>&1 | tee "$logfile"
   status=${PIPESTATUS[0]}
@@ -272,19 +289,20 @@ for ((run=0;run<runs;run++)); do
   fi
   read -r class_error precision recall f1score <<< "$metrics"
   accuracy=$(awk -v e="$class_error" 'BEGIN {printf "%.10f",100-e}')
-  printf '%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$((run+1))" "$current_seed" "$class_error" "$accuracy" \
+  printf '%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$fold" "$((run+1))" "$current_seed" "$class_error" "$accuracy" \
     "$precision" "$recall" "$f1score" "$logfile" >> "$summary_file"
   echo "Log: $logfile"
 done
+done
 
 echo
-echo "Summary for $runs runs:"
+echo "Summary for $((folds*runs)) runs:"
 LC_ALL=C awk -F '\t' '
 NR==1 {next}
 {
   n++
-  for(i=3;i<=7;i++) {
+  for(i=4;i<=8;i++) {
     x=$i+0
     sum[i]+=x
     sq[i]+=x*x
@@ -292,13 +310,13 @@ NR==1 {next}
 }
 END {
   if(n==0) exit 1
-  name[3]="Class error (%)"
-  name[4]="Accuracy (%)"
-  name[5]="Precision"
-  name[6]="Recall"
-  name[7]="F1 score"
+  name[4]="Class error (%)"
+  name[5]="Accuracy (%)"
+  name[6]="Precision"
+  name[7]="Recall"
+  name[8]="F1 score"
   printf "%-19s %14s %14s\n","Metric","Mean","Std.Dev."
-  for(i=3;i<=7;i++) {
+  for(i=4;i<=8;i++) {
     avg=sum[i]/n
     variance=n>1?(sq[i]-sum[i]*sum[i]/n)/(n-1):0
     if(variance<0) variance=0
