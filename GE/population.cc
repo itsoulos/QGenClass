@@ -341,22 +341,67 @@ void Population::setElitism(int s)
 // STANDARD MUTATION
 // ============================================================
 
+void Population::setMutationMethod(string method)
+{
+    if (method == "standard" || method == "active" || method == "targeted")
+        mutationMethod = method;
+    else
+    {
+        fprintf(stderr, "Unknown mutation method: %s\n", method.c_str());
+        exit(EXIT_FAILURE);
+    }
+}
+
 void Population::mutate()
 {
-    int start =elitism *static_cast<int>(genome_count *selection_rate);
-    start =elitism;
-    start =1;
+    // Preserve the best chromosome, as in the original implementation.
+    const int start = 1;
+    ClassProgram *cp = dynamic_cast<ClassProgram *>(program);
 
-    for (int i = start;i < genome_count;i++)
+    for (int i = start; i < genome_count; ++i)
     {
-        for (int j = 0;j < genome_size;j++)
+        if (mutationMethod == "standard" || !cp)
         {
-            double r =rand() *1.0 /RAND_MAX;
-            if (r <mutation_rate)
-            {
-                genome[i][j] =rand() %MAX_RULE;
-            }
+            for (int j = 0; j < genome_size; ++j)
+                if (rand() / (RAND_MAX + 1.0) < mutation_rate)
+                    genome[i][j] = rand() % MAX_RULE;
+            continue;
         }
+
+        vector<int> chromosome(genome[i], genome[i] + genome_size);
+        vector<CodonTrace> trace;
+        cp->getCodonTrace(chromosome, trace);
+        if (trace.empty()) continue;
+
+        // Targeted: choose one semantic category per chromosome.
+        // Active: allow every category, but only at traced positions.
+        vector<int> candidates;
+        if (mutationMethod == "targeted")
+        {
+            vector<CodonType> categories;
+            for (const auto &entry : trace)
+            {
+                if (entry.genomePos < 0 || entry.genomePos >= genome_size) continue;
+                if (find(categories.begin(), categories.end(), entry.type) == categories.end())
+                    categories.push_back(entry.type);
+            }
+            if (categories.empty()) continue;
+            CodonType selected = categories[rand() % categories.size()];
+            for (const auto &entry : trace)
+                if (entry.type == selected && entry.genomePos >= 0 && entry.genomePos < genome_size)
+                    candidates.push_back(entry.genomePos);
+        }
+        else
+        {
+            for (const auto &entry : trace)
+                if (entry.genomePos >= 0 && entry.genomePos < genome_size)
+                    candidates.push_back(entry.genomePos);
+        }
+        sort(candidates.begin(), candidates.end());
+        candidates.erase(unique(candidates.begin(), candidates.end()), candidates.end());
+        for (int pos : candidates)
+            if (rand() / (RAND_MAX + 1.0) < mutation_rate)
+                genome[i][pos] = rand() % MAX_RULE;
     }
 }
 

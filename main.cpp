@@ -84,6 +84,9 @@ void setParams()
     mainParams.addParam(Parameter("pop_gens",2000,10,10000,"Maximum number of generations"));
     mainParams.addParam(Parameter("pop_srate",0.1,0.0,1.0,"Selection rate"));
     mainParams.addParam(Parameter("pop_mrate",0.05,0.0,1.0,"Mutation rate"));
+    QStringList mutationMethods;
+    mutationMethods << "standard" << "active" << "targeted";
+    mainParams.addParam(Parameter("pop_mutationmethod", mutationMethods[0], mutationMethods, "Mutation operator"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
     QStringList local_list;
     local_list<<"none"<<"crossover"<<"mutate"
@@ -311,6 +314,7 @@ void run()
                 );
     pop->setSelectionRate(mainParams.getParam("pop_srate").getValue().toDouble());
     pop->setMutationRate(mainParams.getParam("pop_mrate").getValue().toDouble());
+    pop->setMutationMethod(mainParams.getParam("pop_mutationmethod").getValue().toStdString());
     pop->setCrossItems(mainParams.getParam("pop_crossitems").getValue().toInt());
     pop->setLocalItems(mainParams.getParam("pop_localitems").getValue().toInt());
     pop->setLocalGens(mainParams.getParam("pop_localgens").getValue().toInt());

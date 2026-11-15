@@ -1,0 +1,2 @@
+run	seed	class_error_percent	accuracy_percent	precision	recall	f1score	logfile
+1	1	11.7647058824	88.2352941176	0.8888888889	0.8888888889	0.8666666667	results/wine_1_standard_class_seed1_20261115_110631.log

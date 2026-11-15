@@ -136,6 +136,7 @@ private:
     // ========================================================
 
     double mutation_rate;
+    string mutationMethod = "standard";
 
     double selection_rate;
 
@@ -278,6 +279,7 @@ public:
     double  fitness(vector<int> &g);
     void    setElitism(int s);
     void    setLocalMethod(string s);
+    void setMutationMethod(string method);
 
     // ========================================================
     // NEW:
