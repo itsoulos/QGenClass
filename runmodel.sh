@@ -266,7 +266,21 @@ for ((run=0;run<runs;run++)); do
   for key in "${keys[@]}"; do cmd+=("--$key=${config[$key]}"); done
   logfile="$results_dir/${dataset_tag}_${config[pop_mutationmethod]}_${config[mode]}_${config[pop_fitnessmethod]}_fold${fold}_seed${current_seed}_$(date +%Y%m%d_%H%M%S).log"
   printf 'Running (%d/%d): ' "$((run+1))" "$runs"; printf '%q ' "${cmd[@]}"; echo
-  "${cmd[@]}" 2>&1 | tee "$logfile"
+  # Keep compact progress, final metrics, and confusion matrices only.
+  "${cmd[@]}" 2>&1 | LC_ALL=C awk '
+    /GENERATION[[:space:]]*=/ {
+      if (match($0, /GENERATION[[:space:]]*=[[:space:]]*[0-9]+/)) {
+        gen=substr($0,RSTART,RLENGTH); gsub(/[^0-9]/,"",gen)
+        if (gen % 50 == 0) { print; fflush() }
+      }
+      next
+    }
+    /\*\* CONFUSION MATRIX \*\*/ { matrix=1; print; fflush(); next }
+    matrix && /^[[:space:]]*[0-9]+([[:space:]]+[0-9]+)*[[:space:]]*$/ { print; fflush(); next }
+    matrix { matrix=0 }
+    /CLASS_ERROR:.*PRECISION:.*RECALL:.*F1SCORE:/ { print; fflush(); next }
+    /^(TEST REPORT=>|CLASS\[|QGenClass failed|Error:|ERROR:|Segmentation fault|Killed)/ { print; fflush(); next }
+  ' | tee "$logfile"
   status=${PIPESTATUS[0]}
   if ((status != 0)); then echo "QGenClass failed (exit $status); log: $logfile" >&2; exit "$status"; fi
   metrics=$(LC_ALL=C awk '
