@@ -137,6 +137,7 @@ private:
 
     double mutation_rate;
     string mutationMethod = "standard";
+    // Equal-budget mutation: number of trials ~ Binomial(genome_size, mutation_rate).
 
     double selection_rate;
 

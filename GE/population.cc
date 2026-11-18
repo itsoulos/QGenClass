@@ -343,7 +343,8 @@ void Population::setElitism(int s)
 
 void Population::setMutationMethod(string method)
 {
-    if (method == "standard" || method == "active" || method == "targeted")
+    if (method == "standard" || method == "active" || method == "targeted" ||
+        method == "active_equal" || method == "targeted_equal")
         mutationMethod = method;
     else
     {
@@ -376,7 +377,7 @@ void Population::mutate()
         // Targeted: choose one semantic category per chromosome.
         // Active: allow every category, but only at traced positions.
         vector<int> candidates;
-        if (mutationMethod == "targeted")
+        if (mutationMethod == "targeted" || mutationMethod == "targeted_equal")
         {
             vector<CodonType> categories;
             for (const auto &entry : trace)
@@ -399,6 +400,27 @@ void Population::mutate()
         }
         sort(candidates.begin(), candidates.end());
         candidates.erase(unique(candidates.begin(), candidates.end()), candidates.end());
+
+        // Same expected mutation-attempt budget as Standard, irrespective
+        // of the number of traced codons. Draw positions WITH replacement:
+        // this permits more attempts than available candidate positions.
+        if (mutationMethod == "active_equal" || mutationMethod == "targeted_equal")
+        {
+            if (candidates.empty()) continue;
+            int attempts = 0;
+            for (int j = 0; j < genome_size; ++j)
+                if (rand() / (RAND_MAX + 1.0) < mutation_rate) ++attempts;
+            for (int k = 0; k < attempts; ++k)
+            {
+                const int pos = candidates[rand() % candidates.size()];
+                int value = rand() % MAX_RULE;
+                // Guarantee an actual codon-value change when possible.
+                if (MAX_RULE > 1 && value == genome[i][pos])
+                    value = (value + 1 + rand() % (MAX_RULE - 1)) % MAX_RULE;
+                genome[i][pos] = value;
+            }
+            continue;
+        }
         for (int pos : candidates)
             if (rand() / (RAND_MAX + 1.0) < mutation_rate)
                 genome[i][pos] = rand() % MAX_RULE;
@@ -1152,7 +1174,7 @@ void Population::nextGeneration()
     // PERIODIC LOCAL SEARCH
     // --------------------------------------------------------
 
-    if (localgens > 0 && (generation +1) %localgens ==0)
+    if (localMethod != "none" && localgens > 0 && (generation +1) %localgens ==0)
     {
         for (int i = 0;i < localitems;i++)
         {
@@ -1166,6 +1188,7 @@ void Population::nextGeneration()
     // ============================================================
 
     if(
+        localMethod != "none" &&
         targetedStagnationLimit > 0 &&
         generationsWithoutImprovement >=targetedStagnationLimit)
     {
@@ -1205,7 +1228,7 @@ void Population::nextGeneration()
     // LOCAL CROSSOVER
     // --------------------------------------------------------
 
-    for(int i=0;i<crossitems;i++)
+    for(int i=0; localMethod != "none" && i<crossitems;i++)
     {
         int pos =(i == 0?0:rand() %genome_count);
         if(crossMethod =="targeted")
