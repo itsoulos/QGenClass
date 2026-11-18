@@ -85,7 +85,7 @@ void setParams()
     mainParams.addParam(Parameter("pop_srate",0.1,0.0,1.0,"Selection rate"));
     mainParams.addParam(Parameter("pop_mrate",0.05,0.0,1.0,"Mutation rate"));
     QStringList mutationMethods;
-    mutationMethods << "standard" << "active" << "targeted";
+    mutationMethods << "standard" << "active" << "targeted" << "active_equal" << "targeted_equal";
     mainParams.addParam(Parameter("pop_mutationmethod", mutationMethods[0], mutationMethods, "Mutation operator"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
     QStringList local_list;
