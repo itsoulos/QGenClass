@@ -29,7 +29,7 @@ QGenClass parameters:
   --generations                default 2000  (QGenClass: --pop_gens)
   --selection-rate             default 0.1  (QGenClass: --pop_srate)
   --mutation-rate              default 0.05  (QGenClass: --pop_mrate)
-  --mutation-method            default standard (standard|active|targeted|active_equal|targeted_equal)
+  --mutation-method            default standard (standard|active|targeted|active_equal|targeted_equal|gradient|adam|semantic_adam)
   --local                      default targeted  (QGenClass: --pop_lmethod)
   --fbeta-beta                 default 2.0 (minority F-beta; higher favors recall)
   --fpr-limit                  default 0.10 (majority false-positive rate threshold)
@@ -84,6 +84,11 @@ config[pop_gens]='2000'
 config[pop_srate]='0.1'
 config[pop_mrate]='0.05'
 config[pop_mutationmethod]='standard'
+config[guided_steps]='2'
+config[guided_codons]='4'
+config[guided_budget]='16'
+config[guided_alpha]='1.0'
+config[guided_fraction]='0.05'
 config[pop_lmethod]='targeted'
 config[pop_fitnessmethod]='class'
 config[pop_macropr_alpha]='0.5'
@@ -127,6 +132,11 @@ options[length]=pop_size
 options[generations]=pop_gens
 options[selection-rate]=pop_srate
 options[mutation-rate]=pop_mrate
+options[guided-steps]=guided_steps
+options[guided-codons]=guided_codons
+options[guided-budget]=guided_budget
+options[guided-alpha]=guided_alpha
+options[guided-fraction]=guided_fraction
 options[mutation-method]=pop_mutationmethod
 options[pop_mutationmethod]=pop_mutationmethod
 options[local]=pop_lmethod
@@ -200,7 +210,7 @@ done
 (( runs > 0 )) || { echo 'runs must be positive' >&2; exit 2; }
 (( seed + runs - 1 <= 1000 )) || { echo 'QGenClass random_seed range is 0..1000' >&2; exit 2; }
 case ${config[mode]} in standard|feature_construction) ;; *) echo 'Invalid mode' >&2; exit 2;; esac
-case ${config[pop_mutationmethod]} in standard|active|targeted|active_equal|targeted_equal) ;; *) echo 'Invalid mutation method' >&2; exit 2;; esac
+case ${config[pop_mutationmethod]} in standard|active|targeted|active_equal|targeted_equal|gradient|adam|semantic_adam) ;; *) echo 'Invalid mutation method' >&2; exit 2;; esac
 case ${config[pop_lmethod]} in none|crossover|mutate|mutateWorst|siman|hill|de|gd|adam|targeted|targetedWorst|targetedBest|constants) ;; *) echo 'Invalid local search' >&2; exit 2;; esac
 case ${config[pop_fitnessmethod]} in class|average|squared|mixed|mean|weightedF1|macroF1|macroPR|adaptive_mixed|adaptive_mixed_gmean|adaptive_mixed_minority_f1|minority_f1|minority_fbeta|constrained_recall|balanced_sampling|hybrid_sampling) ;; *) echo 'Invalid fitness' >&2; exit 2;; esac
 if ! awk -v x="${config[sampling_lambda]}" 'BEGIN {exit !(x ~ /^([0-9]+([.][0-9]*)?|[.][0-9]+)$/ && x>=0 && x<=1)}'; then

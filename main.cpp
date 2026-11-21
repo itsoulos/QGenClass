@@ -85,9 +85,14 @@ void setParams()
     mainParams.addParam(Parameter("pop_srate",0.1,0.0,1.0,"Selection rate"));
     mainParams.addParam(Parameter("pop_mrate",0.05,0.0,1.0,"Mutation rate"));
     QStringList mutationMethods;
-    mutationMethods << "standard" << "active" << "targeted" << "active_equal" << "targeted_equal";
+    mutationMethods << "standard" << "active" << "targeted" << "active_equal" << "targeted_equal" << "gradient" << "adam" << "semantic_adam";
     mainParams.addParam(Parameter("pop_mutationmethod", mutationMethods[0], mutationMethods, "Mutation operator"));
     mainParams.addParam(Parameter("pop_size",200,10,500,"The size of chromosomes"));
+    mainParams.addParam(Parameter("guided_steps",2,1,100,"Guided optimization steps"));
+    mainParams.addParam(Parameter("guided_codons",4,1,500,"Codons sampled per step"));
+    mainParams.addParam(Parameter("guided_budget",16,1,10000,"Maximum fitness evaluations per guided chromosome"));
+    mainParams.addParam(Parameter("guided_alpha",1.0,0.01,100.0,"Guided learning rate"));
+    mainParams.addParam(Parameter("guided_fraction",0.05,0.0,1.0,"Fraction of non-elite chromosomes using guided mutation"));
     QStringList local_list;
     local_list<<"none"<<"crossover"<<"mutate"
                <<"mutateWorst"<<"siman"
@@ -315,6 +320,12 @@ void run()
     pop->setSelectionRate(mainParams.getParam("pop_srate").getValue().toDouble());
     pop->setMutationRate(mainParams.getParam("pop_mrate").getValue().toDouble());
     pop->setMutationMethod(mainParams.getParam("pop_mutationmethod").getValue().toStdString());
+    pop->setGuidedParameters(
+        mainParams.getParam("guided_steps").getValue().toInt(),
+        mainParams.getParam("guided_codons").getValue().toInt(),
+        mainParams.getParam("guided_budget").getValue().toInt(),
+        mainParams.getParam("guided_alpha").getValue().toDouble(),
+        mainParams.getParam("guided_fraction").getValue().toDouble());
     pop->setCrossItems(mainParams.getParam("pop_crossitems").getValue().toInt());
     pop->setLocalItems(mainParams.getParam("pop_localitems").getValue().toInt());
     pop->setLocalGens(mainParams.getParam("pop_localgens").getValue().toInt());

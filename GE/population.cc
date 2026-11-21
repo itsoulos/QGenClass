@@ -344,7 +344,8 @@ void Population::setElitism(int s)
 void Population::setMutationMethod(string method)
 {
     if (method == "standard" || method == "active" || method == "targeted" ||
-        method == "active_equal" || method == "targeted_equal")
+        method == "active_equal" || method == "targeted_equal" ||
+        method == "gradient" || method == "adam" || method == "semantic_adam")
         mutationMethod = method;
     else
     {
@@ -361,6 +362,16 @@ void Population::mutate()
 
     for (int i = start; i < genome_count; ++i)
     {
+        if (mutationMethod == "gradient" || mutationMethod == "adam" || mutationMethod == "semantic_adam")
+        {
+            if (rand() / (RAND_MAX + 1.0) < guidedFraction)
+                guidedMutation(i, mutationMethod != "gradient", mutationMethod == "semantic_adam");
+            else
+                for (int j=0;j<genome_size;++j)
+                    if (rand() / (RAND_MAX + 1.0) < mutation_rate)
+                        genome[i][j] = rand() % MAX_RULE;
+            continue;
+        }
         if (mutationMethod == "standard" || !cp)
         {
             for (int j = 0; j < genome_size; ++j)
@@ -425,6 +436,85 @@ void Population::mutate()
             if (rand() / (RAND_MAX + 1.0) < mutation_rate)
                 genome[i][pos] = rand() % MAX_RULE;
     }
+}
+
+void Population::setGuidedParameters(int steps,int codons,int budget,double alpha,double fraction)
+{
+    guidedSteps=std::max(1,steps);
+    guidedCodons=std::max(1,codons);
+    guidedBudget=std::max(1,budget);
+    guidedAlpha=std::max(0.01,alpha);
+    guidedFraction=std::max(0.0,std::min(1.0,fraction));
+}
+
+// Bounded, integer-projected finite-difference optimization.
+// Population::fitness is MAXIMIZED; candidate acceptance is strictly improving.
+void Population::guidedMutation(int index,bool useAdam,bool semantic)
+{
+    if (MAX_RULE < 2) return;
+    ClassProgram *cp=dynamic_cast<ClassProgram*>(program);
+    if (semantic && !cp) return;
+    vector<int> x(genome[index],genome[index]+genome_size);
+    double best=fitness(x);
+    if (!std::isfinite(best)) return;
+    int used=1;
+    vector<double> moment(genome_size,0.0), variance(genome_size,0.0);
+    for (int t=1;t<=guidedSteps && used+2<=guidedBudget;++t)
+    {
+        vector<int> positions;
+        if (semantic) {
+            vector<CodonTrace> trace;
+            cp->getCodonTrace(x,trace);
+            for (const auto &e:trace)
+                if (e.genomePos>=0 && e.genomePos<genome_size)
+                    positions.push_back(e.genomePos);
+        } else {
+            for (int j=0;j<genome_size;++j) positions.push_back(j);
+        }
+        std::sort(positions.begin(),positions.end());
+        positions.erase(std::unique(positions.begin(),positions.end()),positions.end());
+        if (positions.empty()) break;
+        // Fisher-Yates shuffle using the existing rand() stream.
+        for (int k=(int)positions.size()-1;k>0;--k)
+            std::swap(positions[k],positions[rand()%(k+1)]);
+        int n=std::min((int)positions.size(),guidedCodons);
+        vector<int> candidate=x;
+        bool changed=false;
+        for (int k=0;k<n && used+2<=guidedBudget;++k)
+        {
+            int j=positions[k];
+            vector<int> plus=x, minus=x;
+            plus[j]=std::min(MAX_RULE-1,x[j]+1);
+            minus[j]=std::max(0,x[j]-1);
+            if (plus[j]==minus[j]) continue;
+            double fp=fitness(plus), fm=fitness(minus);
+            used+=2;
+            if (!std::isfinite(fp) || !std::isfinite(fm)) continue;
+            // Gradient of the objective to MAXIMIZE.
+            double g=(fp-fm)/(plus[j]-minus[j]);
+            if (!std::isfinite(g)) continue;
+            double delta=guidedAlpha*g;
+            if (useAdam) {
+                moment[j]=0.9*moment[j]+0.1*g;
+                variance[j]=0.999*variance[j]+0.001*g*g;
+                double mh=moment[j]/(1.0-std::pow(0.9,t));
+                double vh=variance[j]/(1.0-std::pow(0.999,t));
+                delta=guidedAlpha*mh/(std::sqrt(vh)+1e-8);
+            }
+            // A minimum one-codon move avoids rounding every small step to zero.
+            if (std::fabs(delta)>1e-12 && std::fabs(delta)<1.0)
+                delta=std::copysign(1.0,delta);
+            double target=std::max(0.0,std::min((double)(MAX_RULE-1),x[j]+delta));
+            candidate[j]=(int)std::lround(target);
+            changed|=(candidate[j]!=x[j]);
+        }
+        if (!changed || used>=guidedBudget) break;
+        double fc=fitness(candidate);++used;
+        if (std::isfinite(fc) && fc>best+1e-12) {
+            x.swap(candidate);best=fc;
+        }
+    }
+    for (int j=0;j<genome_size;++j) genome[index][j]=x[j];
 }
 
 // ============================================================
