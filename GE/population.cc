@@ -345,7 +345,7 @@ void Population::setMutationMethod(string method)
 {
     if (method == "standard" || method == "active" || method == "targeted" ||
         method == "active_equal" || method == "targeted_equal" ||
-        method == "gradient" || method == "adam" || method == "semantic_adam")
+        method == "gradient" || method == "adam" || method == "semantic_adam" || method == "entropy")
         mutationMethod = method;
     else
     {
@@ -358,6 +358,84 @@ void Population::mutate()
 {
     // Preserve the best chromosome, as in the original implementation.
     const int start = 1;
+    if (mutationMethod == "entropy")
+    {
+        if (genome_count <= start || genome_size <= 0 ||
+            MAX_RULE <= 1 || mutation_rate <= 0.0) return;
+
+        // Snapshot diversity before mutating any chromosome.
+        const double epsilon = 1e-6;
+        const double logK = std::log(double(MAX_RULE));
+        vector<double> weight(genome_size, 0.0);
+        vector<double> probability(genome_size, 0.0);
+        vector<int> counts(MAX_RULE, 0);
+        for (int j = 0; j < genome_size; ++j)
+        {
+            std::fill(counts.begin(), counts.end(), 0);
+            for (int i = 0; i < genome_count; ++i)
+            {
+                const int v = genome[i][j];
+                if (v < 0 || v >= MAX_RULE)
+                {
+                    fprintf(stderr, "Entropy mutation: invalid codon %d\n", v);
+                    exit(EXIT_FAILURE);
+                }
+                ++counts[v];
+            }
+            double H = 0.0;
+            for (int c : counts)
+                if (c > 0)
+                {
+                    const double q = double(c) / genome_count;
+                    H -= q * std::log(q);
+                }
+            H = std::max(0.0, std::min(1.0, H / logK));
+            weight[j] = 1.0 - H + epsilon;
+        }
+
+        // Water filling: p_j = min(1, lambda * weight[j]).
+        // Redistribute excess probability after saturation so that
+        // sum(p_j) = genome_size * mutation_rate (up to roundoff).
+        double remaining = genome_size * mutation_rate;
+        vector<int> order(genome_size);
+        double totalWeight = 0.0;
+        for (int j = 0; j < genome_size; ++j)
+        {
+            order[j] = j;
+            totalWeight += weight[j];
+        }
+        std::sort(order.begin(), order.end(), [&](int a, int b) {
+            return weight[a] > weight[b];
+        });
+        int k = 0;
+        for (; k < genome_size; ++k)
+        {
+            const int j = order[k];
+            if (remaining >= genome_size - k)
+            {
+                for (; k < genome_size; ++k) probability[order[k]] = 1.0;
+                break;
+            }
+            if (remaining * weight[j] <= totalWeight) break;
+            probability[j] = 1.0;
+            remaining -= 1.0;
+            totalWeight -= weight[j];
+        }
+        if (k < genome_size)
+        {
+            const double scale = std::max(0.0, remaining) / totalWeight;
+            for (; k < genome_size; ++k)
+                probability[order[k]] = std::min(1.0, scale * weight[order[k]]);
+        }
+
+        // Same replacement distribution as Standard, including possible
+        // replacement by the original codon value. Preserve chromosome 0.
+        for (int i = start; i < genome_count; ++i)
+            for (int j = 0; j < genome_size; ++j)
+                if (rand() / (RAND_MAX + 1.0) < probability[j])
+                    genome[i][j] = rand() % MAX_RULE;
+        return;
+    }
     ClassProgram *cp = dynamic_cast<ClassProgram *>(program);
 
     for (int i = start; i < genome_count; ++i)
