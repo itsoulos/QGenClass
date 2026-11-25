@@ -143,6 +143,8 @@ private:
     double guidedAlpha = 1.0;
     double guidedFraction = 0.05;
     double entropyGamma = 1.0;
+    double differentialF = 0.5;
+    double differentialFraction = 0.5;
     void guidedMutation(int index, bool useAdam, bool semantic);
     // Equal-budget mutation: number of trials ~ Binomial(genome_size, mutation_rate).
 
@@ -289,6 +291,7 @@ public:
     void    setLocalMethod(string s);
     void setMutationMethod(string method);
     void setEntropyGamma(double gamma);
+    void setDifferentialParameters(double f, double fraction);
     void setGuidedParameters(int steps,int codons,int budget,double alpha,double fraction);
 
     // ========================================================

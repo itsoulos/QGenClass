@@ -345,7 +345,7 @@ void Population::setMutationMethod(string method)
 {
     if (method == "standard" || method == "active" || method == "targeted" ||
         method == "active_equal" || method == "targeted_equal" ||
-        method == "gradient" || method == "adam" || method == "semantic_adam" || method == "entropy")
+        method == "gradient" || method == "adam" || method == "semantic_adam" || method == "entropy" || method == "differential")
         mutationMethod = method;
     else
     {
@@ -364,10 +364,49 @@ void Population::setEntropyGamma(double gamma)
     entropyGamma = gamma;
 }
 
+void Population::setDifferentialParameters(double f, double fraction)
+{
+    if (!std::isfinite(f) || f < 0.0 || f > 2.0 ||
+        !std::isfinite(fraction) || fraction < 0.0 || fraction > 1.0)
+    {
+        fprintf(stderr, "Invalid differential mutation parameters\n");
+        exit(EXIT_FAILURE);
+    }
+    differentialF = f;
+    differentialFraction = fraction;
+}
+
 void Population::mutate()
 {
     // Preserve the best chromosome, as in the original implementation.
     const int start = 1;
+    if (mutationMethod == "differential" && differentialFraction > 0.0 && genome_count >= 4)
+    {
+        if (mutation_rate <= 0.0 || genome_size <= 0 || MAX_RULE <= 1) return;
+        vector<vector<int>> snapshot(genome_count);
+        for (int i = 0; i < genome_count; ++i)
+            snapshot[i].assign(genome[i], genome[i] + genome_size);
+        for (int i = start; i < genome_count; ++i)
+        {
+            for (int j = 0; j < genome_size; ++j)
+            {
+                if (rand() / (RAND_MAX + 1.0) >= mutation_rate) continue;
+                if (rand() / (RAND_MAX + 1.0) < differentialFraction)
+                {
+                    int r1, r2, r3;
+                    do { r1 = rand() % genome_count; } while (r1 == i);
+                    do { r2 = rand() % genome_count; } while (r2 == i || r2 == r1);
+                    do { r3 = rand() % genome_count; } while (r3 == i || r3 == r1 || r3 == r2);
+                    double value = snapshot[r1][j] + differentialF *
+                        (double(snapshot[r2][j]) - double(snapshot[r3][j]));
+                    value = std::max(0.0, std::min(double(MAX_RULE - 1), value));
+                    genome[i][j] = int(std::lround(value));
+                }
+                else genome[i][j] = rand() % MAX_RULE;
+            }
+        }
+        return;
+    }
     if (mutationMethod == "entropy" && entropyGamma != 0.0)
     {
         if (genome_count <= start || genome_size <= 0 ||
@@ -461,7 +500,7 @@ void Population::mutate()
                         genome[i][j] = rand() % MAX_RULE;
             continue;
         }
-        if (mutationMethod == "standard" || mutationMethod == "entropy" || !cp)
+        if (mutationMethod == "standard" || mutationMethod == "entropy" || mutationMethod == "differential" || !cp)
         {
             for (int j = 0; j < genome_size; ++j)
                 if (rand() / (RAND_MAX + 1.0) < mutation_rate)
