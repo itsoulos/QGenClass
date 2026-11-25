@@ -354,11 +354,21 @@ void Population::setMutationMethod(string method)
     }
 }
 
+void Population::setEntropyGamma(double gamma)
+{
+    if (!std::isfinite(gamma) || gamma < 0.0 || gamma > 3.0)
+    {
+        fprintf(stderr, "entropy_gamma must be in [0,3]\n");
+        exit(EXIT_FAILURE);
+    }
+    entropyGamma = gamma;
+}
+
 void Population::mutate()
 {
     // Preserve the best chromosome, as in the original implementation.
     const int start = 1;
-    if (mutationMethod == "entropy")
+    if (mutationMethod == "entropy" && entropyGamma != 0.0)
     {
         if (genome_count <= start || genome_size <= 0 ||
             MAX_RULE <= 1 || mutation_rate <= 0.0) return;
@@ -390,7 +400,8 @@ void Population::mutate()
                     H -= q * std::log(q);
                 }
             H = std::max(0.0, std::min(1.0, H / logK));
-            weight[j] = 1.0 - H + epsilon;
+            weight[j] = entropyGamma == 1.0 ? 1.0 - H + epsilon
+                                           : std::pow(1.0 - H + epsilon, entropyGamma);
         }
 
         // Water filling: p_j = min(1, lambda * weight[j]).
@@ -450,7 +461,7 @@ void Population::mutate()
                         genome[i][j] = rand() % MAX_RULE;
             continue;
         }
-        if (mutationMethod == "standard" || !cp)
+        if (mutationMethod == "standard" || mutationMethod == "entropy" || !cp)
         {
             for (int j = 0; j < genome_size; ++j)
                 if (rand() / (RAND_MAX + 1.0) < mutation_rate)

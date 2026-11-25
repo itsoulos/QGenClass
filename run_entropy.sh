@@ -2,11 +2,11 @@
 
 nohup ./runmodel.sh \
   --dataset "$1" \
-  --folds 10 \
-  --runs 10 \
+  --folds 10 --runs 10 \
   --generations 2000 \
   --chromosomes 500 \
   --mutation-method entropy \
+  --entropy-gamma 0.25 \
   --mutation-rate 0.05 \
   --local none \
   --results-dir results_entropy \

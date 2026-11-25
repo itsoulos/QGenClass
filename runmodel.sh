@@ -30,6 +30,7 @@ QGenClass parameters:
   --selection-rate             default 0.1  (QGenClass: --pop_srate)
   --mutation-rate              default 0.05  (QGenClass: --pop_mrate)
   --mutation-method            default standard (standard|active|targeted|active_equal|targeted_equal|gradient|adam|semantic_adam|entropy)
+  --entropy-gamma              default 1.0 (range 0..3)
   --local                      default targeted  (QGenClass: --pop_lmethod)
   --fbeta-beta                 default 2.0 (minority F-beta; higher favors recall)
   --fpr-limit                  default 0.10 (majority false-positive rate threshold)
@@ -89,6 +90,7 @@ config[guided_codons]='4'
 config[guided_budget]='16'
 config[guided_alpha]='1.0'
 config[guided_fraction]='0.05'
+config[entropy_gamma]='1.0'
 config[pop_lmethod]='targeted'
 config[pop_fitnessmethod]='class'
 config[pop_macropr_alpha]='0.5'
@@ -137,6 +139,8 @@ options[guided-codons]=guided_codons
 options[guided-budget]=guided_budget
 options[guided-alpha]=guided_alpha
 options[guided-fraction]=guided_fraction
+options[entropy-gamma]=entropy_gamma
+options[entropy_gamma]=entropy_gamma
 options[mutation-method]=pop_mutationmethod
 options[pop_mutationmethod]=pop_mutationmethod
 options[local]=pop_lmethod

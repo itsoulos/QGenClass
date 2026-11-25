@@ -93,6 +93,7 @@ void setParams()
     mainParams.addParam(Parameter("guided_budget",16,1,10000,"Maximum fitness evaluations per guided chromosome"));
     mainParams.addParam(Parameter("guided_alpha",1.0,0.01,100.0,"Guided learning rate"));
     mainParams.addParam(Parameter("guided_fraction",0.05,0.0,1.0,"Fraction of non-elite chromosomes using guided mutation"));
+    mainParams.addParam(Parameter("entropy_gamma",1.0,0.0,3.0,"Entropy mutation exponent"));
     QStringList local_list;
     local_list<<"none"<<"crossover"<<"mutate"
                <<"mutateWorst"<<"siman"
@@ -320,6 +321,7 @@ void run()
     pop->setSelectionRate(mainParams.getParam("pop_srate").getValue().toDouble());
     pop->setMutationRate(mainParams.getParam("pop_mrate").getValue().toDouble());
     pop->setMutationMethod(mainParams.getParam("pop_mutationmethod").getValue().toStdString());
+    pop->setEntropyGamma(mainParams.getParam("entropy_gamma").getValue().toDouble());
     pop->setGuidedParameters(
         mainParams.getParam("guided_steps").getValue().toInt(),
         mainParams.getParam("guided_codons").getValue().toInt(),
