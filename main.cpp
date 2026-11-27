@@ -73,6 +73,9 @@ void setParams()
 {
     QStringList fcModes; fcModes << "standard" << "feature_construction";
     mainParams.addParam(Parameter("mode",fcModes[0],fcModes,"Classifier mode"));
+    QStringList fcMethods; fcMethods << "standard" << "gini" << "gini_continuous" << "gini_hybrid";
+    mainParams.addParam(Parameter("fc_method",fcMethods[0],fcMethods,"Feature construction method"));
+    mainParams.addParam(Parameter("fc_thresholds",5,1,20,"Thresholds per variable"));
     mainParams.addParam(Parameter("features",5,1,100,"Number of constructed features"));
     mainParams.addParam(Parameter("train_file","","The trainfile used here"));
     mainParams.addParam(Parameter("test_file","","The test file used"));
@@ -265,19 +268,6 @@ void run()
                     mainParams.getParam("test_format").getValue()
                     );
     }
-    if(mainParams.getParam("mode").getValue()=="feature_construction") {
-        FeatureConstruction fc;
-        try {
-            fc.fit(*trainSet,
-                   mainParams.getParam("features").getValue().toInt(),
-                   mainParams.getParam("random_seed").getValue().toInt());
-            fc.print();
-            fc.transform(*trainSet);
-            if(testSet) fc.transform(*testSet);
-        } catch(const std::exception &e) {
-            error(QString("Feature construction failed: %1").arg(e.what()));
-        }
-    }
     const QString adaptiveMethod=mainParams.getParam("pop_fitnessmethod").getValue();
     const bool adaptive = adaptiveMethod=="adaptive_mixed" || adaptiveMethod=="adaptive_mixed_gmean" || adaptiveMethod=="adaptive_mixed_minority_f1";
     const bool useGmean = adaptiveMethod=="adaptive_mixed_gmean";
@@ -313,6 +303,22 @@ void run()
         for(const auto &kv:trainCounts)
             printf("ADAPTIVE_CLASS_COUNTS label=%.10g training=%zu validation=%zu\n",
                    kv.first,kv.second,valCounts[kv.first]);
+    }
+    if(mainParams.getParam("mode").getValue()=="feature_construction") {
+        FeatureConstruction fc;
+        try {
+            fc.fit(*trainSet,
+                   mainParams.getParam("features").getValue().toInt(),
+                   mainParams.getParam("random_seed").getValue().toInt(),
+                   mainParams.getParam("fc_method").getValue().toStdString(),
+                   mainParams.getParam("fc_thresholds").getValue().toInt());
+            fc.print();
+            fc.transform(*trainSet);
+            if(validationSet) fc.transform(*validationSet);
+            if(testSet) fc.transform(*testSet);
+        } catch(const std::exception &e) {
+            error(QString("Feature construction failed: %1").arg(e.what()));
+        }
     }
     program = new ClassProgram(trainSet,testSet);
     pop=new Population(

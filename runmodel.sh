@@ -21,6 +21,8 @@ General:
 
 QGenClass parameters:
   --mode                       default standard  (QGenClass: --mode)
+  --fc-method                  standard|gini|gini_continuous|gini_hybrid (default standard)
+  --fc-thresholds              thresholds per variable (default 5)
   --features                   default 5  (QGenClass: --features)
   --train-format               default data  (QGenClass: --train_format)
   --test-format                default data  (QGenClass: --test_format)
@@ -79,6 +81,8 @@ dataset=; train=; test=; folds=1; runs=1; seed=1; results_dir=results; summary_f
 declare -A config=()
 config[mode]='standard'
 config[features]='5'
+config[fc_method]='standard'
+config[fc_thresholds]='5'
 config[train_format]='data'
 config[test_format]='data'
 config[pop_count]='500'
@@ -131,6 +135,8 @@ config[pythonoutput_file]='classifier.py'
 declare -A options=()
 options[mode]=mode
 options[features]=features
+options[fc-method]=fc_method
+options[fc-thresholds]=fc_thresholds
 options[train-format]=train_format
 options[test-format]=test_format
 options[chromosomes]=pop_count
